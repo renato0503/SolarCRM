@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SolarCRM - Painel de Vendas</title>
+  <style>
+    /* Estilos Adicionais do Painel */
+    .dashboard-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 0;
+    }
+    
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: var(--font-headings);
+    }
+
+    .crm-table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      margin-top: 1.5rem;
+    }
+
+    .crm-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    .crm-table th {
+      background-color: rgba(255, 255, 255, 0.02);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    .crm-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .crm-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .crm-table tr:hover td {
+      background-color: rgba(255, 255, 255, 0.01);
+    }
+
+    .action-btn-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    .action-btn.whatsapp {
+      color: var(--status-fechado);
+      border-color: rgba(34, 197, 94, 0.2);
+    }
+    .action-btn.whatsapp:hover {
+      background: var(--status-fechado-bg);
+    }
+
+    .action-btn.delete {
+      color: var(--status-perdido);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .action-btn.delete:hover {
+      background: var(--status-perdido-bg);
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(15, 23, 42, 0.85);
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      max-width: 500px;
+      width: 90%;
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.5rem;
+    }
+
+    /* Filter buttons styling */
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .filter-btn.active {
+      background: var(--solar-gradient);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 10px rgba(255, 94, 0, 0.2);
+    }
+  </style>
+  <script type="module" crossorigin src="/SolarCRM/assets/dashboard-DynQNRN1.js"></script>
+  <link rel="modulepreload" crossorigin href="/SolarCRM/assets/utils-CywaZc80.js">
+  <link rel="modulepreload" crossorigin href="/SolarCRM/assets/auth-wG_nZQHb.js">
+  <link rel="modulepreload" crossorigin href="/SolarCRM/assets/config-BTVWL6Az.js">
+  <link rel="stylesheet" crossorigin href="/SolarCRM/assets/utils-BoD8BU91.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 2rem;">
+        <a href="./index.html" class="brand-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/>
+          </svg>
+          <span>SolarCRM</span>
+        </a>
+        <span style="font-size: 0.75rem; background-color: var(--border-color); color: var(--text-muted); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">PAINEL INTERNO</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <span id="userEmail" style="font-size: 0.875rem; color: var(--text-muted);">vendedor@solarcrm.com.br</span>
+        <button id="btnConfig" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem; display: flex; align-items: center; gap: 4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Configurações
+        </button>
+        <button id="btnLogout" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+          Sair
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Section -->
+  <main style="padding: 2.5rem 0;">
+    <div class="container">
+      
+      <!-- Page Title -->
+      <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 700; color: #fff;">Painel CRM de Leads e Propostas</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Monitore as simulações enviadas, altere status e contate leads direto pelo WhatsApp.</p>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-3" style="margin-bottom: 2.5rem;">
+        <!-- Total Leads -->
+        <div class="stat-card">
+          <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">Simulações / Leads</span>
+          <div id="statTotal" class="stat-value">0</div>
+          <span style="font-size: 0.75rem; color: var(--status-novo);">Cadastros recebidos</span>
+        </div>
+        <!-- Enviadas -->
+        <div class="stat-card">
+          <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">Propostas Enviadas</span>
+          <div id="statEnviadas" class="stat-value">0</div>
+          <span style="font-size: 0.75rem; color: var(--status-enviado);">Aguardando retorno</span>
+        </div>
+        <!-- Fechadas / Faturamento -->
+        <div class="stat-card" style="border-left: 3px solid var(--status-fechado);">
+          <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">Projetos Fechados / Faturamento</span>
+          <div id="statFaturamento" class="stat-value">R$ 0,00</div>
+          <span style="font-size: 0.75rem; color: var(--status-fechado);"><span id="statFechadosCount">0</span> vendas concretizadas</span>
+        </div>
+      </div>
+
+      <!-- Filter Controls & Search -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+        <!-- Filter Tabs -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="filter-btn active" data-filter="Todos">Todos</button>
+          <button class="filter-btn" data-filter="Novo">Novos</button>
+          <button class="filter-btn" data-filter="Enviado">Enviados</button>
+          <button class="filter-btn" data-filter="Fechado">Fechados</button>
+          <button class="filter-btn" data-filter="Perdido">Perdidos</button>
+        </div>
+        
+        <!-- Search -->
+        <div style="max-width: 300px; width: 100%;">
+          <input type="text" id="crmSearch" class="form-control" placeholder="Buscar por nome ou fone..." style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="crm-table-container">
+        <table class="crm-table">
+          <thead>
+            <tr>
+              <th>Lead / Cliente</th>
+              <th>Consumo</th>
+              <th>Dimensionamento</th>
+              <th>Custo Total</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="crmTableBody">
+            <!-- Dynamic CRM Rows here -->
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
+                Carregando Leads...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="configModal" class="modal">
+    <div class="modal-content">
+      <button class="close-modal" id="btnCloseConfig">&times;</button>
+      <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: #fff;">
+        ⚙️ Configurações do CRM Solar
+      </h3>
+      
+      <form id="configForm">
+        <!-- HSP -->
+        <div class="form-group">
+          <label for="cfgHsp" class="form-label">Horas de Sol Pleno Média (HSP)</label>
+          <input type="number" id="cfgHsp" class="form-control" step="0.1" min="1" max="10" required>
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Utilizado para calcular a potência necessária em kWp.</small>
+        </div>
+
+        <!-- Tarifa -->
+        <div class="form-group">
+          <label for="cfgTarifa" class="form-label">Tarifa de Energia Média (R$ / kWh)</label>
+          <input type="number" id="cfgTarifa" class="form-control" step="0.01" min="0.1" max="3" required>
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Preço por kWh cobrado pela distribuidora de energia.</small>
+        </div>
+
+        <!-- Margem -->
+        <div class="form-group">
+          <label for="cfgMargem" class="form-label">Margem de Lucro Padrão (%)</label>
+          <input type="number" id="cfgMargem" class="form-control" min="5" max="100" required>
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Acrescada sobre o custo dos materiais e da instalação.</small>
+        </div>
+
+        <!-- Telefone Consultor -->
+        <div class="form-group" style="margin-bottom: 2rem;">
+          <label for="cfgTelefone" class="form-label">WhatsApp Padrão da Empresa (DDD+Número)</label>
+          <input type="text" id="cfgTelefone" class="form-control" required>
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Para onde o cliente será redirecionado ao clicar em "Falar com Consultor".</small>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button type="button" class="btn btn-secondary" id="btnCancelConfig">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Ajustes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid var(--border-color); padding: 2rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6); margin-top: 5rem;">
+    <p>&copy; 2026 SolarCRM - CRM de Negócios Solares.</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SolarCRM - Simulador de Economia Solar</title>
+  <meta name="description" content="Simule o custo e a economia de instalar energia solar em sua casa ou empresa.">
+  <script type="module" crossorigin src="/SolarCRM/assets/main-DFsql3ta.js"></script>
+  <link rel="modulepreload" crossorigin href="/SolarCRM/assets/utils-CywaZc80.js">
+  <link rel="modulepreload" crossorigin href="/SolarCRM/assets/config-BTVWL6Az.js">
+  <link rel="stylesheet" crossorigin href="/SolarCRM/assets/utils-BoD8BU91.css">
+</head>
+<body>
+  
+  <!-- Header -->
+  <header style="border-bottom: 1px solid var(--border-color); padding: 1.25rem 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(10px);">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <a href="./index.html" class="brand-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2"/>
+          <path d="M12 20v2"/>
+          <path d="M4.93 4.93l1.41 1.41"/>
+          <path d="M17.66 17.66l1.41 1.41"/>
+          <path d="M2 12h2"/>
+          <path d="M20 12h2"/>
+          <path d="M6.34 17.66l-1.41 1.41"/>
+          <path d="M19.07 4.93l-1.41 1.41"/>
+        </svg>
+        <span>SolarCRM</span>
+      </a>
+      <a href="./login.html" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.875rem;">
+        Painel de Vendas
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero / Simulation Section -->
+  <main style="padding: 4rem 0 6rem 0; position: relative; overflow: hidden;">
+    <!-- Background Light Rays Glow -->
+    <div style="position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(255, 94, 0, 0.15) 0%, rgba(255, 94, 0, 0) 70%); z-index: -1; pointer-events: none; border-radius: 50%;"></div>
+
+    <div class="container">
+      <div style="max-width: 800px; margin: 0 auto; text-align: center; margin-bottom: 3.5rem;">
+        <span style="background: var(--solar-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.875rem;">Energia Limpa e Inesgotável</span>
+        <h1 style="font-size: 3rem; margin-top: 0.5rem; margin-bottom: 1rem; font-weight: 800; line-height: 1.15;">
+          Simule seu Sistema Solar e <br><span style="color: var(--solar-orange);">Economize até 95%</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.125rem; max-width: 600px; margin: 0 auto;">
+          Insira seus dados de consumo abaixo para calcular o tamanho do gerador solar, custo estimado do equipamento e tempo de retorno do investimento.
+        </p>
+      </div>
+
+      <!-- Glass Form Container -->
+      <div class="glass-card" style="max-width: 680px; margin: 0 auto; border-radius: var(--radius-lg);">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; font-weight: 700; color: #fff;">
+          📐 Faça sua Simulação Gratuita
+        </h2>
+        
+        <form id="simulationForm" novalidate>
+          <div class="grid grid-cols-2">
+            
+            <!-- Nome -->
+            <div class="form-group">
+              <label for="nome" class="form-label">Nome Completo *</label>
+              <input type="text" id="nome" class="form-control" placeholder="Ex: João Silva" required>
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+            <!-- Telefone -->
+            <div class="form-group">
+              <label for="telefone" class="form-label">WhatsApp (DDD + Número) *</label>
+              <input type="tel" id="telefone" class="form-control" placeholder="Ex: 11 99999-9999" required>
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+          </div>
+
+          <div class="grid grid-cols-2">
+            
+            <!-- Email -->
+            <div class="form-group">
+              <label for="email" class="form-label">E-mail *</label>
+              <input type="email" id="email" class="form-control" placeholder="Ex: joao@email.com" required>
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+            <!-- Consumo Mensal -->
+            <div class="form-group">
+              <label for="consumo_mensal" class="form-label">Consumo Mensal Médio (kWh) *</label>
+              <input type="number" id="consumo_mensal" class="form-control" placeholder="Ex: 450" min="50" required>
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+          </div>
+
+          <!-- Endereço -->
+          <div class="form-group">
+            <label for="endereco" class="form-label">Endereço da Instalação *</label>
+            <input type="text" id="endereco" class="form-control" placeholder="Rua, Número, Bairro, Cidade - UF" required>
+            <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            
+            <!-- Tipo de Telha -->
+            <div class="form-group">
+              <label for="tipo_telha" class="form-label">Tipo de Telhado *</label>
+              <select id="tipo_telha" class="form-control" required>
+                <option value="" disabled selected>Selecione...</option>
+                <option value="ceramica">Telha Cerâmica (Barro)</option>
+                <option value="metalica">Telha Metálica (Zinco/Sanduíche)</option>
+                <option value="laje">Laje Plano ou Solo (Suportes de Alumínio)</option>
+                <option value="fibrocimento">Telha Fibrocimento (Eternit)</option>
+              </select>
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+            <!-- Orientação -->
+            <div class="form-group">
+              <label for="orientacao" class="form-label">Orientação Solar (Se souber)</label>
+              <select id="orientacao" class="form-control">
+                <option value="norte" selected>Norte (Ideal)</option>
+                <option value="leste_oeste">Leste / Oeste</option>
+                <option value="sul">Sul (Menor rendimento)</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div style="margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+            <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; height: 50px;">
+              <span>Calcular Economia</span>
+              <div class="spinner" style="display: none; border-top-color: #fff; width: 20px; height: 20px;"></div>
+            </button>
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke: var(--status-fechado);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Seus dados estão protegidos e salvos de forma segura.
+            </span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notifications Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid var(--border-color); padding: 2.5rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6);">
+    <div class="container">
+      <p>&copy; 2026 SolarCRM - Todos os direitos reservados.</p>
+      <p style="margin-top: 0.5rem; font-size: 0.75rem;">Desenvolvido com HTML5, CSS3, Vanilla JS & Firebase</p>
+    </div>
+  </footer>
+
+</body>
+</html>

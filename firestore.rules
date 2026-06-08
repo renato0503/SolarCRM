@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Regras para a coleção de Leads
+    match /leads/{leadId} {
+      // Qualquer visitante pode submeter o formulário de simulação para criar um lead
+      allow create: if true;
+      
+      // Apenas vendedores autenticados no CRM podem ler, atualizar ou excluir leads
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // Regras para a coleção de Propostas
+    match /propostas/{proposalId} {
+      // Qualquer visitante pode criar uma proposta durante a simulação
+      allow create: if true;
+      
+      // O cliente precisa ler os dados da proposta correspondente sem estar logado
+      allow read: if true;
+      
+      // Apenas vendedores autenticados no CRM podem alterar status (como Fechado, Enviado) ou excluir propostas
+      allow update, delete: if request.auth != null;
+    }
+  }
+}

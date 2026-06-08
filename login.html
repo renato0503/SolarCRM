@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SolarCRM - Login de Vendedor</title>
+  <link rel="stylesheet" href="./src/css/style.css">
+</head>
+<body style="display: flex; flex-direction: column; min-height: 100vh;">
+
+  <!-- Header -->
+  <header style="border-bottom: 1px solid var(--border-color); padding: 1.25rem 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(10px);">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <a href="./index.html" class="brand-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/>
+        </svg>
+        <span>SolarCRM</span>
+      </a>
+      <a href="./index.html" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.875rem;">
+        Voltar à Simulação
+      </a>
+    </div>
+  </header>
+
+  <!-- Login Area -->
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 0; position: relative;">
+    <div style="position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255, 94, 0, 0.1) 0%, rgba(255, 94, 0, 0) 70%); z-index: -1; pointer-events: none; border-radius: 50%;"></div>
+    
+    <div class="container" style="display: flex; justify-content: center; width: 100%;">
+      <div class="glass-card" style="max-width: 420px; width: 100%;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.75rem; font-weight: 700; color: #fff;">Acesso restrito</h2>
+          <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem;">Entre com suas credenciais de vendedor</p>
+        </div>
+
+        <form id="loginForm">
+          
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email" class="form-label">E-mail corporativo</label>
+            <input type="email" id="email" class="form-control" placeholder="vendedor@solarcrm.com.br" required>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group" style="margin-bottom: 2rem;">
+            <label for="password" class="form-label">Senha</label>
+            <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+          </div>
+
+          <button type="submit" id="btnLogin" class="btn btn-primary" style="width: 100%; height: 50px;">
+            <span>Entrar no Painel</span>
+            <div class="spinner" style="display: none; border-top-color: #fff; width: 20px; height: 20px;"></div>
+          </button>
+        </form>
+
+        <!-- Mock Credentials Box Helper -->
+        <div style="margin-top: 2rem; padding: 1rem; background: rgba(255, 94, 0, 0.08); border: 1px solid rgba(255, 94, 0, 0.2); border-radius: var(--radius-md); font-size: 0.8125rem; line-height: 1.4;">
+          <span style="color: var(--solar-orange); font-weight: 700; display: block; margin-bottom: 0.25rem;">💡 Teste Rápido (Modo Simulador):</span>
+          Você pode logar com qualquer e-mail <strong>@solarcrm.com.br</strong> e senha com no mínimo 6 caracteres para testar sem configurar o Firebase.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid var(--border-color); padding: 2rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6);">
+    <p>&copy; 2026 SolarCRM - Painel de Vendas.</p>
+  </footer>
+
+  <script type="module">
+    import { login, protegerLogin } from './src/js/auth.js';
+    
+    // Evita acesso se já logado
+    protegerLogin();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginForm = document.getElementById('loginForm');
+      const submitBtn = document.getElementById('btnLogin');
+      const btnText = submitBtn.querySelector('span');
+      const btnSpinner = submitBtn.querySelector('.spinner');
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        try {
+          submitBtn.disabled = true;
+          btnText.style.display = 'none';
+          btnSpinner.style.display = 'block';
+
+          await login(email, password);
+        } catch (error) {
+          // Erro já é tratado com toast na função login()
+          submitBtn.disabled = false;
+          btnText.style.display = 'block';
+          btnSpinner.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

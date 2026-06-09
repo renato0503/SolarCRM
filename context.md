@@ -47,6 +47,27 @@ Este documento apresenta um resumo consolidado de tudo o que já foi implementad
 - **Segurança de Banco de Dados (`firestore.rules`)**: Regras para o Firestore protegendo leitura e escrita de leads/propostas, garantindo integridade das informações do CRM.
 - **MockDB Fallback (`firebase.js`)**: Mecanismo inteligente de fallback. Caso não existam chaves de conexão do Firebase ativas no ambiente, a aplicação utiliza automaticamente um banco mockado no `localStorage`, permitindo rodar e testar 100% das funções do CRM de forma imediata e sem erros.
 
+### 6. Configuração e Publicação no GitHub Pages (MVP) (Fase 6)
+- **Vite Subdirectory Base**: Adicionado o parâmetro `base: '/SolarCRM/'` em `vite.config.js` para suportar corretamente arquivos compilados sob subpastas.
+- **Caminhos Relativos Portáveis**: Substituição de todas as referências de caminhos absolutos (`/`) para relativos (`./`) nas páginas HTML e arquivos JavaScript, garantindo a portabilidade completa de rotas, redirecionamentos e assets.
+- **Segurança e Proteção de Chaves**: Regras configuradas em `.gitignore` para proibir commits de arquivos `.env` e `.env.*` locais, evitando o vazamento acidental de chaves privadas do Firebase.
+- **Automação de Build e Deploy**: Configuração do pacote `gh-pages` e scripts `"predeploy"` e `"deploy"` no `package.json` para compilação (`dist/`) e deploy automático da aplicação na branch `gh-pages` do repositório remoto.
+- **Publicação no GitHub**: Inicialização do Git, vinculação com o remote `renato0503/SolarCRM` e push sincronizado das branches `main` e `gh-pages`.
+
+### 7. Cálculo de Frete por CEP e Robustez de PDF (Fase 7)
+- **CEP no Formulário**: Campo de endereço do simulador substituído por CEP com máscara automática (`99999-999`) e validação estrita.
+- **Cálculo de Distância por Geolocalização**: Integração assíncrona com API ViaCEP (para puxar Cidade e UF) e Nominatim OpenStreetMap (para achar a latitude/longitude do CEP e do Centro da Cidade correspondente), calculando a distância física entre os dois pontos em linha reta pela fórmula de Haversine.
+- **Tabela de Frete Proporcional**: Inclusão de três faixas de frete no arquivo `equipamentos.js` integradas diretamente na planilha de custo direto do simulador em `calculator.js`:
+  - Até 15 km: R$ 350,00 (mínimo)
+  - De 15 km a 25 km: R$ 650,00 (médio)
+  - Acima de 25 km: R$ 1.100,00 (máximo)
+- **Salvaguarda de Falha em API**: Estrutura com fallbacks que garante a continuação do cálculo de frete (com distância padrão de 10km e frete mínimo) caso o cliente esteja sem conexão ou as APIs geográficas caiam.
+- **Robustez na Emissão do PDF**:
+  * Utilização de bloco `try-catch-finally` que obriga o corpo do documento a sempre remover a classe de estilização temporária de impressão (`.pdf-mode`), evitando que a tela fique travada após a geração do arquivo.
+  * Inclusão de atraso de 150ms antes da captura do PDF para permitir a repintura do DOM no navegador.
+  * Integração de **fallback automático de impressão nativa (`window.print()`)** caso a biblioteca `html2pdf` falhe ou não seja carregada no navegador do usuário, com layout de 2 páginas A4 perfeitamente formatadas.
+- **Área de Assinaturas e Exibição de Frete**: Adicionado bloco visual de frete cobrado/distância percorrida e a seção de assinaturas formais de aceite para o PDF ao final do documento `proposta.html`, preenchendo automaticamente o nome do cliente.
+
 ---
 
 ## 📋 O que FALTA fazer
@@ -59,12 +80,15 @@ Como a lógica e interface da aplicação já estão totalmente prontas e funcio
 - [ ] Ativar o **Firebase Authentication** com provedor de e-mail e senha.
 - [ ] Criar a conta de vendedor padrão no painel do Authentication para permitir o login corporativo inicial.
 
-### 2. Ativação das Variáveis de Ambiente
+### 2. Ativação das Variáveis de Ambiente (Conexão Firebase Real)
 - [ ] Copiar o arquivo `.env.example` para `.env` ou `.env.local` na raiz do projeto.
 - [ ] Substituir os valores fictícios pelas chaves reais do SDK do Web App gerado no console do Firebase.
 - [ ] Reiniciar o servidor de desenvolvimento para aplicar a conexão real.
 
-### 3. Deploy de Produção (Firebase Hosting)
+### 3. Migração do GitHub Pages para Produção Oficial (Opcional)
+- [ ] O GitHub Pages servirá perfeitamente para testes e homologação como MVP. Se desejar usar o domínio customizado da empresa com SSL ou hospedar regras estritas integradas diretamente no CLI do Firebase, seguir os passos de Deploy em Produção (Firebase Hosting) listados a seguir.
+
+### 4. Deploy de Produção (Firebase Hosting)
 - [ ] Instalar a CLI do Firebase globalmente:
   ```bash
   npm install -g firebase-tools
@@ -87,7 +111,8 @@ Como a lógica e interface da aplicação já estão totalmente prontas e funcio
   firebase deploy
   ```
 
-### 4. Melhorias e Funcionalidades Adicionais (Sugestões)
+### 5. Melhorias e Funcionalidades Adicionais (Sugestões)
 - [ ] **Integração com Gráfico de Geração**: Incluir a biblioteca `Chart.js` na página da proposta comercial para exibir a projeção de geração solar mês a mês em formato de gráfico de barras.
 - [ ] **Recuperação de Senha**: Adicionar o fluxo de "Esqueci minha senha" na tela de login para enviar e-mail de redefinição pelo Firebase Auth.
 - [ ] **Banco de Equipamentos no Firestore**: Mover o array de equipamentos do arquivo local `equipamentos.js` para uma coleção no Firestore, possibilitando ao dono da empresa atualizar preços de inversores e módulos em tempo real sem precisar recompilar ou alterar o código do front-end.
+- [ ] **Histórico e Relatório de Distâncias de Frete**: Armazenar métricas de distâncias calculadas por CEP no Firestore para ajudar a gerência a mapear áreas de atuação com mais vendas e ajustar os multiplicadores de frete.

@@ -79,6 +79,29 @@ export function cleanPhone(phone) {
 }
 
 /**
+ * Dicionário de coordenadas aproximadas do centro de capitais brasileiras
+ * para evitar requisições extras e rate-limiting no Nominatim.
+ */
+const CENTROS_CIDADES = {
+  "cuiaba": { lat: -15.5960, lon: -56.0967 },
+  "cuiabá": { lat: -15.5960, lon: -56.0967 },
+  "campo grande": { lat: -20.4697, lon: -54.6201 },
+  "sao paulo": { lat: -23.5505, lon: -46.6333 },
+  "são paulo": { lat: -23.5505, lon: -46.6333 },
+  "rio de janeiro": { lat: -22.9068, lon: -43.1729 },
+  "belo horizonte": { lat: -19.9167, lon: -43.9345 },
+  "brasilia": { lat: -15.7942, lon: -47.8822 },
+  "brasília": { lat: -15.7942, lon: -47.8822 },
+  "salvador": { lat: -12.9777, lon: -38.5016 },
+  "fortaleza": { lat: -3.7319, lon: -38.5267 },
+  "recife": { lat: -8.0543, lon: -34.8813 },
+  "curitiba": { lat: -25.4284, lon: -49.2733 },
+  "porto alegre": { lat: -30.0346, lon: -51.2177 },
+  "goiania": { lat: -16.6869, lon: -49.2648 },
+  "goiânia": { lat: -16.6869, lon: -49.2648 }
+};
+
+/**
  * Calcula a distância do CEP digitado até o centro da cidade e classifica o valor do frete.
  * Regras: até 15km = valor mínimo (R$ 350), 15 a 25km = valor médio (R$ 650), acima de 25km = valor máximo (R$ 1100).
  * @param {string} cep - CEP limpo (8 dígitos)
@@ -87,11 +110,85 @@ export function cleanPhone(phone) {
 export async function calcularFretePorCEP(cep) {
   const clean = cep.replace(/\D/g, '');
   
-  // Valores padrão/fallback (caso dê erro absoluto)
+  // 1. Determinar cidade/UF fallback baseado nas faixas de CEP brasileiras (para garantia absoluta)
+  let fallbackCidade = "Cuiabá";
+  let fallbackUf = "MT";
+  
+  if (clean.length === 8) {
+    const prefix2 = clean.slice(0, 2);
+    if (prefix2 === "79") {
+      fallbackCidade = "Campo Grande";
+      fallbackUf = "MS";
+    } else if (prefix2 >= "01" && prefix2 <= "19") {
+      fallbackCidade = "São Paulo";
+      fallbackUf = "SP";
+    } else if (prefix2 >= "20" && prefix2 <= "28") {
+      fallbackCidade = "Rio de Janeiro";
+      fallbackUf = "RJ";
+    } else if (prefix2 === "29") {
+      fallbackCidade = "Vitória";
+      fallbackUf = "ES";
+    } else if (prefix2 >= "30" && prefix2 <= "39") {
+      fallbackCidade = "Belo Horizonte";
+      fallbackUf = "MG";
+    } else if (prefix2 >= "40" && prefix2 <= "48") {
+      fallbackCidade = "Salvador";
+      fallbackUf = "BA";
+    } else if (prefix2 === "49") {
+      fallbackCidade = "Aracaju";
+      fallbackUf = "SE";
+    } else if (prefix2 >= "50" && prefix2 <= "56") {
+      fallbackCidade = "Recife";
+      fallbackUf = "PE";
+    } else if (prefix2 === "57") {
+      fallbackCidade = "Maceió";
+      fallbackUf = "AL";
+    } else if (prefix2 === "58") {
+      fallbackCidade = "João Pessoa";
+      fallbackUf = "PB";
+    } else if (prefix2 === "59") {
+      fallbackCidade = "Natal";
+      fallbackUf = "RN";
+    } else if (prefix2 >= "60" && prefix2 <= "63") {
+      fallbackCidade = "Fortaleza";
+      fallbackUf = "CE";
+    } else if (prefix2 >= "64" && prefix2 <= "65") {
+      fallbackCidade = "Teresina";
+      fallbackUf = "PI";
+    } else if (prefix2 >= "66" && prefix2 <= "68") {
+      fallbackCidade = "Belém";
+      fallbackUf = "PA";
+    } else if (prefix2 === "69") {
+      fallbackCidade = "Manaus";
+      fallbackUf = "AM";
+    } else if (prefix2 >= "70" && prefix2 <= "72") {
+      fallbackCidade = "Brasília";
+      fallbackUf = "DF";
+    } else if (prefix2 >= "73" && prefix2 <= "76") {
+      fallbackCidade = "Goiânia";
+      fallbackUf = "GO";
+    } else if (prefix2 === "77") {
+      fallbackCidade = "Palmas";
+      fallbackUf = "TO";
+    } else if (prefix2 === "78") {
+      fallbackCidade = "Cuiabá";
+      fallbackUf = "MT";
+    } else if (prefix2 >= "80" && prefix2 <= "87") {
+      fallbackCidade = "Curitiba";
+      fallbackUf = "PR";
+    } else if (prefix2 >= "88" && prefix2 <= "89") {
+      fallbackCidade = "Florianópolis";
+      fallbackUf = "SC";
+    } else if (prefix2 >= "90" && prefix2 <= "99") {
+      fallbackCidade = "Porto Alegre";
+      fallbackUf = "RS";
+    }
+  }
+
   let result = {
     cep: clean,
-    cidade: "Campo Grande",
-    uf: "MS",
+    cidade: fallbackCidade,
+    uf: fallbackUf,
     distanciaKm: 10.0,
     freteValor: 350.00,
     tipoFrete: "mínimo"
@@ -101,73 +198,109 @@ export async function calcularFretePorCEP(cep) {
     return result;
   }
 
+  // 2. Tentar obter a cidade e UF via APIs de CEP (ViaCEP e BrasilAPI como fallback)
+  let apiData = null;
   try {
-    // 1. Busca detalhes do CEP no ViaCEP (Muito estável para obter Cidade e UF)
     const viaCepRes = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
-    if (!viaCepRes.ok) throw new Error("Erro ao acessar ViaCEP");
-    const viaCepData = await viaCepRes.json();
-    if (viaCepData.erro) throw new Error("CEP inexistente");
+    if (viaCepRes.ok) {
+      const data = await viaCepRes.json();
+      if (data && !data.erro && data.localidade) {
+        apiData = {
+          cidade: data.localidade,
+          uf: data.uf
+        };
+      }
+    }
+  } catch (e) {
+    console.warn("ViaCEP falhou, tentando BrasilAPI...", e);
+  }
 
-    // Preserva a Cidade e UF corretos do CEP
-    result.cidade = viaCepData.localidade;
-    result.uf = viaCepData.uf;
-
-    // Tentamos calcular a distância de forma secundária
+  if (!apiData) {
     try {
-      // 2. Busca coordenadas do CEP no Nominatim (OpenStreetMap)
-      const nomCepRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${clean}&country=Brazil&format=json&limit=1`);
-      if (!nomCepRes.ok) throw new Error("Erro no geocoding do CEP");
-      const nomCepData = await nomCepRes.json();
-
-      // 3. Busca coordenadas do Centro da Cidade no Nominatim
-      const nomCityRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(result.cidade)}+${encodeURIComponent(result.uf)}+Brazil&format=json&limit=1`);
-      if (!nomCityRes.ok) throw new Error("Erro no geocoding do centro da cidade");
-      const nomCityData = await nomCityRes.json();
-
-      if (nomCepData.length > 0 && nomCityData.length > 0) {
-        const lat1 = parseFloat(nomCepData[0].lat);
-        const lon1 = parseFloat(nomCepData[0].lon);
-        const lat2 = parseFloat(nomCityData[0].lat);
-        const lon2 = parseFloat(nomCityData[0].lon);
-
-        // Distância de Haversine
-        const R = 6371; // km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        const distanciaKm = R * c;
-
-        result.distanciaKm = Math.round(distanciaKm * 10) / 10;
-
-        // Classificação do frete
-        if (distanciaKm > 25.0) {
-          result.freteValor = 1100.00;
-          result.tipoFrete = "máximo";
-        } else if (distanciaKm >= 15.0) {
-          result.freteValor = 650.00;
-          result.tipoFrete = "médio";
-        } else {
-          result.freteValor = 350.00;
-          result.tipoFrete = "mínimo";
+      const brasilApiRes = await fetch(`https://brasilapi.com.br/api/cep/v1/${clean}`);
+      if (brasilApiRes.ok) {
+        const data = await brasilApiRes.json();
+        if (data && data.city) {
+          apiData = {
+            cidade: data.city,
+            uf: data.state
+          };
         }
       }
-    } catch (geoError) {
-      console.warn("Falha ao geocodificar coordenadas (Nominatim), usando frete mínimo padrão e preservando a cidade:", geoError);
-      result.distanciaKm = 10.0;
-      result.freteValor = 350.00;
-      result.tipoFrete = "mínimo";
+    } catch (e) {
+      console.warn("BrasilAPI também falhou.", e);
     }
-  } catch (error) {
-    console.warn("Falha absoluta ao buscar CEP nas APIs. Usando fallback de Cuiabá:", error);
-    // Caso de falha total de rede ou CEP inválido, se for o CEP de Cuiabá informado pelo usuário, usamos Cuiabá como fallback absoluto
-    if (clean === "78005400") {
-      result.cidade = "Cuiabá";
-      result.uf = "MT";
+  }
+
+  // Atualiza cidade/UF no resultado final se obtidos com sucesso das APIs
+  if (apiData) {
+    result.cidade = apiData.cidade;
+    result.uf = apiData.uf;
+  }
+
+  // 3. Tentar geolocalizar as coordenadas do CEP e do Centro da Cidade para distância
+  try {
+    const nomCepRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${clean}&country=Brazil&format=json&limit=1`);
+    if (nomCepRes.ok) {
+      const nomCepData = await nomCepRes.json();
+      if (nomCepData && nomCepData.length > 0) {
+        const lat1 = parseFloat(nomCepData[0].lat);
+        const lon1 = parseFloat(nomCepData[0].lon);
+        
+        let lat2 = null;
+        let lon2 = null;
+
+        // Se a cidade estiver em nosso dicionário de capitais, usamos a coordenada direta
+        const cidadeLower = result.cidade.toLowerCase().trim();
+        if (CENTROS_CIDADES[cidadeLower]) {
+          lat2 = CENTROS_CIDADES[cidadeLower].lat;
+          lon2 = CENTROS_CIDADES[cidadeLower].lon;
+        } else {
+          // Caso contrário, busca no Nominatim com atraso de 1s para respeitar limite
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const nomCityRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(result.cidade)}+${encodeURIComponent(result.uf)}+Brazil&format=json&limit=1`);
+          if (nomCityRes.ok) {
+            const nomCityData = await nomCityRes.json();
+            if (nomCityData && nomCityData.length > 0) {
+              lat2 = parseFloat(nomCityData[0].lat);
+              lon2 = parseFloat(nomCityData[0].lon);
+            }
+          }
+        }
+
+        if (lat2 !== null && lon2 !== null) {
+          // Fórmula de Haversine
+          const R = 6371; // km
+          const dLat = (lat2 - lat1) * Math.PI / 180;
+          const dLon = (lon2 - lon1) * Math.PI / 180;
+          
+          const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const distanciaKm = R * c;
+
+          result.distanciaKm = Math.round(distanciaKm * 10) / 10;
+
+          // Regras de frete:
+          // até 15km = valor minimo (R$ 350)
+          // de 15 a 25km = valor médio (R$ 650)
+          // acima de 25km = valor maximo (R$ 1100)
+          if (distanciaKm > 25.0) {
+            result.freteValor = 1100.00;
+            result.tipoFrete = "máximo";
+          } else if (distanciaKm >= 15.0) {
+            result.freteValor = 650.00;
+            result.tipoFrete = "médio";
+          } else {
+            result.freteValor = 350.00;
+            result.tipoFrete = "mínimo";
+          }
+        }
+      }
     }
+  } catch (geoError) {
+    console.warn("Erro ao calcular geolocalização e distância. Mantendo cidade e frete mínimo padrão:", geoError);
   }
 
   return result;

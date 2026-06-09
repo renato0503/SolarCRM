@@ -80,6 +80,20 @@ Este documento apresenta um resumo consolidado de tudo o que já foi implementad
 - **Fallback Inteligente de APIs**: Encadeamento de requisições que consulta primeiramente o ViaCEP e migra automaticamente para a BrasilAPI caso haja falhas na primeira, assegurando alta taxa de sucesso.
 - **Detector de Região por Prefixo**: Criação de um algoritmo inteligente baseado nas faixas de CEP brasileiras que determina o Estado e a Capital do CEP inserido instantaneamente, garantindo a correção de dados (ex. CEP `78005-400` resolvido para Cuiabá/MT) mesmo com falha total de rede ou APIs off-line.
 
+### 9. Otimização do Layout e Dimensões do PDF (Fase 9)
+- **Compactação Geral de Margens, Paddings e Fontes**: Dimensionamento preciso de tipografia e espaçamentos sob a classe `body.pdf-mode` (para PDF gerado por biblioteca) e diretivas `@media print` (para impressão nativa do navegador). As fontes do cabeçalho e dos valores em destaque foram reduzidas e otimizadas para escala A4 corporativa.
+- **Preservação de Layout Multicolunas**: Forçado o posicionamento rígido de 3 colunas para os destaques financeiros. A especificação técnica (`#cardSpecs`) agora utiliza um grid de 2 colunas para organizar os itens (Módulos, Inversor, Estrutura e Logística lado a lado; e Serviços ocupando a largura total), reduzindo a altura do card pela metade e mantendo o alinhamento impecável.
+- **Evitar Quebras de Páginas em Branco**: Resolução do espaçamento excessivo reorganizando o fluxo vertical das páginas para caber exatamente em 2 páginas A4.
+- **Enquadramento Perfeito em Exatamente 2 Páginas**: Injeção estratégica de diretivas CSS para controle de quebras de página (`break-before: page` e `break-inside: avoid`). O documento foi ajustado milimetricamente para se dividir entre a Página 1 (Cabeçalho, Visão Geral, Valores e Especificações de Módulos/Instalação) e a Página 2 (Métricas Ecológicas/Geração, Dicas Solar e Assinaturas), eliminando qualquer transbordo acidental e páginas em branco.
+- **Área de Assinaturas Alinhada**: Formatação da seção de assinaturas corporativa/cliente em blocos horizontais paralelos (`flex-box` balanceado) perfeitamente posicionados ao rodapé da segunda página.
+
+### 10. Arquitetura Isolada de Impressão (`pdf.html`) (Fase 10)
+- **Criação do Template Dedicado**: Implementação do arquivo `pdf.html` e sua lógica de carregamento assíncrono em `src/js/pdf.js`, operando de forma isolada da página interativa `proposta.html`. Isso previne deformações de layout decorrentes de responsividade do navegador ou estilos dinâmicos da tela.
+- **Páginas A4 Rígidas sem Transbordo**: Redução da altura da folha `.pdf-page` no CSS para `296mm` (um milímetro menor que o A4 padrão) para absorver eventuais erros de arredondamento de pixels dos navegadores e da biblioteca `html2pdf.js`. Isso evita quebras automáticas de linha que criavam páginas em branco entre as seções.
+- **Remoção de Páginas Trilhantes**: Configuração da regra `:not(:last-child)` na diretiva `page-break-after: always` e inclusão do parâmetro `pagebreak: { mode: 'css' }` nas configurações da biblioteca. Com isso, o PDF encerra exatamente no término da segunda página, eliminando qualquer folha em branco residual.
+- **Vite Bundler Integrado**: Adicionado o ponto de entrada `pdf.html` em `vite.config.js` para garantir que o compilador do Vite compacte e gere as referências relativas do template de exportação de forma idêntica às demais telas.
+- **Download Inteligente**: Ao clicar em "Baixar PDF" na proposta, a aba `pdf.html` é aberta, carrega os dados reais, gera a exportação através de `html2pdf.js` e se fecha de maneira invisível e automatizada.
+
 ---
 
 ## 📋 O que FALTA fazer
@@ -128,3 +142,4 @@ Como a lógica e interface da aplicação já estão totalmente prontas e funcio
 - [ ] **Recuperação de Senha**: Adicionar o fluxo de "Esqueci minha senha" na tela de login para enviar e-mail de redefinição pelo Firebase Auth.
 - [ ] **Banco de Equipamentos no Firestore**: Mover o array de equipamentos do arquivo local `equipamentos.js` para uma coleção no Firestore, possibilitando ao dono da empresa atualizar preços de inversores e módulos em tempo real sem precisar recompilar ou alterar o código do front-end.
 - [ ] **Histórico e Relatório de Distâncias de Frete**: Armazenar métricas de distâncias calculadas por CEP no Firestore para ajudar a gerência a mapear áreas de atuação com mais vendas e ajustar os multiplicadores de frete.
+- [ ] **Preview Visual do PDF**: Criar um painel de preview interativo diretamente na interface do administrador para permitir ajustes visuais rápidos antes de realizar o download ou impressão.

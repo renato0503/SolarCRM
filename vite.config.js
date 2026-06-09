@@ -10,6 +10,7 @@ export default defineConfig({
         proposta: resolve(__dirname, 'proposta.html'),
         login: resolve(__dirname, 'login.html'),
         dashboard: resolve(__dirname, 'dashboard.html'),
+        pdf: resolve(__dirname, 'pdf.html'),
       }
     }
   }

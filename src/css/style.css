@@ -366,3 +366,129 @@ button, input, select, textarea {
     opacity: 1;
   }
 }
+
+/* Área de Assinatura (Escondida por padrão) */
+.signature-area {
+  display: none;
+}
+
+/* ==========================================================================
+   Estilos Otimizados para PDF (Geração de Proposta Corporativa A4)
+   ========================================================================== */
+body.pdf-mode {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+body.pdf-mode #proposal-document {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  width: 210mm;
+  padding: 0 !important;
+  margin: 0 auto !important;
+}
+
+body.pdf-mode .proposal-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+  color: #ffffff !important;
+  border-radius: 0 !important;
+  padding: 2.5rem 2rem !important;
+  margin-bottom: 2.5rem !important;
+  box-shadow: none !important;
+}
+
+body.pdf-mode .proposal-header h1,
+body.pdf-mode .proposal-header p,
+body.pdf-mode .proposal-header h4 {
+  color: #ffffff !important;
+}
+
+body.pdf-mode .glass-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: #1e293b !important;
+  padding: 1.5rem !important;
+  border-radius: var(--radius-md) !important;
+}
+
+body.pdf-mode .pricing-card {
+  background: #f97316 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+body.pdf-mode .pricing-card h2,
+body.pdf-mode .pricing-card span,
+body.pdf-mode .pricing-card p {
+  color: #ffffff !important;
+}
+
+body.pdf-mode .pricing-card .text-muted {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+body.pdf-mode .spec-item {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+body.pdf-mode .spec-icon {
+  background: #ffedd5 !important;
+  color: #f97316 !important;
+}
+
+body.pdf-mode .grid-cols-2 {
+  display: block !important;
+}
+
+body.pdf-mode #cardSpecs {
+  opacity: 1 !important;
+  transform: none !important;
+  margin-bottom: 0 !important;
+}
+
+body.pdf-mode #cardImpact {
+  opacity: 1 !important;
+  transform: none !important;
+  page-break-before: always !important;
+  break-before: page !important;
+  margin-top: 0 !important;
+  padding-top: 1.5rem !important;
+  height: auto !important;
+}
+
+body.pdf-mode .page-break {
+  page-break-before: always !important;
+  break-before: page !important;
+}
+
+body.pdf-mode .signature-area {
+  display: flex !important;
+  justify-content: space-between;
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+body.pdf-mode .signature-box {
+  width: 45%;
+  text-align: center;
+}
+
+body.pdf-mode .signature-line {
+  border-top: 1px solid #94a3b8;
+  margin-bottom: 0.5rem;
+  height: 1px;
+}
+
+body.pdf-mode .signature-title {
+  font-size: 0.8125rem;
+  color: #64748b;
+  font-weight: 500;
+}
+

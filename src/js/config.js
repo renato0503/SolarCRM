@@ -8,7 +8,7 @@ const defaultSettings = {
   margemLucro: 30,            // Margem de lucro padrão aplicada sobre equipamentos (%)
   performanceRatio: 0.80,     // Taxa de eficiência e perdas padrão do sistema (PR)
   empresaNome: "SolarCRM",
-  empresaTelefone: "5511999999999", // Telefone padrão do vendedor/administrador
+  empresaTelefone: "5567993515206", // Telefone padrão do vendedor/administrador
   taxaMinimaGrid: 50          // Taxa mínima de rede da distribuidora (kWh) (Ex: Bifásico)
 };
 

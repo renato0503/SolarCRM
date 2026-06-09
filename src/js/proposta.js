@@ -58,6 +58,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     leadNomeEl.textContent = lead.nome;
     leadContatosEl.textContent = `WhatsApp: ${formatPhone(lead.telefone)} | E-mail: ${lead.email}`;
     leadEnderecoEl.textContent = lead.endereco;
+    
+    const pdfSigClient = document.getElementById('pdf-signature-client-name');
+    if (pdfSigClient) {
+      pdfSigClient.textContent = lead.nome;
+    }
 
     const dataProp = proposta.data_criacao ? new Date(proposta.data_criacao) : new Date();
     propDataEl.textContent = `Simulado em: ${dataProp.toLocaleDateString('pt-BR')}`;
@@ -102,14 +107,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 5. Configurar Botão do WhatsApp (Cliente fala com o Vendedor)
     btnWhatsappVendedor.addEventListener('click', () => {
-      const mensagem = `Olá! Recebi a Proposta Solar da SolarCRM (ID: ${proposta.id}). Gostei da simulação com investimento de ${formatCurrency(precoFinal)} e gostaria de tirar algumas dúvidas. Podemos conversar?`;
-      const url = `https://wa.me/${settings.empresaTelefone}?text=${encodeURIComponent(mensagem)}`;
+      const foneConsultor = (settings.empresaTelefone || "5567993515206").replace(/\D/g, '');
+      
+      const mensagem = `Olá! Meu nome é *${lead.nome}* e acabei de realizar uma simulação solar personalizada no SolarCRM.%0A%0A` +
+        `📊 *Resumo do meu projeto:*%0A` +
+        `• *Potência*: ${proposta.potencia_kwp} kWp (${proposta.numero_paineis} painéis)%0A` +
+        `• *Geração Estimada*: ${proposta.geracao_estimada_kwh} kWh/mês%0A` +
+        `• *Economia Anual*: ${formatCurrency(proposta.economia_anual)}%0A` +
+        `• *Investimento*: ${formatCurrency(proposta.preco_final)}%0A` +
+        `• *Payback*: ${proposta.payback_anos} anos%0A%0A` +
+        `Gostaria de falar com um especialista para tirar dúvidas sobre o projeto e formas de pagamento. Podemos conversar?`;
+
+      const url = `https://wa.me/${foneConsultor}?text=${mensagem}`;
       window.open(url, '_blank');
     });
 
     // 6. Configurar Botão de PDF
     btnPdf.addEventListener('click', () => {
-      // Oculta a barra de topo temporariamente para não sair no PDF
+      // Ativa classe de estilo de impressão PDF
+      document.body.classList.add('pdf-mode');
+
       const docElement = document.getElementById('proposal-document');
       
       const opt = {
@@ -117,7 +134,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         filename:     `Proposta_Solar_${lead.nome.replace(/\s+/g, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
       };
 
       // Mostra toast de progresso
@@ -126,9 +144,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Executa geração
       html2pdf().set(opt).from(docElement).save().then(() => {
         showToast("PDF baixado com sucesso!", "success");
+        document.body.classList.remove('pdf-mode');
       }).catch(err => {
         console.error("Erro na geração do PDF:", err);
         showToast("Erro ao gerar PDF.", "error");
+        document.body.classList.remove('pdf-mode');
       });
     });
 

@@ -49,8 +49,12 @@ export function gerarProposta(dadosLead, configsCustom = {}) {
   const servicoInfo = EQUIPAMENTOS.servicos;
   const custoServicos = servicoInfo.custoFixo + (servicoInfo.custoPorKwp * potenciaRealKwp);
   
-  // Custo Direto Total (Equipamentos + Serviços)
-  const custoDiretoTotal = custoEquipamentos + custoServicos;
+  // Frete e Logística (calculado e repassado por CEP)
+  const freteValor = Number(dadosLead.frete_valor) || 350.00;
+  const distanciaKm = Number(dadosLead.distancia_km) || 10.0;
+  
+  // Custo Direto Total (Equipamentos + Serviços + Frete)
+  const custoDiretoTotal = custoEquipamentos + custoServicos + freteValor;
   
   // 8. Preço Final (Com Margem de Lucro)
   const margem = settings.margemLucro; // ex: 30%
@@ -78,6 +82,8 @@ export function gerarProposta(dadosLead, configsCustom = {}) {
     custoEquipamentos: Number(custoEquipamentos.toFixed(2)),
     custoServicos: Number(custoServicos.toFixed(2)),
     custoDiretoTotal: Number(custoDiretoTotal.toFixed(2)),
+    frete_valor: freteValor,
+    distancia_km: distanciaKm,
     margemLucro: Number(margem),
     margemLucroValor: Number(margemLucroValor.toFixed(2)),
     precoFinal: Number(precoFinal.toFixed(2)),

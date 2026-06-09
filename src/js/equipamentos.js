@@ -37,5 +37,10 @@ export const EQUIPAMENTOS = {
     nome: "Projeto de Engenharia, Homologação e Mão de Obra de Instalação",
     custoFixo: 2200.00,
     custoPorKwp: 350.00 // Custo de instalação adicional por kWp
+  },
+  frete: {
+    minimo: 350.00,
+    medio: 650.00,
+    maximo: 1100.00
   }
 };

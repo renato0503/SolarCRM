@@ -1,6 +1,6 @@
 import { dbAddLead, dbAddProposal } from './firebase.js';
 import { gerarProposta } from './calculator.js';
-import { showToast, formatPhone, cleanPhone } from './utils.js';
+import { showToast, formatPhone, cleanPhone, calcularFretePorCEP } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('simulationForm');
@@ -12,6 +12,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Máscara de telefone dinâmica
   phoneInput.addEventListener('input', (e) => {
     e.target.value = formatPhone(e.target.value);
+  });
+
+  // Máscara de CEP dinâmica
+  const cepInput = document.getElementById('endereco');
+  cepInput.addEventListener('input', (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length > 8) val = val.slice(0, 8);
+    if (val.length > 5) {
+      e.target.value = val.slice(0, 5) + '-' + val.slice(5);
+    } else {
+      e.target.value = val;
+    }
   });
 
   // Evento de submissão do formulário
@@ -60,8 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
       isValid = false;
     }
 
-    if (!endereco) {
-      errors.endereco = "Endereço é obrigatório.";
+    const cepClean = endereco.replace(/\D/g, '');
+    if (cepClean.length !== 8) {
+      errors.endereco = "CEP inválido (digite os 8 números).";
       isValid = false;
     }
 
@@ -94,21 +107,26 @@ document.addEventListener('DOMContentLoaded', () => {
       btnText.style.display = 'none';
       btnSpinner.style.display = 'block';
 
-      // 1. Salvar Lead no Firestore / MockDB
+      // 1. Calcular frete por CEP
+      const freteInfo = await calcularFretePorCEP(cepClean);
+
+      // 2. Salvar Lead no Firestore / MockDB
       const leadData = {
         nome,
         telefone,
         email,
-        endereco,
+        endereco: `${freteInfo.cep.slice(0, 5)}-${freteInfo.cep.slice(5)} (${freteInfo.cidade}/${freteInfo.uf})`,
         consumo_mensal_kwh: Number(consumoKwh)
       };
 
       const savedLead = await dbAddLead(leadData);
 
-      // 2. Gerar proposta baseada nos dados do Lead
+      // 3. Gerar proposta baseada nos dados do Lead + Frete
       const dadosLeadCalculo = {
         consumo_mensal_kwh: Number(consumoKwh),
-        tipo_telha: tipoTelha
+        tipo_telha: tipoTelha,
+        frete_valor: freteInfo.freteValor,
+        distancia_km: freteInfo.distanciaKm
       };
       
       const proposalCalculated = gerarProposta(dadosLeadCalculo);
@@ -121,6 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
         potencia_kwp: proposalCalculated.potenciaRealKwp,
         custo_equipamentos: proposalCalculated.custoEquipamentos,
         custo_servicos: proposalCalculated.custoServicos,
+        frete_valor: proposalCalculated.frete_valor,
+        distancia_km: proposalCalculated.distancia_km,
         margem_lucro: proposalCalculated.margemLucro,
         preco_final: proposalCalculated.precoFinal,
         economia_mensal: proposalCalculated.economiaMensal,

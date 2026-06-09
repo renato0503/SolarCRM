@@ -77,3 +77,92 @@ export function formatPhone(value) {
 export function cleanPhone(phone) {
   return phone.replace(/\D/g, '');
 }
+
+/**
+ * Calcula a distância do CEP digitado até o centro da cidade e classifica o valor do frete.
+ * Regras: até 15km = valor mínimo (R$ 350), 15 a 25km = valor médio (R$ 650), acima de 25km = valor máximo (R$ 1100).
+ * @param {string} cep - CEP limpo (8 dígitos)
+ * @returns {Promise<Object>} Dados de frete e geolocalização
+ */
+export async function calcularFretePorCEP(cep) {
+  const clean = cep.replace(/\D/g, '');
+  
+  // Valores padrão/fallback (caso dê algum erro ou offline)
+  const fallbackResult = {
+    cep: clean,
+    cidade: "Campo Grande",
+    uf: "MS",
+    distanciaKm: 10.0,
+    freteValor: 350.00,
+    tipoFrete: "mínimo"
+  };
+
+  if (clean.length !== 8) {
+    return fallbackResult;
+  }
+
+  try {
+    // 1. Busca detalhes do CEP no ViaCEP
+    const viaCepRes = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
+    if (!viaCepRes.ok) throw new Error("Erro ao acessar ViaCEP");
+    const viaCepData = await viaCepRes.json();
+    if (viaCepData.erro) throw new Error("CEP inexistente");
+
+    const cidade = viaCepData.localidade;
+    const uf = viaCepData.uf;
+
+    // 2. Busca coordenadas do CEP no Nominatim (OpenStreetMap)
+    const nomCepRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${clean}&country=Brazil&format=json&limit=1`);
+    if (!nomCepRes.ok) throw new Error("Erro no geocoding do CEP");
+    const nomCepData = await nomCepRes.json();
+
+    // 3. Busca coordenadas do Centro da Cidade no Nominatim
+    const nomCityRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cidade)}+${encodeURIComponent(uf)}+Brazil&format=json&limit=1`);
+    if (!nomCityRes.ok) throw new Error("Erro no geocoding do centro da cidade");
+    const nomCityData = await nomCityRes.json();
+
+    if (nomCepData.length > 0 && nomCityData.length > 0) {
+      const lat1 = parseFloat(nomCepData[0].lat);
+      const lon1 = parseFloat(nomCepData[0].lon);
+      const lat2 = parseFloat(nomCityData[0].lat);
+      const lon2 = parseFloat(nomCityData[0].lon);
+
+      // Distância de Haversine
+      const R = 6371; // Raio da Terra em km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distanciaKm = R * c;
+
+      // Classificação do frete
+      let freteValor = 350.00;
+      let tipoFrete = "mínimo";
+
+      if (distanciaKm > 25.0) {
+        freteValor = 1100.00;
+        tipoFrete = "máximo";
+      } else if (distanciaKm >= 15.0) {
+        freteValor = 650.00;
+        tipoFrete = "médio";
+      }
+
+      return {
+        cep: clean,
+        cidade,
+        uf,
+        distanciaKm: Math.round(distanciaKm * 10) / 10,
+        freteValor,
+        tipoFrete
+      };
+    }
+  } catch (error) {
+    console.warn("Falha ao calcular frete exato via API. Usando fallback de frete mínimo:", error);
+  }
+
+  return fallbackResult;
+}
+

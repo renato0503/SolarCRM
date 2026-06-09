@@ -84,6 +84,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     specInversorEl.textContent = proposta.inversor_selecionado;
     specEstruturaEl.textContent = proposta.estrutura_selecionada;
 
+    const specFreteEl = document.getElementById('spec-frete');
+    if (specFreteEl) {
+      const dist = proposta.distancia_km || 10.0;
+      const freteVal = proposta.frete_valor || 350.00;
+      specFreteEl.textContent = `${formatCurrency(freteVal)} (Distância calculada: ${dist} km)`;
+    }
+
     // Métricas ecológicas e geração
     propGeracaoKwhEl.textContent = `${geracaoKwh} kWh / mês`;
     
@@ -123,33 +130,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // 6. Configurar Botão de PDF
-    btnPdf.addEventListener('click', () => {
+    btnPdf.addEventListener('click', async () => {
       // Ativa classe de estilo de impressão PDF
       document.body.classList.add('pdf-mode');
-
-      const docElement = document.getElementById('proposal-document');
-      
-      const opt = {
-        margin:       0,
-        filename:     `Proposta_Solar_${lead.nome.replace(/\s+/g, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-
-      // Mostra toast de progresso
       showToast("Gerando arquivo PDF. Aguarde...", "info");
 
-      // Executa geração
-      html2pdf().set(opt).from(docElement).save().then(() => {
-        showToast("PDF baixado com sucesso!", "success");
+      // Atraso de 150ms para permitir que o navegador repinte a tela em modo PDF antes da captura
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      try {
+        const docElement = document.getElementById('proposal-document');
+        
+        const opt = {
+          margin:       0,
+          filename:     `Proposta_Solar_${lead.nome.replace(/\s+/g, '_')}.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, logging: false },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        if (typeof html2pdf !== 'undefined') {
+          await html2pdf().set(opt).from(docElement).save();
+          showToast("PDF baixado com sucesso!", "success");
+        } else {
+          console.warn("html2pdf não está disponível. Abrindo diálogo nativo de impressão.");
+          showToast("Abrindo diálogo de impressão. Escolha 'Salvar como PDF'.", "info");
+          window.print();
+        }
+      } catch (err) {
+        console.error("Erro na geração do PDF com html2pdf:", err);
+        showToast("Erro ao gerar PDF. Abrindo diálogo nativo de impressão...", "error");
+        window.print();
+      } finally {
+        // Sempre desativa o estilo de impressão PDF
         document.body.classList.remove('pdf-mode');
-      }).catch(err => {
-        console.error("Erro na geração do PDF:", err);
-        showToast("Erro ao gerar PDF.", "error");
-        document.body.classList.remove('pdf-mode');
-      });
+      }
     });
 
   } catch (error) {

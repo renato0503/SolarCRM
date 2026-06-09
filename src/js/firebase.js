@@ -1,10 +1,10 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js';
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged 
-} from 'firebase/auth';
+} from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js';
 import { 
   getFirestore, 
   collection, 
@@ -17,7 +17,7 @@ import {
   query, 
   orderBy,
   deleteDoc
-} from 'firebase/firestore';
+} from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js';
 
 // Configuração do Firebase carregada a partir de variáveis de ambiente do Vite (.env)
 const firebaseConfig = {
@@ -75,6 +75,31 @@ function saveMockPropostas(propostas) {
   localStorage.setItem(MOCK_PROPOSTAS_KEY, JSON.stringify(propostas));
 }
 
+// Helpers para carregar dados estáticos do JSON do repositório (MVP)
+async function fetchStaticPropostas() {
+  try {
+    const res = await fetch('./api/propostas.json');
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.warn("Erro ao buscar propostas estáticas:", e);
+  }
+  return [];
+}
+
+async function fetchStaticLeads() {
+  try {
+    const res = await fetch('./api/leads.json');
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.warn("Erro ao buscar leads estáticos:", e);
+  }
+  return [];
+}
+
 // ==========================================
 // EXPORTS DAS APIS DA APLICAÇÃO (FACADE)
 // ==========================================
@@ -111,23 +136,32 @@ export async function dbAddLead(leadData) {
 }
 
 export async function dbGetLeads() {
+  let list = [];
   if (!isMock) {
     try {
       const q = query(collection(db, 'leads'), orderBy('data_criacao', 'desc'));
       const querySnapshot = await getDocs(q);
-      const leads = [];
       querySnapshot.forEach((doc) => {
-        leads.push({ id: doc.id, ...doc.data() });
+        list.push({ id: doc.id, ...doc.data() });
       });
-      return leads;
+      return list;
     } catch (e) {
       console.error("Erro no Firestore ao buscar leads:", e);
-      throw e;
     }
-  } else {
-    // Retorna ordenado por data_criacao desc
-    return getMockLeads().sort((a, b) => new Date(b.data_criacao) - new Date(a.data_criacao));
   }
+
+  // Combina localStorage e JSON estático
+  const localList = getMockLeads();
+  const staticList = await fetchStaticLeads();
+  
+  const combined = [...localList];
+  staticList.forEach(item => {
+    if (!combined.some(c => c.id === item.id)) {
+      combined.push(item);
+    }
+  });
+
+  return combined.sort((a, b) => new Date(b.data_criacao) - new Date(a.data_criacao));
 }
 
 // --- PROPOSTAS ---
@@ -158,60 +192,79 @@ export async function dbAddProposal(proposalData) {
 }
 
 export async function dbGetProposal(id) {
+  let proposal = null;
   if (!isMock) {
     try {
       const docRef = doc(db, 'propostas', id);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() };
+        proposal = { id: docSnap.id, ...docSnap.data() };
       }
-      return null;
     } catch (e) {
       console.error("Erro no Firestore ao buscar proposta:", e);
-      throw e;
     }
-  } else {
-    const propostas = getMockPropostas();
-    return propostas.find(p => p.id === id) || null;
   }
+
+  if (proposal) return proposal;
+
+  const propostas = getMockPropostas();
+  proposal = propostas.find(p => p.id === id) || null;
+  if (proposal) return proposal;
+
+  const staticPropostas = await fetchStaticPropostas();
+  return staticPropostas.find(p => p.id === id) || null;
 }
 
 export async function dbGetLead(id) {
+  let lead = null;
   if (!isMock) {
     try {
       const docRef = doc(db, 'leads', id);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() };
+        lead = { id: docSnap.id, ...docSnap.data() };
       }
-      return null;
     } catch (e) {
       console.error("Erro no Firestore ao buscar lead:", e);
-      throw e;
     }
-  } else {
-    const leads = getMockLeads();
-    return leads.find(l => l.id === id) || null;
   }
+
+  if (lead) return lead;
+
+  const leads = getMockLeads();
+  lead = leads.find(l => l.id === id) || null;
+  if (lead) return lead;
+
+  const staticLeads = await fetchStaticLeads();
+  return staticLeads.find(l => l.id === id) || null;
 }
 
 export async function dbGetProposals() {
+  let list = [];
   if (!isMock) {
     try {
       const q = query(collection(db, 'propostas'), orderBy('data_criacao', 'desc'));
       const querySnapshot = await getDocs(q);
-      const propostas = [];
       querySnapshot.forEach((doc) => {
-        propostas.push({ id: doc.id, ...doc.data() });
+        list.push({ id: doc.id, ...doc.data() });
       });
-      return propostas;
+      return list;
     } catch (e) {
       console.error("Erro no Firestore ao buscar propostas:", e);
-      throw e;
     }
-  } else {
-    return getMockPropostas().sort((a, b) => new Date(b.data_criacao) - new Date(a.data_criacao));
   }
+
+  const localList = getMockPropostas();
+  const staticList = await fetchStaticPropostas();
+
+  const combined = [...localList];
+  staticList.forEach(item => {
+    if (!combined.some(c => c.id === item.id)) {
+      combined.push(item);
+    }
+  });
+
+  return combined.sort((a, b) => new Date(b.data_criacao) - new Date(a.data_criacao));
 }
 
 export async function dbUpdateProposalStatus(id, newStatus) {

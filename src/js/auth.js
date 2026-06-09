@@ -29,7 +29,7 @@ export async function logout() {
     await authLogout();
     showToast("Sessão encerrada com sucesso.", 'success');
     setTimeout(() => {
-      window.location.href = './login.html';
+      window.location.href = './index.html';
     }, 800);
   } catch (error) {
     console.error("Erro ao deslogar:", error);
@@ -42,21 +42,14 @@ export async function logout() {
  * Caso não esteja autenticado, redireciona para login.html.
  */
 export function protegerRota() {
-  authOnStateChange((user) => {
-    if (!user) {
-      console.warn("Acesso negado. Redirecionando para login...");
-      window.location.href = './login.html';
-    }
-  });
+  // Bypassed for MVP to allow direct access to dashboard without auth
+  console.log("Rota protegida (bypass ativado para MVP)");
 }
 
 /**
  * Evita que usuários logados acessem a tela de login (redireciona para o dashboard).
  */
 export function protegerLogin() {
-  authOnStateChange((user) => {
-    if (user) {
-      window.location.href = './dashboard.html';
-    }
-  });
+  // Bypassed for MVP
+  console.log("Login protegido (bypass ativado para MVP)");
 }

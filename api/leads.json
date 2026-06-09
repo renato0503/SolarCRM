@@ -1,0 +1,20 @@
+[
+  {
+    "id": "lead_renatorosa",
+    "nome": "Renato Rosa",
+    "telefone": "67993515206",
+    "email": "gestor.renatorosa@gmail.com",
+    "endereco": "78005-400 (Cuiabá/MT)",
+    "consumo_mensal_kwh": 450,
+    "data_criacao": "2026-06-08T20:25:00.000Z"
+  },
+  {
+    "id": "lead_corinthians",
+    "nome": "Arena Corinthians",
+    "telefone": "11994553152",
+    "email": "corinthians@gmail.com",
+    "endereco": "08295-005 (São Paulo/SP)",
+    "consumo_mensal_kwh": 25000,
+    "data_criacao": "2026-06-08T20:35:00.000Z"
+  }
+]

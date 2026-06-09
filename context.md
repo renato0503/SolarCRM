@@ -94,6 +94,17 @@ Este documento apresenta um resumo consolidado de tudo o que já foi implementad
 - **Vite Bundler Integrado**: Adicionado o ponto de entrada `pdf.html` em `vite.config.js` para garantir que o compilador do Vite compacte e gere as referências relativas do template de exportação de forma idêntica às demais telas.
 - **Download Inteligente**: Ao clicar em "Baixar PDF" na proposta, a aba `pdf.html` é aberta, carrega os dados reais, gera a exportação através de `html2pdf.js` e se fecha de maneira invisível e automatizada.
 
+### 11. Estratégia de Arquivos Estáticos e Eliminação de Bare Imports (Fase 11)
+- **Eliminação de Bare Imports (Módulos ESM Nativos)**:
+  - Substituímos todas as importações de pacotes bare do npm (`firebase/app`, `firebase/auth`, `firebase/firestore` em `src/js/firebase.js` e `motion` em `src/js/proposta.js`) por imports diretos de CDNs de desenvolvimento e produção (como Google GStatic e JSDelivr ESM). Isso permitiu que o navegador resolvesse todos os módulos nativamente, viabilizando o funcionamento instantâneo da aplicação em servidores estáticos simples que hospedam arquivos da branch `main` diretamente, sem qualquer necessidade de build/transpilação.
+- **Estratégia de Banco de Dados Estático (Fallbacks de JSON)**:
+  - Criamos uma base de dados mockada local em arquivos JSON estruturados sob a pasta `api/` na raiz do repositório (`api/leads.json` e `api/propostas.json`), contendo o exato detalhamento de dimensionamento e geocodificação calculados e testados para os clientes Renato Rosa (Cuiabá/MT, 450 kWh) e Arena Corinthians (São Paulo/SP, 25.000 kWh).
+  - Implementamos um mecanismo inteligente de fallback que intercepta consultas locais. Se as credenciais do Firebase estiverem ausentes e o registro solicitado não estiver no `localStorage` do navegador, a aplicação busca automaticamente a proposta ou lead a partir dos arquivos estáticos (`leads.json`/`propostas.json`).
+- **Acesso Direto ao Dashboard**:
+  - Ajustamos os links das páginas de simulação e o comportamento de `protegerRota()` para direcionar e conceder acesso imediato ao Painel de Vendas (`dashboard.html`) sem bloqueio por login para fins de validação do MVP.
+- **Publicação e Deploy**:
+  - Commits integrados e deploy efetuado com sucesso na branch `main` no repositório remoto para atualização imediata no GitHub Pages.
+
 ---
 
 ## 📋 O que FALTA fazer

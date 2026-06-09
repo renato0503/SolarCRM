@@ -1,7 +1,7 @@
 import { dbGetProposal, dbGetLead } from './firebase.js';
 import { formatCurrency, showToast } from './utils.js';
-import { getSettings } from './config';
-import { animate } from 'motion';
+import { getSettings } from './config.js';
+import { animate } from 'https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // 1. Obter ID da proposta pela URL

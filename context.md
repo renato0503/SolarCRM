@@ -75,6 +75,11 @@ Este documento apresenta um resumo consolidado de tudo o que já foi implementad
   * Exibição estruturada dessas informações por HTML dinâmico sob cada item da especificação técnica em `proposta.html`, detalhando o valor individual e informando a presença da taxa de deslocamento no bloco de Serviços.
   * Área de assinaturas formais de aceite para o PDF ao final do documento `proposta.html` preenchendo automaticamente o nome do cliente.
 
+### 8. Aprimoramento e Resolução da API de CEP (Fase 8)
+- **Dicionário Local de Capitais**: Criação de um cache local com as coordenadas das principais capitais brasileiras (como Cuiabá e Campo Grande), o que otimiza a performance de geolocalização e previne rate-limiting do Nominatim (OpenStreetMap).
+- **Fallback Inteligente de APIs**: Encadeamento de requisições que consulta primeiramente o ViaCEP e migra automaticamente para a BrasilAPI caso haja falhas na primeira, assegurando alta taxa de sucesso.
+- **Detector de Região por Prefixo**: Criação de um algoritmo inteligente baseado nas faixas de CEP brasileiras que determina o Estado e a Capital do CEP inserido instantaneamente, garantindo a correção de dados (ex. CEP `78005-400` resolvido para Cuiabá/MT) mesmo com falha total de rede ou APIs off-line.
+
 ---
 
 ## 📋 O que FALTA fazer

@@ -46,12 +46,22 @@ export function gerarProposta(dadosLead, configsCustom = {}) {
   const custoEquipamentos = custoPaineis + custoInversor + custoEstrutura + custoKitEletrico;
   
   // 7. Serviços de Engenharia e Instalação
-  const servicoInfo = EQUIPAMENTOS.servicos;
-  const custoServicos = servicoInfo.custoFixo + (servicoInfo.custoPorKwp * potenciaRealKwp);
-  
   // Frete e Logística (calculado e repassado por CEP)
   const freteValor = Number(dadosLead.frete_valor) || 350.00;
   const distanciaKm = Number(dadosLead.distancia_km) || 10.0;
+
+  // 7. Serviços de Engenharia e Instalação
+  const servicoInfo = EQUIPAMENTOS.servicos;
+  
+  // Taxa de deslocamento de instalação em função da localidade (CEP)
+  let taxaInstalacaoLocalidade = 0.00;
+  if (distanciaKm > 25.0) {
+    taxaInstalacaoLocalidade = 450.00;
+  } else if (distanciaKm >= 15.0) {
+    taxaInstalacaoLocalidade = 250.00;
+  }
+  
+  const custoServicos = servicoInfo.custoFixo + (servicoInfo.custoPorKwp * potenciaRealKwp) + taxaInstalacaoLocalidade;
   
   // Custo Direto Total (Equipamentos + Serviços + Frete)
   const custoDiretoTotal = custoEquipamentos + custoServicos + freteValor;
@@ -60,6 +70,15 @@ export function gerarProposta(dadosLead, configsCustom = {}) {
   const margem = settings.margemLucro; // ex: 30%
   const precoFinal = custoDiretoTotal * (1 + margem / 100);
   const margemLucroValor = precoFinal - custoDiretoTotal;
+
+  // Preços finais de venda (com margem incluída) para exibição detalhada ao cliente
+  const markupFactor = (1 + margem / 100);
+  const precoPaineis = (custoPaineis + custoKitEletrico) * markupFactor;
+  const precoInversor = custoInversor * markupFactor;
+  const precoEstrutura = custoEstrutura * markupFactor;
+  const precoServicos = custoServicos * markupFactor;
+  const precoFrete = freteValor * markupFactor;
+  const taxaLocalidadeVenda = taxaInstalacaoLocalidade * markupFactor;
   
   // 9. Geração Estimada de Energia (Mensal)
   const geracaoEstimadaKwh = potenciaRealKwp * settings.hsp * 30 * settings.performanceRatio;
@@ -84,6 +103,12 @@ export function gerarProposta(dadosLead, configsCustom = {}) {
     custoDiretoTotal: Number(custoDiretoTotal.toFixed(2)),
     frete_valor: freteValor,
     distancia_km: distanciaKm,
+    preco_paineis: Number(precoPaineis.toFixed(2)),
+    preco_inversor: Number(precoInversor.toFixed(2)),
+    preco_estrutura: Number(precoEstrutura.toFixed(2)),
+    preco_servicos: Number(precoServicos.toFixed(2)),
+    preco_frete: Number(precoFrete.toFixed(2)),
+    taxa_localidade_venda: Number(taxaLocalidadeVenda.toFixed(2)),
     margemLucro: Number(margem),
     margemLucroValor: Number(margemLucroValor.toFixed(2)),
     precoFinal: Number(precoFinal.toFixed(2)),

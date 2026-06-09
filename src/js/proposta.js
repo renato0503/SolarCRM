@@ -1,5 +1,5 @@
 import { dbGetProposal, dbGetLead } from './firebase.js';
-import { formatCurrency } from './utils.js';
+import { formatCurrency, showToast } from './utils.js';
 import { getSettings } from './config';
 import { animate } from 'motion';
 
@@ -80,15 +80,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     propEconomia25AnosEl.textContent = `Economia de até ${formatCurrency(economia25Anos)} em 25 anos`;
 
     // Especificações
-    specPaineisEl.textContent = `${proposta.numero_paineis}x ${proposta.painel_selecionado}`;
-    specInversorEl.textContent = proposta.inversor_selecionado;
-    specEstruturaEl.textContent = proposta.estrutura_selecionada;
+    // Especificações detalhadas com preço comercial individual
+    const precoPaineis = proposta.preco_paineis || (proposta.custo_equipamentos * 0.6 * (1 + proposta.margem_lucro / 100));
+    const precoInversor = proposta.preco_inversor || (proposta.custo_equipamentos * 0.3 * (1 + proposta.margem_lucro / 100));
+    const precoEstrutura = proposta.preco_estrutura || (proposta.custo_equipamentos * 0.1 * (1 + proposta.margem_lucro / 100));
+    const precoServicos = proposta.preco_servicos || (proposta.custo_servicos * (1 + proposta.margem_lucro / 100));
+    const precoFrete = proposta.preco_frete || (proposta.frete_valor * (1 + proposta.margem_lucro / 100));
+
+    specPaineisEl.innerHTML = `${proposta.numero_paineis}x ${proposta.painel_selecionado} <br> <span style="font-weight: 500; font-size: 0.8125rem; color: var(--text-muted); display: block; margin-top: 0.15rem;">Módulos Fotovoltaicos e Cabos: <strong>${formatCurrency(precoPaineis)}</strong></span>`;
+    specInversorEl.innerHTML = `${proposta.inversor_selecionado} <br> <span style="font-weight: 500; font-size: 0.8125rem; color: var(--text-muted); display: block; margin-top: 0.15rem;">Inversor Grid-Tie Homologado: <strong>${formatCurrency(precoInversor)}</strong></span>`;
+    specEstruturaEl.innerHTML = `${proposta.estrutura_selecionada} <br> <span style="font-weight: 500; font-size: 0.8125rem; color: var(--text-muted); display: block; margin-top: 0.15rem;">Suportes de Fixação Alumínio: <strong>${formatCurrency(precoEstrutura)}</strong></span>`;
+
+    const specServicoEl = document.getElementById('spec-servico');
+    if (specServicoEl) {
+      let servicoHtml = `Instalação padrão, Projeto de Engenharia e homologação inclusos. <br> <span style="font-weight: 500; font-size: 0.8125rem; color: var(--text-muted); display: block; margin-top: 0.15rem;">Mão de Obra e Homologação: <strong>${formatCurrency(precoServicos)}</strong>`;
+      if (proposta.taxa_localidade_venda > 0) {
+        servicoHtml += ` (inclui taxa local de deslocamento de <strong>${formatCurrency(proposta.taxa_localidade_venda)}</strong>)`;
+      }
+      servicoHtml += `</span>`;
+      specServicoEl.innerHTML = servicoHtml;
+    }
 
     const specFreteEl = document.getElementById('spec-frete');
     if (specFreteEl) {
       const dist = proposta.distancia_km || 10.0;
-      const freteVal = proposta.frete_valor || 350.00;
-      specFreteEl.textContent = `${formatCurrency(freteVal)} (Distância calculada: ${dist} km)`;
+      specFreteEl.innerHTML = `${formatCurrency(precoFrete)} <br> <span style="font-weight: 500; font-size: 0.8125rem; color: var(--text-muted); display: block; margin-top: 0.15rem;">Logística e Entrega (Distância calculada: <strong>${dist} km</strong>)</span>`;
     }
 
     // Métricas ecológicas e geração

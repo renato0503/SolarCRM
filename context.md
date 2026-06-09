@@ -57,16 +57,23 @@ Este documento apresenta um resumo consolidado de tudo o que já foi implementad
 ### 7. Cálculo de Frete por CEP e Robustez de PDF (Fase 7)
 - **CEP no Formulário**: Campo de endereço do simulador substituído por CEP com máscara automática (`99999-999`) e validação estrita.
 - **Cálculo de Distância por Geolocalização**: Integração assíncrona com API ViaCEP (para puxar Cidade e UF) e Nominatim OpenStreetMap (para achar a latitude/longitude do CEP e do Centro da Cidade correspondente), calculando a distância física entre os dois pontos em linha reta pela fórmula de Haversine.
+- **Isolamento de Falhas de Geocodificação (Correção Cuiabá/MT)**: Refatorado o calculador de frete para tratar a API Nominatim de geolocalização física separadamente. Com isso, mesmo se o Nominatim falhar (ex: limites de taxa), a Cidade e UF do ViaCEP são **sempre preservados** na proposta e no lead (exibindo Cuiabá/MT de forma confiável para o CEP `78005-400`).
 - **Tabela de Frete Proporcional**: Inclusão de três faixas de frete no arquivo `equipamentos.js` integradas diretamente na planilha de custo direto do simulador em `calculator.js`:
   - Até 15 km: R$ 350,00 (mínimo)
   - De 15 km a 25 km: R$ 650,00 (médio)
   - Acima de 25 km: R$ 1.100,00 (máximo)
 - **Salvaguarda de Falha em API**: Estrutura com fallbacks que garante a continuação do cálculo de frete (com distância padrão de 10km e frete mínimo) caso o cliente esteja sem conexão ou as APIs geográficas caiam.
-- **Robustez na Emissão do PDF**:
+- **Robustez na Emissão do PDF (Correção de Travamento e Integridade)**:
+  * Removidos atributos obsoletos de `integrity` e `crossorigin` do script CDN `html2pdf.js` que causavam bloqueio de carregamento no navegador.
+  * Importação explícita de `showToast` em `proposta.js` para sanar erros de referência indefinida.
   * Utilização de bloco `try-catch-finally` que obriga o corpo do documento a sempre remover a classe de estilização temporária de impressão (`.pdf-mode`), evitando que a tela fique travada após a geração do arquivo.
   * Inclusão de atraso de 150ms antes da captura do PDF para permitir a repintura do DOM no navegador.
   * Integração de **fallback automático de impressão nativa (`window.print()`)** caso a biblioteca `html2pdf` falhe ou não seja carregada no navegador do usuário, com layout de 2 páginas A4 perfeitamente formatadas.
-- **Área de Assinaturas e Exibição de Frete**: Adicionado bloco visual de frete cobrado/distância percorrida e a seção de assinaturas formais de aceite para o PDF ao final do documento `proposta.html`, preenchendo automaticamente o nome do cliente.
+- **Descritivo Detalhado de Valores e Taxa Local**:
+  * Adicionado cálculo de preços comerciais de venda unitários (com margem de lucro aplicada) para Módulos, Inversor, Estrutura, Serviços e Frete.
+  * Inclusão de uma **taxa local de deslocamento de instalação** baseada na quilometragem calculada (R$ 0,00 até 15km; R$ 250,00 de 15 a 25km; R$ 450,00 acima de 25km) somada nos serviços.
+  * Exibição estruturada dessas informações por HTML dinâmico sob cada item da especificação técnica em `proposta.html`, detalhando o valor individual e informando a presença da taxa de deslocamento no bloco de Serviços.
+  * Área de assinaturas formais de aceite para o PDF ao final do documento `proposta.html` preenchendo automaticamente o nome do cliente.
 
 ---
 

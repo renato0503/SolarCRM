@@ -3,7 +3,8 @@ import {
   getAuth, 
   signInWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  sendPasswordResetEmail
 } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js';
 import { 
   getFirestore, 
@@ -16,17 +17,20 @@ import {
   updateDoc, 
   query, 
   orderBy,
-  deleteDoc
+  deleteDoc,
+  where
 } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js';
+import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js';
 
-// Configuração do Firebase carregada a partir de variáveis de ambiente do Vite (.env)
+// Credenciais Firebase via variáveis de ambiente (nunca commitar .env)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDStqxnwdR6hYxypR1Xm_2cLM0MQRphytE",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "solarcrm-60ce1.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "solarcrm-60ce1",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "solarcrm-60ce1.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "797245411122",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:797245411122:web:bcfa64de128b1fd5d1112b",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-XQQZCQQ1FE9"
 };
 
 let app, auth, db;
@@ -40,6 +44,7 @@ if (isFirebaseConfigured) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
+    getAnalytics(app);
     console.log("🔥 Firebase inicializado com sucesso!");
   } catch (error) {
     console.warn("⚠️ Falha ao conectar ao Firebase. Ativando Modo de Teste Local (MockDB):", error);
@@ -108,7 +113,7 @@ export const firebaseIsMock = () => isMock;
 
 // --- LEADS ---
 
-export async function dbAddLead(leadData) {
+export async function dbAddLead(leadData, vendedorId = null, vendedorNome = null) {
   const cleanLead = {
     nome: leadData.nome || '',
     telefone: leadData.telefone || '',
@@ -117,6 +122,11 @@ export async function dbAddLead(leadData) {
     consumo_mensal_kwh: Number(leadData.consumo_mensal_kwh) || 0,
     data_criacao: new Date().toISOString()
   };
+
+  if (vendedorId) {
+    cleanLead.vendedorId = vendedorId;
+    cleanLead.vendedorNome = vendedorNome || 'Vendedor';
+  }
 
   if (!isMock) {
     try {
@@ -135,11 +145,16 @@ export async function dbAddLead(leadData) {
   }
 }
 
-export async function dbGetLeads() {
+export async function dbGetLeads(vendedorId = null, isAdminUser = false) {
   let list = [];
   if (!isMock) {
     try {
-      const q = query(collection(db, 'leads'), orderBy('data_criacao', 'desc'));
+      let q;
+      if (vendedorId && !isAdminUser) {
+        q = query(collection(db, 'leads'), where('vendedorId', '==', vendedorId), orderBy('data_criacao', 'desc'));
+      } else {
+        q = query(collection(db, 'leads'), orderBy('data_criacao', 'desc'));
+      }
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         list.push({ id: doc.id, ...doc.data() });
@@ -150,16 +165,19 @@ export async function dbGetLeads() {
     }
   }
 
-  // Combina localStorage e JSON estático
   const localList = getMockLeads();
   const staticList = await fetchStaticLeads();
   
-  const combined = [...localList];
+  let combined = [...localList];
   staticList.forEach(item => {
     if (!combined.some(c => c.id === item.id)) {
       combined.push(item);
     }
   });
+
+  if (vendedorId && !isAdminUser) {
+    combined = combined.filter(l => l.vendedorId === vendedorId);
+  }
 
   return combined.sort((a, b) => new Date(b.data_criacao) - new Date(a.data_criacao));
 }
@@ -324,22 +342,54 @@ export async function dbDeleteLeadAndProposal(leadId) {
 export async function authLogin(email, password) {
   if (!isMock) {
     try {
+      if (auth && auth.currentUser) {
+        await signOut(auth);
+      }
+
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      const user = userCredential.user;
+      
+      const docRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        const isAdminEmail = email === 'admin@admin.com' || email.includes('admin');
+        await setDoc(docRef, {
+          email: user.email,
+          nome: user.displayName || (isAdminEmail ? 'Administrador' : 'Vendedor'),
+          role: isAdminEmail ? 'admin' : 'vendedor',
+          createdAt: new Date().toISOString()
+        });
+      }
+      
+      return user;
     } catch (e) {
       console.error("Erro no Firebase Auth:", e);
       throw e;
     }
   } else {
-    // Autenticação mockada: aceita qualquer email de vendedor da empresa e senha >= 6 digitos
-    if (email.includes('@solarcrm.com.br') || email === 'vendedor@solarcrm.com.br' || email === 'admin@admin.com') {
-      if (password.length >= 6) {
-        const user = { email, uid: 'mock_uid_123', displayName: 'Vendedor Solar' };
-        localStorage.setItem(MOCK_USER_KEY, JSON.stringify(user));
-        // Dispara callback se registrado
-        if (authCallback) authCallback(user);
-        return user;
-      }
+    localStorage.removeItem(MOCK_USER_KEY);
+    const isAdminEmail = email === 'admin@admin.com' || email.includes('admin');
+    const isValidDomain = email.includes('@solarcrm.com.br') || email === 'vendedor@solarcrm.com.br' || isAdminEmail;
+    
+    if (isValidDomain && password.length >= 6) {
+      const uid = isAdminEmail ? 'mock_admin_001' : 'mock_vendedor_001';
+      const role = isAdminEmail ? 'admin' : 'vendedor';
+      const user = { 
+        email, 
+        uid, 
+        displayName: isAdminEmail ? 'Administrador' : 'Vendedor Solar' 
+      };
+      localStorage.setItem(MOCK_USER_KEY, JSON.stringify(user));
+      localStorage.setItem('solarcrm_user_profile_' + uid, JSON.stringify({ 
+        id: uid, 
+        role, 
+        nome: user.displayName,
+        email 
+      }));
+      
+      if (authCallback) authCallback(user);
+      return user;
     }
     throw new Error("Credenciais inválidas. Use um e-mail com @solarcrm.com.br e senha de 6+ dígitos.");
   }
@@ -379,5 +429,380 @@ export function authGetCurrentUser() {
   } else {
     const user = localStorage.getItem(MOCK_USER_KEY);
     return user ? JSON.parse(user) : null;
+  }
+}
+
+export async function authSendPasswordReset(email) {
+  if (!isMock) {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (e) {
+      console.error("Erro ao enviar reset de senha:", e);
+      throw e;
+    }
+  } else {
+    if (email.includes('@solarcrm.com.br') || email === 'admin@admin.com' || email === 'vendedor@solarcrm.com.br') {
+      return { success: true };
+    }
+    throw new Error("E-mail não encontrado.");
+  }
+}
+
+export async function getUserProfile(uid) {
+  if (!isMock) {
+    try {
+      const docRef = doc(db, 'users', uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() };
+      }
+      return null;
+    } catch (e) {
+      console.error("Erro ao buscar perfil do usuário:", e);
+      return null;
+    }
+  } else {
+    const stored = localStorage.getItem('solarcrm_user_profile_' + uid);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return { id: uid, role: 'vendedor', nome: 'Vendedor Solar' };
+  }
+}
+
+export async function setUserProfile(uid, data) {
+  if (!isMock) {
+    try {
+      await setDoc(doc(db, 'users', uid), data, { merge: true });
+      return true;
+    } catch (e) {
+      console.error("Erro ao salvar perfil do usuário:", e);
+      return false;
+    }
+  } else {
+    localStorage.setItem('solarcrm_user_profile_' + uid, JSON.stringify(data));
+    return true;
+  }
+}
+
+export function isAdmin(user) {
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  return false;
+}
+
+export function isVendedor(user) {
+  if (!user) return false;
+  return user.role === 'vendedor' || user.role === 'admin';
+}
+
+const MOCK_AUDIT_KEY = 'solarcrm_mock_audit';
+
+function getMockAudit() {
+  const data = localStorage.getItem(MOCK_AUDIT_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+function saveMockAudit(audit) {
+  localStorage.setItem(MOCK_AUDIT_KEY, JSON.stringify(audit));
+}
+
+export async function logAudit(action, entityType, entityId, userId, details = {}) {
+  const timestamp = new Date().toISOString();
+  const logEntry = {
+    id: 'audit_' + Date.now(),
+    action,
+    entityType,
+    entityId,
+    userId,
+    details,
+    timestamp
+  };
+
+  if (!isMock) {
+    try {
+      await addDoc(collection(db, 'audit_log'), logEntry);
+      return logEntry;
+    } catch (e) {
+      console.error("Erro ao salvar log de auditoria:", e);
+      return null;
+    }
+  } else {
+    const audit = getMockAudit();
+    audit.unshift(logEntry);
+    if (audit.length > 500) audit.pop();
+    saveMockAudit(audit);
+    return logEntry;
+  }
+}
+
+export async function getAuditLog(limitCount = 100) {
+  if (!isMock) {
+    try {
+      const q = query(collection(db, 'audit_log'), orderBy('timestamp', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const logs = [];
+      querySnapshot.forEach((doc) => {
+        logs.push({ id: doc.id, ...doc.data() });
+      });
+      return logs.slice(0, limitCount);
+    } catch (e) {
+      console.error("Erro ao buscar logs de auditoria:", e);
+      return [];
+    }
+  } else {
+    const audit = getMockAudit();
+    return audit.slice(0, limitCount);
+  }
+}
+
+const MOCK_EQUIPAMENTOS_KEY = 'solarcrm_mock_equipamentos';
+let equipamentosCache = null;
+
+export function getEquipamentosLocais() {
+  return {
+    paineis: [
+      { id: "painel_550w", nome: "Painel Solar 550W Monocristalino Half-Cell", potenciaW: 550, precoUnitario: 520.00, marca: "Jinko Solar / Canadian" }
+    ],
+    inversores: [
+      { id: "inv_3kw", nome: "Inversor Monofásico 3kW - 220V", potenciaMaxW: 3000, precoUnitario: 2200.00, marca: "Deye / Growatt" },
+      { id: "inv_5kw", nome: "Inversor Monofásico 5kW - 220V", potenciaMaxW: 5000, precoUnitario: 3100.00, marca: "Deye / Growatt" },
+      { id: "inv_8kw", nome: "Inversor Trifásico 8kW - 220V/380V", potenciaMaxW: 8000, precoUnitario: 4500.00, marca: "Deye / Growatt" },
+      { id: "inv_10kw", nome: "Inversor Trifásico 10kW - 220V/380V", potenciaMaxW: 10000, precoUnitario: 5200.00, marca: "Deye / Growatt" },
+      { id: "inv_15kw", nome: "Inversor Trifásico 15kW - 220V/380V", potenciaMaxW: 15000, precoUnitario: 6800.00, marca: "Deye / Growatt" },
+      { id: "inv_20kw", nome: "Inversor Trifásico 20kW - 220V/380V", potenciaMaxW: 20000, precoUnitario: 8100.00, marca: "Deye / Growatt" }
+    ],
+    estruturas: {
+      ceramica: { nome: "Estrutura para Telha Cerâmica", precoPorPainel: 110.00 },
+      metalica: { nome: "Estrutura para Telha Metálica", precoPorPainel: 75.00 },
+      laje: { nome: "Estrutura com Suporte para Laje / Solo", precoPorPainel: 180.00 },
+      fibrocimento: { nome: "Estrutura para Telha Fibrocimento / Ondulada", precoPorPainel: 85.00 }
+    },
+    kitsEletricos: [
+      { id: "kit_eletrico_padrao", nome: "Kit Elétrico (Cabos CC, Conectores MC4 e String Box)", precoBase: 950.00, precoAdicionalPorKw: 100.00 }
+    ],
+    servicos: {
+      nome: "Projeto de Engenharia, Homologação e Mão de Obra de Instalação",
+      custoFixo: 2200.00,
+      custoPorKwp: 350.00
+    },
+    frete: { minimo: 350.00, medio: 650.00, maximo: 1100.00 }
+  };
+}
+
+export async function getEquipamentos() {
+  if (equipamentosCache) {
+    return equipamentosCache;
+  }
+
+  if (!isMock) {
+    try {
+      const equipamentos = {};
+      const tipos = ['paineis', 'inversores', 'kitsEletricos'];
+      
+      for (const tipo of tipos) {
+        const q = query(collection(db, 'equipamentos'), where('tipo', '==', tipo), where('active', '==', true));
+        const querySnapshot = await getDocs(q);
+        equipamentos[tipo] = [];
+        querySnapshot.forEach((doc) => {
+          equipamentos[tipo].push({ id: doc.id, ...doc.data() });
+        });
+      }
+
+      const qEstrutura = query(collection(db, 'equipamentos'), where('tipo', '==', 'estruturas'), where('active', '==', true));
+      const estruturaSnap = await getDocs(qEstrutura);
+      equipamentos.estruturas = {};
+      estruturaSnap.forEach((doc) => {
+        equipamentos.estruturas[doc.id] = { id: doc.id, ...doc.data() };
+      });
+
+      const qServicos = query(collection(db, 'equipamentos'), where('tipo', '==', 'servicos'), where('active', '==', true));
+      const servicosSnap = await getDocs(qServicos);
+      if (!servicosSnap.empty) {
+        const servicosData = servicosSnap.docs[0].data();
+        equipamentos.servicos = { id: servicosSnap.docs[0].id, ...servicosData };
+      } else {
+        equipamentos.servicos = getEquipamentosLocais().servicos;
+      }
+
+      const qFrete = query(collection(db, 'equipamentos'), where('tipo', '==', 'frete'), where('active', '==', true));
+      const freteSnap = await getDocs(qFrete);
+      if (!freteSnap.empty) {
+        const freteData = freteSnap.docs[0].data();
+        equipamentos.frete = { id: freteSnap.docs[0].id, ...freteData };
+      } else {
+        equipamentos.frete = getEquipamentosLocais().frete;
+      }
+
+      equipamentosCache = equipamentos;
+      return equipamentos;
+    } catch (e) {
+      console.error("Erro ao buscar equipamentos do Firestore:", e);
+      return getEquipamentosLocais();
+    }
+  } else {
+    const stored = localStorage.getItem(MOCK_EQUIPAMENTOS_KEY);
+    if (stored) {
+      equipamentosCache = JSON.parse(stored);
+      return equipamentosCache;
+    }
+    const locais = getEquipamentosLocais();
+    equipamentosCache = locais;
+    return locais;
+  }
+}
+
+export async function saveEquipamento(tipo, data) {
+  const now = new Date().toISOString();
+  
+  if (!isMock) {
+    try {
+      const docData = {
+        tipo,
+        ...data,
+        updatedAt: now,
+        active: true
+      };
+      
+      if (data.id) {
+        await setDoc(doc(db, 'equipamentos', data.id), docData, { merge: true });
+        return { success: true, id: data.id };
+      } else {
+        const docRef = await addDoc(collection(db, 'equipamentos'), {
+          ...docData,
+          createdAt: now
+        });
+        return { success: true, id: docRef.id };
+      }
+    } catch (e) {
+      console.error("Erro ao salvar equipamento:", e);
+      throw e;
+    }
+  } else {
+    const stored = localStorage.getItem(MOCK_EQUIPAMENTOS_KEY);
+    let equipList = stored ? JSON.parse(stored) : {};
+    
+    if (!equipList[tipo]) {
+      equipList[tipo] = [];
+    }
+    
+    if (data.id) {
+      const index = equipList[tipo].findIndex(e => e.id === data.id);
+      if (index !== -1) {
+        equipList[tipo][index] = { ...equipList[tipo][index], ...data, updatedAt: now };
+      } else {
+        equipList[tipo].push({ id: data.id, ...data, updatedAt: now, active: true });
+      }
+    } else {
+      const newId = tipo + '_' + Date.now();
+      equipList[tipo].push({ id: newId, ...data, createdAt: now, updatedAt: now, active: true });
+    }
+    
+    localStorage.setItem(MOCK_EQUIPAMENTOS_KEY, JSON.stringify(equipList));
+    equipamentosCache = null;
+    return { success: true };
+  }
+}
+
+export async function deleteEquipamento(tipo, id) {
+  if (!isMock) {
+    try {
+      await updateDoc(doc(db, 'equipamentos', id), { active: false, deletedAt: new Date().toISOString() });
+      return { success: true };
+    } catch (e) {
+      console.error("Erro ao deletar equipamento:", e);
+      throw e;
+    }
+  } else {
+    const stored = localStorage.getItem(MOCK_EQUIPAMENTOS_KEY);
+    let equipList = stored ? JSON.parse(stored) : {};
+    
+    if (equipList[tipo]) {
+      equipList[tipo] = equipList[tipo].filter(e => e.id !== id);
+      localStorage.setItem(MOCK_EQUIPAMENTOS_KEY, JSON.stringify(equipList));
+      equipamentosCache = null;
+    }
+    return { success: true };
+  }
+}
+
+export function invalidateEquipamentosCache() {
+  equipamentosCache = null;
+}
+
+const MOCK_INTERACOES_KEY = 'solarcrm_mock_interacoes';
+
+export async function dbAddInteracao(interacaoData) {
+  const cleanInteracao = {
+    leadId: interacaoData.leadId,
+    tipo: interacaoData.tipo || 'nota',
+    descricao: interacaoData.descricao || '',
+    vendedorId: interacaoData.vendedorId || null,
+    vendedorNome: interacaoData.vendedorNome || 'Vendedor',
+    data: new Date().toISOString(),
+    proximoContato: interacaoData.proximoContato || null
+  };
+
+  if (!isMock) {
+    try {
+      const docRef = await addDoc(collection(db, 'interacoes'), cleanInteracao);
+      return { id: docRef.id, ...cleanInteracao };
+    } catch (e) {
+      console.error("Erro no Firestore ao salvar interação:", e);
+      throw e;
+    }
+  } else {
+    const interacoes = JSON.parse(localStorage.getItem(MOCK_INTERACOES_KEY) || '[]');
+    const newInteracao = { id: 'int_' + Date.now(), ...cleanInteracao };
+    interacoes.unshift(newInteracao);
+    if (interacoes.length > 500) interacoes.pop();
+    localStorage.setItem(MOCK_INTERACOES_KEY, JSON.stringify(interacoes));
+    return newInteracao;
+  }
+}
+
+export async function dbGetInteracoes(leadId) {
+  if (!isMock) {
+    try {
+      const q = query(
+        collection(db, 'interacoes'), 
+        where('leadId', '==', leadId),
+        orderBy('data', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      const list = [];
+      querySnapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+      return list;
+    } catch (e) {
+      console.error("Erro no Firestore ao buscar interações:", e);
+      return [];
+    }
+  } else {
+    const interacoes = JSON.parse(localStorage.getItem(MOCK_INTERACOES_KEY) || '[]');
+    return interacoes.filter(i => i.leadId === leadId).sort((a, b) => new Date(b.data) - new Date(a.data));
+  }
+}
+
+export async function dbUpdateLead(leadId, data) {
+  if (!isMock) {
+    try {
+      await updateDoc(doc(db, 'leads', leadId), data);
+      return true;
+    } catch (e) {
+      console.error("Erro ao atualizar lead:", e);
+      return false;
+    }
+  } else {
+    const leads = getMockLeads();
+    const index = leads.findIndex(l => l.id === leadId);
+    if (index !== -1) {
+      leads[index] = { ...leads[index], ...data };
+      saveMockLeads(leads);
+      return true;
+    }
+    return false;
   }
 }

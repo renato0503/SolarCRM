@@ -15,6 +15,8 @@ export default defineConfig({
         lead: resolve(__dirname, 'lead.html'),
         historico: resolve(__dirname, 'historico.html'),
         tv: resolve(__dirname, 'tv.html'),
+        adminEquipamentos: resolve(__dirname, 'admin/equipamentos.html'),
+        relatorios: resolve(__dirname, 'relatorios.html'),
       }
     }
   }

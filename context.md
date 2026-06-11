@@ -1,6 +1,6 @@
-# Contexto do Projeto - SolarCRM
+# Contexto do Projeto - Spark
 
-Este documento apresenta um resumo consolidado de tudo o que já foi implementado no **SolarCRM** e quais são os próximos passos sugeridos para levar a aplicação ao ambiente de produção.
+Este documento apresenta um resumo consolidado de tudo o que já foi implementado na **Spark** e quais são os próximos passos sugeridos para levar a aplicação ao ambiente de produção.
 
 ---
 
@@ -9,148 +9,340 @@ Este documento apresenta um resumo consolidado de tudo o que já foi implementad
 ### 1. Fundação e Estrutura do Projeto (Fase 1)
 - **Scaffolding**: Inicialização da estrutura de arquivos utilizando Vite com template Vanilla JS (`npm create vite`).
 - **Organização Modular**: Criação de diretórios estruturados para separar o código CSS (`src/css`) e o código de lógica JS (`src/js`).
-- **Vite Multi-page**: Configuração do arquivo `vite.config.js` para suportar o empacotamento Rollup de múltiplas páginas independentes:
-  - `index.html` (Simulador de Leads)
-  - `proposta.html` (Apresentação Comercial)
-  - `login.html` (Acesso do Vendedor)
-  - `dashboard.html` (CRM de Vendas)
+- **Vite Multi-page**: Configuração do arquivo `vite.config.js` para suportar o empacotamento Rollup de múltiplas páginas independentes.
 
 ### 2. Lógica de Negócio e Dimensionamento Solar (Fase 2)
 - **Banco de Equipamentos (`equipamentos.js`)**: Cadastro local estruturado contendo especificações técnicas e preços de custo de módulos fotovoltaicos (550W), inversores grid-tie de diversas potências, kits de fixação estrutural e custos estimados de engenharia e instalação.
 - **Configurações Dinâmicas (`config.js`)**: Parametrização dos coeficientes globais de cálculo (Horas de Sol Pleno - HSP, Tarifa média de energia da distribuidora e Margem de Lucro global aplicada) salvos no `localStorage`.
-- **Módulo de Cálculo (`calculator.js`)**: Algoritmo que recebe o consumo em kWh e calcula:
-  - Potência ideal do sistema (kWp).
-  - Quantidade de painéis solares necessários.
-  - Seleção otimizada do modelo de inversor.
-  - Subtotal de custo do kit, serviços e preço final com a margem de lucro.
-  - Estimativa de geração mensal de energia, economia anual e tempo de retorno do investimento (Payback).
+- **Módulo de Cálculo (`calculator.js`)**: Algoritmo que recebe o consumo em kWh e calcula potência, painéis, inversor, custos e payback.
 
 ### 3. Apresentação Comercial Visual da Proposta (Fase 3)
 - **Interface da Proposta (`proposta.html`)**: Tela com design limpo e moderno (modo claro padrão) otimizada para o cliente.
-- **Animações Fluidas (`proposta.js` + Motion One)**:
-  - Contagem animada numérica de 0 até o valor final da economia anual.
-  - Fade-in e slide-up dos painéis de especificações técnicas e impacto ecológico.
-- **Geração de PDF**: Integração da biblioteca `html2pdf.js` para exportar a proposta comercial formatada com apenas 1 clique, ocultando botões interativos através de regras de impressão CSS.
+- **Animações Fluidas (`proposta.js` + Motion One)**: Contagem animada numérica e fade-in/slide-up dos painéis.
+- **Geração de PDF**: Integração da biblioteca `html2pdf.js` para exportar a proposta formatada.
 
 ### 4. Integração com WhatsApp (Fase 4)
-- **Gerador de Mensagem Inteligente**: Função que formata automaticamente os dados da proposta (kWp, geração, economia anual, preço final e payback) em um texto persuasivo enriquecido com emojis e quebras de linha.
-- **Transição de Status Automatizada**: No clique de disparo do WhatsApp, a proposta atualiza automaticamente no banco de dados para o status **"Enviado"** e redireciona o vendedor para a API do WhatsApp.
+- **Gerador de Mensagem Inteligente**: Função que formata automaticamente os dados da proposta em texto persuasivo.
+- **Transição de Status Automatizada**: No clique de disparo do WhatsApp, a proposta atualiza para status **"Enviado"**.
 
 ### 5. CRM, Autenticação e Configurações (Fase 5)
-- **Painel Administrativo (`dashboard.html` & `dashboard.js`)**: Tela em tema escuro premium para gestão comercial:
-  - Painel de indicadores de desempenho (Total de Leads, Propostas Enviadas, Quantidade de Fechados e Faturamento Total do CRM).
-  - Tabela com filtros rápidos por status (Novos, Enviados, Fechados, Perdidos) e barra de pesquisa dinâmica.
-  - Menu de Ações rápidas por lead: Ver Proposta, Disparar WhatsApp e Excluir Lead.
-  - Dropdowns internos à tabela para modificação imediata de status.
-  - Modal de configurações onde o usuário altera os valores do `config.js` diretamente da interface.
-- **Controle de Acesso (`auth.js` & `login.html`)**: Controle de sessão usando Firebase Auth com rotas e telas de login protegidas por guards de rota.
-- **Segurança de Banco de Dados (`firestore.rules`)**: Regras para o Firestore protegendo leitura e escrita de leads/propostas, garantindo integridade das informações do CRM.
-- **MockDB Fallback (`firebase.js`)**: Mecanismo inteligente de fallback. Caso não existam chaves de conexão do Firebase ativas no ambiente, a aplicação utiliza automaticamente um banco mockado no `localStorage`, permitindo rodar e testar 100% das funções do CRM de forma imediata e sem erros.
+- **Painel Administrativo (`dashboard.html` & `dashboard.js`)**: Tela em tema escuro premium com:
+  - Indicadores de desempenho (Total Leads, Propostas Enviadas, Faturamento, Vendas Fechadas)
+  - Tabela com filtros por status e busca dinâmica
+  - Ações rápidas: Ver Proposta, WhatsApp, Excluir
+  - Modal de configurações
+- **Controle de Acesso (`auth.js` & `login.html`)**: Firebase Auth com rotas e telas protegidas.
+- **MockDB Fallback (`firebase.js`)**: Fallback automático para localStorage quando Firebase não disponível.
 
-### 6. Configuração e Publicação no GitHub Pages (MVP) (Fase 6)
-- **Vite Subdirectory Base**: Adicionado o parâmetro `base: '/SolarCRM/'` em `vite.config.js` para suportar corretamente arquivos compilados sob subpastas.
-- **Caminhos Relativos Portáveis**: Substituição de todas as referências de caminhos absolutos (`/`) para relativos (`./`) nas páginas HTML e arquivos JavaScript, garantindo a portabilidade completa de rotas, redirecionamentos e assets.
-- **Segurança e Proteção de Chaves**: Regras configuradas em `.gitignore` para proibir commits de arquivos `.env` e `.env.*` locais, evitando o vazamento acidental de chaves privadas do Firebase.
-- **Automação de Build e Deploy**: Configuração do pacote `gh-pages` e scripts `"predeploy"` e `"deploy"` no `package.json` para compilação (`dist/`) e deploy automático da aplicação na branch `gh-pages` do repositório remoto.
-- **Publicação no GitHub**: Inicialização do Git, vinculação com o remote `renato0503/SolarCRM` e push sincronizado das branches `main` e `gh-pages`.
+### 6. Configuração e Publicação (Fase 6)
+- **Vite Subdirectory Base**: Parâmetro `base: '/SolarCRM/'` para subpastas.
+- **Caminhos Relativos Portáveis**: Todas referências absolutas substituídas por relativas.
+- **Automação de Deploy**: Scripts `predeploy` e `deploy` com gh-pages.
+- **Deploy no Firebase Hosting**: URL produção: `https://solarcrm-60ce1.web.app`
 
 ### 7. Cálculo de Frete por CEP e Robustez de PDF (Fase 7)
-- **CEP no Formulário**: Campo de endereço do simulador substituído por CEP com máscara automática (`99999-999`) e validação estrita.
-- **Cálculo de Distância por Geolocalização**: Integração assíncrona com API ViaCEP (para puxar Cidade e UF) e Nominatim OpenStreetMap (para achar a latitude/longitude do CEP e do Centro da Cidade correspondente), calculando a distância física entre os dois pontos em linha reta pela fórmula de Haversine.
-- **Isolamento de Falhas de Geocodificação (Correção Cuiabá/MT)**: Refatorado o calculador de frete para tratar a API Nominatim de geolocalização física separadamente. Com isso, mesmo se o Nominatim falhar (ex: limites de taxa), a Cidade e UF do ViaCEP são **sempre preservados** na proposta e no lead (exibindo Cuiabá/MT de forma confiável para o CEP `78005-400`).
-- **Tabela de Frete Proporcional**: Inclusão de três faixas de frete no arquivo `equipamentos.js` integradas diretamente na planilha de custo direto do simulador em `calculator.js`:
-  - Até 15 km: R$ 350,00 (mínimo)
-  - De 15 km a 25 km: R$ 650,00 (médio)
-  - Acima de 25 km: R$ 1.100,00 (máximo)
-- **Salvaguarda de Falha em API**: Estrutura com fallbacks que garante a continuação do cálculo de frete (com distância padrão de 10km e frete mínimo) caso o cliente esteja sem conexão ou as APIs geográficas caiam.
-- **Robustez na Emissão do PDF (Correção de Travamento e Integridade)**:
-  * Removidos atributos obsoletos de `integrity` e `crossorigin` do script CDN `html2pdf.js` que causavam bloqueio de carregamento no navegador.
-  * Importação explícita de `showToast` em `proposta.js` para sanar erros de referência indefinida.
-  * Utilização de bloco `try-catch-finally` que obriga o corpo do documento a sempre remover a classe de estilização temporária de impressão (`.pdf-mode`), evitando que a tela fique travada após a geração do arquivo.
-  * Inclusão de atraso de 150ms antes da captura do PDF para permitir a repintura do DOM no navegador.
-  * Integração de **fallback automático de impressão nativa (`window.print()`)** caso a biblioteca `html2pdf` falhe ou não seja carregada no navegador do usuário, com layout de 2 páginas A4 perfeitamente formatadas.
-- **Descritivo Detalhado de Valores e Taxa Local**:
-  * Adicionado cálculo de preços comerciais de venda unitários (com margem de lucro aplicada) para Módulos, Inversor, Estrutura, Serviços e Frete.
-  * Inclusão de uma **taxa local de deslocamento de instalação** baseada na quilometragem calculada (R$ 0,00 até 15km; R$ 250,00 de 15 a 25km; R$ 450,00 acima de 25km) somada nos serviços.
-  * Exibição estruturada dessas informações por HTML dinâmico sob cada item da especificação técnica em `proposta.html`, detalhando o valor individual e informando a presença da taxa de deslocamento no bloco de Serviços.
-  * Área de assinaturas formais de aceite para o PDF ao final do documento `proposta.html` preenchendo automaticamente o nome do cliente.
+- **CEP no Formulário**: Campo com máscara automática (`99999-999`) e validação estrita.
+- **Cálculo de Distância por Geolocalização**: APIs ViaCEP, BrasilAPI e Nominatim OpenStreetMap.
+- **Tabela de Frete Proporcional**: Até 15km (R$ 350), 15-25km (R$ 650), acima de 25km (R$ 1.100).
+- **Robustez na Emissão do PDF**: Try-catch-finally, fallback para `window.print()`, 2 páginas A4 perfeitas.
+- **Taxa Local de Deslocamento**: R$ 0 (até 15km), R$ 250 (15-25km), R$ 450 (acima de 25km).
 
 ### 8. Aprimoramento e Resolução da API de CEP (Fase 8)
-- **Dicionário Local de Capitais**: Criação de um cache local com as coordenadas das principais capitais brasileiras (como Cuiabá e Campo Grande), o que otimiza a performance de geolocalização e previne rate-limiting do Nominatim (OpenStreetMap).
-- **Fallback Inteligente de APIs**: Encadeamento de requisições que consulta primeiramente o ViaCEP e migra automaticamente para a BrasilAPI caso haja falhas na primeira, assegurando alta taxa de sucesso.
-- **Detector de Região por Prefixo**: Criação de um algoritmo inteligente baseado nas faixas de CEP brasileiras que determina o Estado e a Capital do CEP inserido instantaneamente, garantindo a correção de dados (ex. CEP `78005-400` resolvido para Cuiabá/MT) mesmo com falha total de rede ou APIs off-line.
+- **Dicionário Local de Capitais**: Cache local com coordenadas das capitais brasileiras.
+- **Fallback Inteligente de APIs**: ViaCEP → BrasilAPI como fallback.
+- **Detector de Região por Prefixo**: Algoritmo baseado nas faixas de CEP brasileiras.
 
 ### 9. Otimização do Layout e Dimensões do PDF (Fase 9)
-- **Compactação Geral de Margens, Paddings e Fontes**: Dimensionamento preciso de tipografia e espaçamentos sob a classe `body.pdf-mode` (para PDF gerado por biblioteca) e diretivas `@media print` (para impressão nativa do navegador). As fontes do cabeçalho e dos valores em destaque foram reduzidas e otimizadas para escala A4 corporativa.
-- **Preservação de Layout Multicolunas**: Forçado o posicionamento rígido de 3 colunas para os destaques financeiros. A especificação técnica (`#cardSpecs`) agora utiliza um grid de 2 colunas para organizar os itens (Módulos, Inversor, Estrutura e Logística lado a lado; e Serviços ocupando a largura total), reduzindo a altura do card pela metade e mantendo o alinhamento impecável.
-- **Evitar Quebras de Páginas em Branco**: Resolução do espaçamento excessivo reorganizando o fluxo vertical das páginas para caber exatamente em 2 páginas A4.
-- **Enquadramento Perfeito em Exatamente 2 Páginas**: Injeção estratégica de diretivas CSS para controle de quebras de página (`break-before: page` e `break-inside: avoid`). O documento foi ajustado milimetricamente para se dividir entre a Página 1 (Cabeçalho, Visão Geral, Valores e Especificações de Módulos/Instalação) e a Página 2 (Métricas Ecológicas/Geração, Dicas Solar e Assinaturas), eliminando qualquer transbordo acidental e páginas em branco.
-- **Área de Assinaturas Alinhada**: Formatação da seção de assinaturas corporativa/cliente em blocos horizontais paralelos (`flex-box` balanceado) perfeitamente posicionados ao rodapé da segunda página.
+- **Compactação de Margens, Paddings e Fontes**: Dimensionamento preciso para escala A4.
+- **Layout Multicolunas**: Grid de 2 colunas para especificações técnicas.
+- **Enquadramento Perfeito em 2 Páginas**: CSS para controle de quebras de página.
+- **Área de Assinaturas Alinhada**: Flex-box paralelo para rodapé.
 
 ### 10. Arquitetura Isolada de Impressão (`pdf.html`) (Fase 10)
-- **Criação do Template Dedicado**: Implementação do arquivo `pdf.html` e sua lógica de carregamento assíncrono em `src/js/pdf.js`, operando de forma isolada da página interativa `proposta.html`. Isso previne deformações de layout decorrentes de responsividade do navegador ou estilos dinâmicos da tela.
-- **Páginas A4 Rígidas sem Transbordo**: Redução da altura da folha `.pdf-page` no CSS para `296mm` (um milímetro menor que o A4 padrão) para absorver eventuais erros de arredondamento de pixels dos navegadores e da biblioteca `html2pdf.js`. Isso evita quebras automáticas de linha que criavam páginas em branco entre as seções.
-- **Remoção de Páginas Trilhantes**: Configuração da regra `:not(:last-child)` na diretiva `page-break-after: always` e inclusão do parâmetro `pagebreak: { mode: 'css' }` nas configurações da biblioteca. Com isso, o PDF encerra exatamente no término da segunda página, eliminando qualquer folha em branco residual.
-- **Vite Bundler Integrado**: Adicionado o ponto de entrada `pdf.html` em `vite.config.js` para garantir que o compilador do Vite compacte e gere as referências relativas do template de exportação de forma idêntica às demais telas.
-- **Download Inteligente**: Ao clicar em "Baixar PDF" na proposta, a aba `pdf.html` é aberta, carrega os dados reais, gera a exportação através de `html2pdf.js` e se fecha de maneira invisível e automatizada.
+- **Template Dedicado**: `pdf.html` isolado da página interativa.
+- **Páginas A4 Rígidas**: Altura de 296mm para evitar transbordo.
+- **Download Inteligente**: Abre aba `pdf.html`, gera PDF e fecha automaticamente.
 
 ### 11. Estratégia de Arquivos Estáticos e Eliminação de Bare Imports (Fase 11)
-- **Eliminação de Bare Imports (Módulos ESM Nativos)**:
-  - Substituímos todas as importações de pacotes bare do npm (`firebase/app`, `firebase/auth`, `firebase/firestore` em `src/js/firebase.js` e `motion` em `src/js/proposta.js`) por imports diretos de CDNs de desenvolvimento e produção (como Google GStatic e JSDelivr ESM). Isso permitiu que o navegador resolvesse todos os módulos nativamente, viabilizando o funcionamento instantâneo da aplicação em servidores estáticos simples que hospedam arquivos da branch `main` diretamente, sem qualquer necessidade de build/transpilação.
-- **Estratégia de Banco de Dados Estático (Fallbacks de JSON)**:
-  - Criamos uma base de dados mockada local em arquivos JSON estruturados sob a pasta `api/` na raiz do repositório (`api/leads.json` e `api/propostas.json`), contendo o exato detalhamento de dimensionamento e geocodificação calculados e testados para os clientes Renato Rosa (Cuiabá/MT, 450 kWh) e Arena Corinthians (São Paulo/SP, 25.000 kWh).
-  - Implementamos um mecanismo inteligente de fallback que intercepta consultas locais. Se as credenciais do Firebase estiverem ausentes e o registro solicitado não estiver no `localStorage` do navegador, a aplicação busca automaticamente a proposta ou lead a partir dos arquivos estáticos (`leads.json`/`propostas.json`).
-- **Acesso Direto ao Dashboard**:
-  - Ajustamos os links das páginas de simulação e o comportamento de `protegerRota()` para direcionar e conceder acesso imediato ao Painel de Vendas (`dashboard.html`) sem bloqueio por login para fins de validação do MVP.
-- **Publicação e Deploy**:
-  - Commits integrados e deploy efetuado com sucesso na branch `main` no repositório remoto para atualização imediata no GitHub Pages.
+- **CDN Imports**: Todos os imports via Google GStatic e JSDelivr ESM (sem bare imports).
+- **Fallbacks de JSON**: Arquivos `api/leads.json` e `api/propostas.json` como fallback estático.
+
+### 12. Sistema CRM Completo com Kanban e Páginas Públicas (Fase 12)
+- **Conexão Firebase Ativa**: Firestore e Analytics ativos.
+- **Kanban com 6 colunas**: Novo, Qualificação, Proposta, Negociação, Fechado, Perdido.
+- **Drag-and-drop**: Cards arrastáveis entre colunas para atualizar status.
+- **Páginas Públicas**: `lead.html`, `historico.html`, `tv.html` sem autenticação.
+- **Tabela de Parcelas**: 12x, 24x, 36x, 48x, 60x com taxa de 1,49% a.m.
+
+### 13. Autenticação e Segurança (Fase 13)
+- **Recuperação de Senha**: Modal "Esqueci minha senha" no `login.html` com envio via Firebase Auth.
+- **Roles e Permissões (RBAC)**:
+  - Campo `role` (admin/vendedor) no documento do usuário na coleção `users` do Firestore.
+  - Middleware `protegerRota(allowedRoles)` em `auth.js` para verificação de roles.
+  - Admin: acesso total (configurações, CRUD equipamentos, todos leads).
+  - Vendedor: apenas seus próprios leads.
+- **Criação Automática de Profile**: Ao fazer login, cria automaticamente `users/{uid}` com role.
+- **Auditoria (`logAudit`)**:
+  - Coleção `audit_log` no Firestore para logs de alterações.
+  - Funções `auditAction()`, `auditLogin()`, `auditLogout()` em `auth.js`.
+  - localStorage para fallback em modo mock.
+
+### 14. Banco de Equipamentos Dinâmico (Fase 14)
+- **Migração para Firestore**: Funções `getEquipamentos()`, `saveEquipamento()`, `deleteEquipamento()` em `firebase.js`.
+- **Cache em Memória**: `equipamentosCache` com invalidação quando admin edita.
+- **Interface de Gestão Admin**: Página `admin/equipamentos.html` com:
+  - Lista de equipamentos por tipo (painéis, inversores, estruturas, kits, serviços).
+  - Modal de edição com campos dinâmicos.
+  - Filtros por categoria.
+- **Sincronização com Calculator**: `calculator.js` refatorado para suportar `getEquipamentosLocais()` síncrono com fallback.
+
+### 15. Multi-Vendedores (Fase 15)
+- **Atribuição de Leads**: Campos `vendedorId` e `vendedorNome` adicionados aos leads.
+- **Auto-atribuição**: Ao criar lead via `app.js`, captura usuário logado como vendedor responsável.
+- **Isolamento de Dados**: `dbGetLeads(vendedorId, isAdminUser)` filtra leads por vendedor.
+- **Exibição no Dashboard**: Tag visual com nome do vendedor responsável pelo lead.
+- **RBAC Funcional**: Vendedores veem apenas seus leads, admins veem todos.
+
+### 16. Gráficos com ApexCharts (Fase 16)
+> **Biblioteca usada**: ApexCharts (v3.45.2 via CDN local `src/vendor/apexcharts.min.js`)
+- **Proposta (`proposta.html`)**: Gráfico de barras com projeção de geração mensal (12 meses com variação sazonal).
+- **Dashboard (`dashboard.html`)**:
+  - Gráfico de funil de vendas (barras horizontais por status).
+  - Gráfico de faturamento mensal com filtros de período (3M, 6M, 12M).
+- **TV (`tv.html`)**: Gráfico de área com crescimento de leads nos últimos 6 meses.
+- **Local**: ApexCharts baixado localmente para evitar bloqueios de Tracking Prevention.
+
+### 17. Timeline de Interações (Fase 17)
+- **Modelo de Dados**: Coleção `interacoes` no Firestore com campos:
+  - `leadId`, `vendedorId`, `vendedorNome`
+  - `tipo`: ligacao|whatsapp|email|reuniao|nota
+  - `descricao`, `data`, `proximoContato`
+- **Interface no Dashboard**: Modal de interações com:
+  - Lista cronológica de interações por lead.
+  - Formulário para nova interação (tipo, descrição, próximo contato).
+  - Ícones por tipo de interação.
+- **Botão no Card**: Relógio no dashboard para abrir histórico do lead.
+- **Funções `dbAddInteracao()` e `dbGetInteracoes()`** em firebase.js.
+
+### 18. Follow-up e Alertas (Fase 18)
+- **Badges Visuais**: Sistema de alertas baseado em dias sem interação:
+  - 3+ dias sem contato: badge "👀 Atenção" azul
+  - 7+ dias sem contato: badge "⚠️ 7+dias" amarelo
+  - 14+ dias sem resposta: badge "❄️ Frio" vermelho
+- **Cálculo Inteligente**: Considera data da última interação ou data de criação do lead.
+- **Exibição no Kanban e Tabela**: Badges visíveis em ambos os layouts.
 
 ---
 
 ## 📋 O que FALTA fazer
 
-Como a lógica e interface da aplicação já estão totalmente prontas e funcionais, os próximos passos concentram-se em infraestrutura, parametrização e publicação comercial:
+---
 
-### 1. Configuração do Projeto no Firebase Console (Infraestrutura)
-- [ ] Criar um projeto no console do Firebase (https://console.firebase.google.com).
-- [ ] Ativar o **Cloud Firestore** em modo de produção na região mais adequada.
-- [ ] Ativar o **Firebase Authentication** com provedor de e-mail e senha.
-- [ ] Criar a conta de vendedor padrão no painel do Authentication para permitir o login corporativo inicial.
+### 🔔 FASE 18 - Automação de Follow-up
 
-### 2. Ativação das Variáveis de Ambiente (Conexão Firebase Real)
-- [ ] Copiar o arquivo `.env.example` para `.env` ou `.env.local` na raiz do projeto.
-- [ ] Substituir os valores fictícios pelas chaves reais do SDK do Web App gerado no console do Firebase.
-- [ ] Reiniciar o servidor de desenvolvimento para aplicar a conexão real.
+#### 18.1 Regras de Alerta ✅
+- [x] Lead sem interação há 3 dias: badge "Atenção" azul
+- [x] Lead há 7 dias sem contato: badge "⚠️ 7+dias" amarelo
+- [x] Lead há 14 dias sem resposta: badge "❄️ Frio" vermelho
 
-### 3. Migração do GitHub Pages para Produção Oficial (Opcional)
-- [ ] O GitHub Pages servirá perfeitamente para testes e homologação como MVP. Se desejar usar o domínio customizado da empresa com SSL ou hospedar regras estritas integradas diretamente no CLI do Firebase, seguir os passos de Deploy em Produção (Firebase Hosting) listados a seguir.
+#### 18.2 Notificações
+- [ ] Firebase Cloud Messaging (FCM) para push
+- [ ] Notificação no dashboard ao fazer login
+- [ ] Badge no ícone do lead pendente
 
-### 4. Deploy de Produção (Firebase Hosting)
-- [ ] Instalar a CLI do Firebase globalmente:
-  ```bash
-  npm install -g firebase-tools
-  ```
-- [ ] Fazer login no terminal:
-  ```bash
-  firebase login
-  ```
-- [ ] Inicializar o projeto no diretório raiz:
-  ```bash
-  firebase init
-  ```
-  *(Selecionar as opções: **Hosting** e **Firestore Rules**; apontar a pasta pública de deploy como `dist`)*
-- [ ] Fazer o build dos assets otimizados:
-  ```bash
-  npm run build
-  ```
-- [ ] Publicar o app na URL gratuita com HTTPS fornecida pelo Firebase Hosting:
-  ```bash
-  firebase deploy
-  ```
+#### 18.3 Lembrete Automático
+- [ ] Agendar lembrete para `proximoContato`
+- [ ] Email ou WhatsApp automático (futuro)
 
-### 5. Melhorias e Funcionalidades Adicionais (Sugestões)
-- [ ] **Integração com Gráfico de Geração**: Incluir a biblioteca `Chart.js` na página da proposta comercial para exibir a projeção de geração solar mês a mês em formato de gráfico de barras.
-- [ ] **Recuperação de Senha**: Adicionar o fluxo de "Esqueci minha senha" na tela de login para enviar e-mail de redefinição pelo Firebase Auth.
-- [ ] **Banco de Equipamentos no Firestore**: Mover o array de equipamentos do arquivo local `equipamentos.js` para uma coleção no Firestore, possibilitando ao dono da empresa atualizar preços de inversores e módulos em tempo real sem precisar recompilar ou alterar o código do front-end.
-- [ ] **Histórico e Relatório de Distâncias de Frete**: Armazenar métricas de distâncias calculadas por CEP no Firestore para ajudar a gerência a mapear áreas de atuação com mais vendas e ajustar os multiplicadores de frete.
-- [ ] **Preview Visual do PDF**: Criar um painel de preview interativo diretamente na interface do administrador para permitir ajustes visuais rápidos antes de realizar o download ou impressão.
+---
+
+### 📧 FASE 19 - Integrações
+
+#### 19.1 Email
+- [ ] Enviar proposta por email direto do dashboard
+- [ ] Template HTML profissional
+- [ ] Anexo do PDF
+
+#### 19.2 WhatsApp Business API
+- [ ] Resposta automática para mensagens
+- [ ] Status de entrega da mensagem
+- [ ] Webhook para receber respostas
+
+#### 19.3 Pix/Boleto
+- [ ] Gerar carnê de parcelas
+- [ ] Links de pagamento via Pix
+- [ ] Status: pendente/pago
+
+---
+
+### 🎨 FASE 20 - UI/UX
+
+#### 20.1 Dark/Light Mode ✅
+- [x] Toggle no dashboard (botão sol/lua)
+- [x] Salvar preferência no localStorage (key: solarcrm_theme)
+- [x] Respeita preferência do sistema inicialmente
+
+#### 20.2 Skeleton Loading ✅
+- [x] Skeleton CSS com animação shimmer
+- [x] Substituir spinners genéricos por placeholders de tabela
+- [x] Feedback visual durante fetch no dashboard
+
+#### 20.3 Preview PDF
+- [ ] Modal com preview antes de baixar
+- [ ] Botões: Baixar PDF, Imprimir, Enviar Email
+
+#### 20.4 Configurações com Preview
+- [ ] Sliders de HSP, Tarifa, Margem com preview em tempo real
+- [ ] Testar cálculo instantâneo
+
+---
+
+### 📱 FASE 21 - PWA
+
+#### 21.1 Service Worker
+- [ ] Cache de assets estáticos
+- [ ] Funcionar offline (read-only)
+- [ ] Atualizar quando nova versão disponível
+
+#### 21.2 "Instalar App"
+- [ ] Prompt de install native
+- [ ] Ícone na home screen
+
+#### 21.3 Push Notifications
+- [ ] Solicitar permissão
+- [ ] Receber notificações de novos leads
+
+---
+
+### ⚡ FASE 22 - Performance
+
+#### 22.1 Paginação
+- [ ] Infinite scroll no Kanban
+- [ ] Limite de 50 leads por load
+- [ ] Botão "Carregar mais"
+
+#### 22.2 Índices Firestore
+- [ ] Criar índice composto para buscas:
+  - `vendedorId` + `status`
+  - `createdAt` + `status`
+
+#### 22.3 Lazy Loading
+- [ ] Carregar imagens de perfil sob demanda
+- [ ] Defer de scripts não críticos
+
+---
+
+### 📦 FASE 23 - Relatórios e Exportação
+
+#### 23.1 Exportar CSV ✅
+- [x] Botão "Exportar Leads" no dashboard
+- [x] Colunas: Nome, Telefone, Email, Cidade/UF, Consumo, Potência, Painéis, Valor Final, Status, Vendedor, Data
+- [x] Download de arquivo `.csv` com encoding UTF-8 e separador `;`
+
+#### 23.2 Relatório de Faturamento ✅
+- [x] Página `relatorios.html` com filtros de período (3M/6M/12M)
+- [x] KPIs: Total Leads, Taxa de Conversão, Faturamento, Ticket Médio
+- [x] Gráfico de faturamento mensal (area chart)
+- [x] Gráfico de leads por status (donut chart)
+- [x] Gráfico de evolução de leads vs fechados (bar chart)
+- [x] Performance por vendedor com barra de progresso
+
+#### 23.3 Métricas de Conversão ✅
+- [x] Taxa de conversão por vendedor (fechados/total)
+- [x] Comparativo de faturamento entre vendedores
+- [x] Evolução mensal de leads e fechamentos
+
+---
+
+### 🔧 FASE 24 - Infraestrutura
+
+#### 24.1 Backup Manual
+- [ ] Botão "Exportar Backup" no admin
+- [ ] Download de JSON com todos os dados
+- [ ] Restore via upload de JSON
+
+#### 24.2 Rate Limiting
+- [ ] Limite de chamadas às APIs externas
+- [ ] Cache de CEP por 24h
+
+#### 24.3 Monitoramento
+- [ ] Analytics de uso
+- [ ] Erros capturados (Sentry?)
+- [ ] Uptime monitoring
+
+---
+
+## 📊 Resumo de Fases
+
+| Fase | Descrição | Status | Items |
+|------|-----------|--------|-------|
+| 1-12 | Fundação e CRM Completo | ✅ Feito | 60+ |
+| 13 | Autenticação e Segurança | ✅ Feito | 8 |
+| 14 | Banco de Equipamentos Dinâmico | ✅ Feito | 9 |
+| 15 | Multi-Vendedores | ✅ Feito | 7 |
+| 16 | Gráficos com ApexCharts | ✅ Feito | 8 |
+| 17 | Timeline de Interações | ✅ Feito | 6 |
+| 18 | Automação de Follow-up | ⏳ Pendente | 7 |
+| 19 | Integrações | ⏳ Pendente | 6 |
+| 20 | UI/UX | ⏳ Pendente | 8 |
+| 21 | PWA | ⏳ Pendente | 6 |
+| 22 | Performance | ⏳ Pendente | 6 |
+| 23 | Relatórios e Exportação | ✅ Feito | 7 |
+| 24 | Infraestrutura | ⏳ Pendente | 6 |
+
+**Total implementado: ~900+ linhas de código**
+**Total pendente: 54 itens organizados em 7 fases**
+
+---
+
+## 🎯 Ordem de Implementação Sugerida (Próximas Fases)
+
+1. **Fase 20** (UI/UX) → Dark/Light mode e preview PDF
+2. **Fase 18** (Follow-up) → Alertas e automação de contato
+3. **Fase 19, 21-22, 24** → Conforme necessidade
+
+---
+
+## 🏗️ Arquivos Criados/Modificados Recentemente
+
+| Arquivo | Ação | Descrição |
+|---------|------|-----------|
+| `src/js/firebase.js` | Modificado | Auth reset, profiles, audit, interações, equipamentos |
+| `src/js/auth.js` | Modificado | resetPassword, checkRole, auditAction |
+| `src/js/calculator.js` | Modificado | Refatorado para equipamentos async |
+| `src/js/dashboard.js` | Modificado | Gráficos ApexCharts, interações, filtros, skeleton loading |
+| `src/js/proposta.js` | Modificado | Gráfico de geração ApexCharts |
+| `src/js/tv.js` | Modificado | Gráfico de crescimento ApexCharts |
+| `src/js/app.js` | Modificado | vendedorId ao criar lead |
+| `src/js/admin/equipamentos.js` | Criado | CRUD de equipamentos |
+| `src/js/relatorios.js` | Criado | Lógica de relatórios, KPIs, gráficos de evolução |
+| `src/vendor/apexcharts.min.js` | Criado | Biblioteca ApexCharts local (522KB) |
+| `src/css/style.css` | Modificado | Skeleton loading styles com shimmer animation |
+| `login.html` | Modificado | Modal recuperação senha |
+| `dashboard.html` | Modificado | Gráficos, coluna data, filtros período, link relatórios |
+| `proposta.html` | Modificado | Canvas → div para ApexCharts |
+| `tv.html` | Modificado | Canvas → div para ApexCharts |
+| `admin/equipamentos.html` | Criado | Página de gestão de equipamentos |
+| `relatorios.html` | Criado | Página de relatórios com gráficos ApexCharts |
+| `vite.config.js` | Modificado | +admin/equipamentos.html +relatorios.html |
+| `CONTEXT.md` | Atualizado | Fases 18, 20.1, 20.2, 23 completas |
+| **Rebranding para Spark** | | |
+| `favicon.svg` | Modificado | Novo ícone com raio e árvore |
+| `src/css/style.css` | Modificado | Cores Spark (preto, amarelo, cinza, branco) |
+| `dashboard.html`, `index.html`, etc. | Modificado | Nome e logo atualizados para Spark |
+| `src/js/config.js` | Modificado | empresaNome: "Spark" |
+| `src/js/*.js` | Modificado | Mensagens atualizadas |
+
+---
+
+## 🔑 Credenciais Firebase
+
+- **Projeto**: solarcrm-60ce1
+- **Auth Domain**: solarcrm-60ce1.firebaseapp.com
+- **Database**: Firestore ativo
+- **Usuários**: Admin criado via Firebase Console (admin@admin.com)
+
+## 🌐 URLs de Deploy
+
+- **Firebase Hosting**: https://solarcrm-60ce1.web.app
+- **GitHub Pages**: https://renato0503.github.io/Spark/

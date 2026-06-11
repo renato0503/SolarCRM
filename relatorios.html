@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark - Relatórios</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon-D6n-THbx.svg">
+  <script src="./src/vendor/apexcharts.min.js"></script>
+  <style>
+    .reports-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 0;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: var(--font-headings);
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .filter-btn.active {
+      background: var(--solar-gradient);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 10px rgba(255, 94, 0, 0.2);
+    }
+
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .vendor-row {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      gap: 1rem;
+    }
+
+    .vendor-row:last-child {
+      border-bottom: none;
+    }
+
+    .vendor-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--solar-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .vendor-info {
+      flex: 1;
+    }
+
+    .vendor-name {
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .vendor-stats {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--solar-gradient);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+  </style>
+  <script type="module" crossorigin src="./assets/relatorios-BMASYGgx.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/utils-g9sFxRsc.js">
+  <link rel="modulepreload" crossorigin href="./assets/auth-RhSlk66I.js">
+  <link rel="stylesheet" crossorigin href="./assets/style-BUx2I9AU.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="reports-header">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 2rem;">
+        <a href="./dashboard.html" class="brand-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48" fill="none">
+            <rect width="48" height="48" rx="8" fill="#000"/>
+            <path d="M28 6L16 26h9l-2 16 14-20h-9l2-16z" fill="#FFD700"/>
+            <path d="M36 40V26l-2.5-2.5L30.5 26l-2.5-4-2.5 4-2.5-2.5v14" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          <span>Spark</span>
+        </a>
+        <span style="font-size: 0.75rem; background-color: var(--border-color); color: var(--text-muted); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">RELATÓRIOS</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="./dashboard.html" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          Voltar ao Painel
+        </a>
+        <span id="userEmail" style="font-size: 0.875rem; color: var(--text-muted);"></span>
+        <button id="btnThemeToggle" class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;" title="Alternar Tema">
+          <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Section -->
+  <main style="padding: 2.5rem 0;">
+    <div class="container">
+
+      <!-- Page Title -->
+      <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 700; color: #fff;">Relatórios de Desempenho</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Acompanhe métricas de conversão, faturamento e performance dos vendedores.</p>
+      </div>
+
+      <!-- Period Filter -->
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <button class="filter-btn active" data-periodo="3">Últimos 3 meses</button>
+        <button class="filter-btn" data-periodo="6">Últimos 6 meses</button>
+        <button class="filter-btn" data-periodo="12">Últimos 12 meses</button>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="grid grid-cols-4" style="margin-bottom: 2rem; gap: 1rem;">
+        <div class="stat-card">
+          <span class="metric-label">Total de Leads</span>
+          <div id="kpiTotalLeads" class="stat-value">0</div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Cadastrados no período</span>
+        </div>
+        <div class="stat-card">
+          <span class="metric-label">Taxa de Conversão</span>
+          <div id="kpiConversao" class="stat-value" style="color: var(--status-fechado);">0%</div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Fechados / Total</span>
+        </div>
+        <div class="stat-card">
+          <span class="metric-label">Faturamento Total</span>
+          <div id="kpiFaturamento" class="stat-value" style="color: var(--solar-orange);">R$ 0</div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Propostas fechadas</span>
+        </div>
+        <div class="stat-card">
+          <span class="metric-label">Ticket Médio</span>
+          <div id="kpiTicketMedio" class="stat-value">R$ 0</div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Média por venda</span>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-2" style="margin-bottom: 2rem; gap: 1.5rem;">
+        <div class="glass-card" style="padding: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin: 0;">Faturamento Mensal</h4>
+          </div>
+          <div id="graficoFaturamento"></div>
+        </div>
+        <div class="glass-card" style="padding: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin: 0;">Leads por Status</h4>
+          </div>
+          <div id="graficoStatus"></div>
+        </div>
+      </div>
+
+      <!-- Conversion by Vendor -->
+      <div class="glass-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin: 0;">Performance por Vendedor</h4>
+        </div>
+        <div id="vendedoresList"></div>
+      </div>
+
+      <!-- Average Time in Stage -->
+      <div class="glass-card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin: 0;">Evolução de Leads</h4>
+        </div>
+        <div id="graficoEvolucao"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid var(--border-color); padding: 2rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6); margin-top: 5rem;">
+    <p>&copy; 2026 Spark - CRM de Negócios Solares.</p>
+  </footer>
+
+</body>
+</html>

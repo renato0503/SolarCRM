@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SolarCRM - Login de Vendedor</title>
-  <link rel="icon" type="image/svg+xml" href="/SolarCRM/assets/favicon-5ssAdHOf.svg">
-  <script type="module" crossorigin src="/SolarCRM/assets/login-DAvX2Kbb.js"></script>
-  <link rel="modulepreload" crossorigin href="/SolarCRM/assets/utils-5ioW-Vfa.js">
-  <link rel="modulepreload" crossorigin href="/SolarCRM/assets/auth-CfeZOauO.js">
-  <link rel="stylesheet" crossorigin href="/SolarCRM/assets/style-D4AaRqof.css">
+  <title>Spark - Login de Vendedor</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon-D6n-THbx.svg">
+  <script type="module" crossorigin src="./assets/login-BGbJim8a.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/utils-g9sFxRsc.js">
+  <link rel="modulepreload" crossorigin href="./assets/auth-RhSlk66I.js">
+  <link rel="stylesheet" crossorigin href="./assets/style-BUx2I9AU.css">
 </head>
 <body style="display: flex; flex-direction: column; min-height: 100vh;">
 
@@ -16,11 +16,12 @@
   <header style="border-bottom: 1px solid var(--border-color); padding: 1.25rem 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(10px);">
     <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
       <a href="./index.html" class="brand-logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="4"/>
-          <path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48" fill="none">
+          <rect width="48" height="48" rx="8" fill="#000"/>
+          <path d="M28 6L16 26h9l-2 16 14-20h-9l2-16z" fill="#FFD700"/>
+          <path d="M36 40V26l-2.5-2.5L30.5 26l-2.5-4-2.5 4-2.5-2.5v14" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         </svg>
-        <span>SolarCRM</span>
+        <span>Spark</span>
       </a>
       <a href="./index.html" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.875rem;">
         Voltar à Simulação
@@ -59,6 +60,13 @@
           </button>
         </form>
 
+        <!-- Forgot Password Link -->
+        <div style="text-align: center; margin-top: 1.5rem;">
+          <a href="#" id="forgotPasswordLink" style="color: var(--solar-orange); font-size: 0.875rem; text-decoration: none; transition: opacity 0.2s;">
+            Esqueci minha senha
+          </a>
+        </div>
+
         <!-- Mock Credentials Box Helper -->
         <div style="margin-top: 2rem; padding: 1rem; background: rgba(255, 94, 0, 0.08); border: 1px solid rgba(255, 94, 0, 0.2); border-radius: var(--radius-md); font-size: 0.8125rem; line-height: 1.4;">
           <span style="color: var(--solar-orange); font-weight: 700; display: block; margin-bottom: 0.25rem;">💡 Teste Rápido (Modo Simulador):</span>
@@ -71,10 +79,39 @@
   <!-- Toast Notification -->
   <div id="toastContainer" class="toast-container"></div>
 
+  <!-- Modal: Forgot Password -->
+  <div id="forgotPasswordModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="glass-card" style="max-width: 400px; width: 90%; padding: 2rem; position: relative;">
+      <button id="closeForgotModal" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.25rem; line-height: 1;">&times;</button>
+      
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <h3 style="color: #fff; font-size: 1.25rem; margin-bottom: 0.5rem;">Recuperar Senha</h3>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">Digite seu e-mail para receber o link de redefinição</p>
+      </div>
+
+      <form id="forgotPasswordForm">
+        <div class="form-group">
+          <input type="email" id="resetEmail" class="form-control" placeholder="seu@email.com" required>
+        </div>
+        <button type="submit" id="btnResetPassword" class="btn btn-primary" style="width: 100%;">
+          <span>Enviar Link</span>
+          <div class="spinner" style="display: none; border-top-color: #fff; width: 20px; height: 20px;"></div>
+        </button>
+      </form>
+
+      <div id="resetSuccessMessage" style="display: none; text-align: center; padding: 1rem; background: rgba(34, 197, 94, 0.1); border-radius: var(--radius-md); margin-top: 1rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--status-fechado)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.5rem;">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <p style="color: var(--status-fechado); font-size: 0.875rem;">Verifique sua caixa de entrada!</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer style="border-top: 1px solid var(--border-color); padding: 2rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6);">
-    <p>&copy; 2026 SolarCRM - Painel de Vendas.</p>
+    <p>&copy; 2026 Spark - Painel de Vendas.</p>
   </footer>
-
+
 </body>
 </html>

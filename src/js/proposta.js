@@ -128,6 +128,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Animação da contagem de Economia Anual
     animarContadorNumero(economiaAnual, propEconomiaAnualEl);
 
+    // Gerar tabela de parcelas
+    gerarTabelaParcelas(precoFinal);
+
     // 5. Configurar Botão do WhatsApp (Cliente fala com o Vendedor)
     btnWhatsappVendedor.addEventListener('click', () => {
       const foneConsultor = (settings.empresaTelefone || "5567993515206").replace(/\D/g, '');
@@ -150,6 +153,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast("Preparando PDF. O download iniciará em uma nova aba...", "info");
       window.open(`./pdf.html?id=${proposalId}`, '_blank');
     });
+
+    // 7. Configurar Botão de PDF CERRADO
+    const btnPdfCerrado = document.getElementById('btnPdfCerrado');
+    if (btnPdfCerrado) {
+      btnPdfCerrado.addEventListener('click', () => {
+        showToast("Gerando Proposta CERRADO...", "info");
+        window.open(`./pdf-cerrado.html?id=${proposalId}`, '_blank');
+      });
+    }
 
   } catch (error) {
     console.error("Erro ao carregar proposta comercial:", error);
@@ -180,6 +192,36 @@ function animarContadorNumero(valorFinal, elemento) {
   }
   
   requestAnimationFrame(atualizar);
+}
+
+function gerarTabelaParcelas(valorTotal) {
+  const parcelasTable = document.getElementById('parcelasTable');
+  if (!parcelasTable) return;
+
+  const taxaMensal = 0.0149; // 1.49% a.m.
+  const opcoesParcelas = [12, 24, 36, 48, 60];
+
+  let html = '';
+  const valorAVista = valorTotal;
+
+  opcoesParcelas.forEach(numParcelas => {
+    // Cálculo da parcela usando fórmula Price (amortização constante)
+    const valorParcela = valorTotal * (taxaMensal * Math.pow(1 + taxaMensal, numParcelas)) / (Math.pow(1 + taxaMensal, numParcelas) - 1);
+    const totalComJuros = valorParcela * numParcelas;
+    const economia = totalComJuros - valorAVista;
+    const economiaFormat = economia > 0 ? `- ${formatCurrency(economia)}` : 'Sem juros';
+
+    html += `
+      <tr style="border-bottom: 1px solid var(--border-color);">
+        <td style="padding: 0.75rem 1rem; font-weight: 600;">${numParcelas}x</td>
+        <td style="padding: 0.75rem 1rem; text-align: center; color: var(--solar-orange); font-weight: 700;">${formatCurrency(valorParcela)}</td>
+        <td style="padding: 0.75rem 1rem; text-align: center;">${formatCurrency(totalComJuros)}</td>
+        <td style="padding: 0.75rem 1rem; text-align: center; color: ${economia > 0 ? 'var(--status-fechado)' : 'var(--text-muted)'};">${economiaFormat}</td>
+      </tr>
+    `;
+  });
+
+  parcelasTable.innerHTML = html;
 }
 
 // Helper local para telefone formatado

@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: '/SolarCRM/',
+  base: './',
   build: {
     rollupOptions: {
       input: {
@@ -11,6 +11,10 @@ export default defineConfig({
         login: resolve(__dirname, 'login.html'),
         dashboard: resolve(__dirname, 'dashboard.html'),
         pdf: resolve(__dirname, 'pdf.html'),
+        pdfCerrado: resolve(__dirname, 'pdf-cerrado.html'),
+        lead: resolve(__dirname, 'lead.html'),
+        historico: resolve(__dirname, 'historico.html'),
+        tv: resolve(__dirname, 'tv.html'),
       }
     }
   }

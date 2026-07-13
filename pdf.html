@@ -3,692 +3,265 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerando Proposta PDF...</title>
-  <link rel="icon" type="image/svg+xml" href="./assets/favicon-D6n-THbx.svg">
-  
-  <!-- Fonts -->
+  <title>Spark - Proposta Solar</title>
+  <link rel="icon" type="image/png" href="./assets/logospark-f2niuQAy.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- html2pdf.js -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+  <script src="./apexcharts.min.js"></script>
   <style>
-    @page {
-      size: A4;
-      margin: 0;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      background: #f1f5f9;
-      font-family: 'Inter', sans-serif;
-      color: #0f172a;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    #loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #0f172a;
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      font-family: 'Outfit', sans-serif;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-top-color: #ff5e00;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 1rem;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* PDF Page Containers */
-    .pdf-container {
-      width: 210mm;
-      margin: 0 auto;
-      background: #f1f5f9;
-    }
-
-    .pdf-page {
-      width: 210mm;
-      height: 296mm; /* Reduzido de 297mm para evitar transbordo e páginas em branco */
-      padding: 18mm 15mm;
-      box-sizing: border-box;
-      background: #ffffff;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .pdf-page:not(:last-child) {
-      page-break-after: always !important;
-      break-after: page !important;
-    }
-
-    /* Header Banner */
-    .header-banner {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: #ffffff;
-      padding: 1.5rem;
-      border-radius: 8px;
-      margin-bottom: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 800;
-      font-size: 1.5rem;
-      color: #ff5e00;
-    }
-
-    .brand-logo svg {
-      fill: #FFD700;
-    }
-
-    .badge-proposal {
-      background: #ff5e00;
-      color: #ffffff;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .proposal-title {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #ffffff;
-      margin-top: 0.25rem;
-    }
-
-    .header-meta {
-      text-align: right;
-      font-size: 0.8rem;
-      opacity: 0.9;
-    }
-
-    .header-bottom {
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      padding-top: 0.75rem;
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8rem;
-    }
-
-    .info-block h4 {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #94a3b8;
-      margin-bottom: 0.2rem;
-    }
-
-    .info-block p {
-      font-weight: 600;
-      color: #ffffff;
-    }
-
-    .info-block span {
-      opacity: 0.8;
-      font-size: 0.75rem;
-    }
-
-    /* Financial Highlights */
-    .highlights-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 1.25rem;
-    }
-
-    .highlight-card {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 0.875rem;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      background: #ffffff;
-    }
-
-    .highlight-card.orange {
-      background: linear-gradient(135deg, #ff5e00 0%, #ff8008 100%);
-      border: none;
-      color: #ffffff;
-    }
-
-    .highlight-card.border-orange {
-      border-left: 4px solid #ff5e00;
-    }
-
-    .highlight-card.border-green {
-      border-left: 4px solid #22c55e;
-    }
-
-    .highlight-label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: #64748b;
-      margin-bottom: 0.25rem;
-    }
-
-    .highlight-card.orange .highlight-label {
-      color: rgba(255, 255, 255, 0.85);
-    }
-
-    .highlight-value {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin: 0.2rem 0;
-    }
-
-    .highlight-card.orange .highlight-value {
-      color: #ffffff;
-    }
-
-    .highlight-sub {
-      font-size: 0.7rem;
-      color: #64748b;
-    }
-
-    .highlight-card.orange .highlight-sub {
-      color: #ffffff;
-    }
-
-    .highlight-card.border-green .highlight-sub {
-      color: #22c55e;
-      font-weight: 600;
-    }
-
-    /* Section Styles */
-    .section-title {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      color: #0f172a;
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 0.35rem;
-    }
-
-    .section-title svg {
-      color: #ff5e00;
-    }
-
-    /* Specs Grid */
-    .specs-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-
-    .spec-card {
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 0.5rem 0.75rem;
-      background: #f8fafc;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .spec-card.span-2 {
-      grid-column: span 2;
-    }
-
-    .spec-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 4px;
-      background: #ffedd5;
-      color: #ff5e00;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .spec-icon svg {
-      width: 15px;
-      height: 15px;
-    }
-
-    .spec-details h5 {
-      font-size: 0.7rem;
-      color: #64748b;
-      font-weight: 500;
-    }
-
-    .spec-details p {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #0f172a;
-      line-height: 1.2;
-    }
-
-    .spec-details span {
-      font-size: 0.7rem;
-      color: #64748b;
-      display: block;
-      margin-top: 0.05rem;
-    }
-
-    /* Footer Meta page */
-    .page-footer-meta {
-      position: absolute;
-      bottom: 8mm;
-      left: 15mm;
-      right: 15mm;
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.7rem;
-      color: #94a3b8;
-      border-top: 1px solid #f1f5f9;
-      padding-top: 0.5rem;
-    }
-
-    /* Page 2 Styles */
-    .impact-container {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 1rem;
-      background: #ffffff;
-      margin-bottom: 1.25rem;
-    }
-
-    .metric-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-
-    .metric-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #64748b;
-    }
-
-    .metric-value {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #0f172a;
-    }
-
-    .progress-bar-bg {
-      width: 100%;
-      height: 6px;
-      background: #f1f5f9;
-      border-radius: 3px;
-      overflow: hidden;
-      margin-bottom: 1rem;
-    }
-
-    .progress-bar-fill {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, #ff5e00 0%, #ff8008 100%);
-      border-radius: 3px;
-    }
-
-    .eco-box {
-      background-color: rgba(34, 197, 94, 0.06);
-      border: 1px dashed rgba(34, 197, 94, 0.25);
-      border-radius: 6px;
-      padding: 0.75rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-    }
-
-    .eco-box-icon {
-      color: #22c55e;
-      flex-shrink: 0;
-    }
-
-    .eco-box-text {
-      font-size: 0.75rem;
-      color: #0f172a;
-      line-height: 1.35;
-    }
-
-    /* FAQ Box */
-    .faq-card {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 1rem;
-      background: #f8fafc;
-      border-left: 4px solid #3b82f6;
-      margin-bottom: 2rem;
-    }
-
-    .faq-card h4 {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #0f172a;
-      margin-bottom: 0.5rem;
-    }
-
-    .faq-list {
-      list-style-type: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .faq-list li {
-      font-size: 0.75rem;
-      color: #475569;
-      line-height: 1.3;
-      padding-left: 0.75rem;
-      position: relative;
-    }
-
-    .faq-list li::before {
-      content: "•";
-      color: #3b82f6;
-      font-weight: bold;
-      position: absolute;
-      left: 0;
-      top: -1px;
-    }
-
-    /* Signature Area */
-    .signatures {
-      display: flex;
-      justify-content: space-between;
-      margin-top: auto; /* Pushes signature to bottom of content area */
-      padding-bottom: 1.5rem;
-    }
-
-    .signature-card {
-      width: 45%;
-      text-align: center;
-    }
-
-    .signature-line {
-      border-top: 1px solid #cbd5e1;
-      margin-bottom: 0.4rem;
-    }
-
-    .signature-name {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #0f172a;
-    }
-
-    .signature-title {
-      font-size: 0.7rem;
-      color: #64748b;
-    }
+    @page { size: A4; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f1f5f9; font-family: 'Inter', sans-serif; color: #0f172a; }
+    .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
+    .loading-screen .spinner { width: 50px; height: 50px; border: 3px solid rgba(255,215,0,0.2); border-top-color: #FFD700; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+    .loading-screen p { color: #fff; font-family: 'Outfit', sans-serif; font-size: 0.95rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #pdf-content { width: 210mm; margin: 0 auto; background: #fff; }
+    .page { width: 210mm; min-height: 296mm; padding: 20mm 18mm; background: #fff; position: relative; overflow: hidden; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    .page-footer { position: absolute; bottom: 12mm; left: 18mm; right: 18mm; font-size: 8pt; color: #94a3b8; display: flex; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 5mm; }
+    .accent { color: #FFD700; }
+    .page-cover { background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%); color: #fff; display: flex; flex-direction: column; justify-content: center; }
+    .page-cover h1 { font-family: 'Outfit', sans-serif; font-size: 28pt; font-weight: 800; line-height: 1.1; margin-bottom: 8mm; color: #fff; }
+    .page-cover h1 .gold { color: #FFD700; }
+    .page-cover .badge { display: inline-block; background: #FFD700; color: #0f172a; padding: 2mm 6mm; border-radius: 20px; font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5mm; margin-bottom: 6mm; }
+    .page-cover .client-info { margin-top: 15mm; padding-top: 8mm; border-top: 1px solid rgba(255,255,255,0.15); }
+    .page-cover .client-info h4 { font-size: 8pt; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 0.5mm; margin-bottom: 1mm; }
+    .page-cover .client-info p { font-size: 11pt; color: rgba(255,255,255,0.9); margin-bottom: 1mm; }
+    .page-cover .logo { font-family: 'Outfit', sans-serif; font-size: 14pt; font-weight: 800; color: #FFD700; display: flex; align-items: center; gap: 3mm; }
+    .page-cover .company-info { position: absolute; bottom: 25mm; left: 18mm; font-size: 7pt; color: rgba(255,255,255,0.4); }
+    .section-title { font-family: 'Outfit', sans-serif; font-size: 14pt; font-weight: 700; color: #0f172a; margin-bottom: 5mm; display: flex; align-items: center; gap: 3mm; }
+    .section-title .num { background: #FFD700; color: #0f172a; width: 8mm; height: 8mm; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8pt; font-weight: 800; flex-shrink: 0; }
+    .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4mm; padding: 5mm; margin-bottom: 4mm; }
+    .card.highlight-price { background: linear-gradient(135deg, #FFD700, #F97316); color: #fff; border: none; }
+    .card.highlight-price p { color: rgba(255,255,255,0.9); }
+    .card-row { display: flex; gap: 4mm; margin-bottom: 4mm; }
+    .card-row .card { flex: 1; margin-bottom: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 8pt; }
+    table th { text-align: left; padding: 2mm 3mm; background: #f1f5f9; font-weight: 600; color: #64748b; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.3mm; }
+    table td { padding: 2mm 3mm; border-bottom: 1px solid #f1f5f9; }
+    .spec-row { display: flex; align-items: flex-start; gap: 3mm; padding: 3mm 0; border-bottom: 1px solid #f1f5f9; font-size: 9pt; }
+    .spec-row:last-child { border-bottom: none; }
+    .spec-row .label { flex: 1; color: #64748b; font-weight: 500; }
+    .spec-row .value { flex: 1.5; font-weight: 600; }
+    .spec-row .price { flex: 1; text-align: right; font-weight: 700; color: #0f172a; }
+    .warranty-grid { display: flex; gap: 4mm; margin-bottom: 5mm; }
+    .warranty-card { flex: 1; border: 1px solid #e2e8f0; border-radius: 3mm; padding: 4mm; font-size: 8pt; }
+    .warranty-card h5 { font-size: 9pt; font-weight: 700; margin-bottom: 2mm; }
+    .signature-line { border-top: 1px solid #94a3b8; width: 60mm; margin: 15mm auto 2mm auto; }
+    .eco-badge { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 3mm; padding: 4mm; font-size: 8pt; color: #166534; margin-top: 4mm; }
+    .graph-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4mm; padding: 5mm; margin-bottom: 4mm; }
+    .two-col { display: flex; gap: 5mm; }
+    .two-col > div { flex: 1; }
+    .pros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin-bottom: 8mm; }
+    .pro-item { display: flex; gap: 3mm; align-items: flex-start; font-size: 8pt; line-height: 1.4; }
+    .pro-item .icon { flex-shrink: 0; width: 6mm; height: 6mm; background: #FFD700; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7pt; font-weight: 800; color: #0f172a; margin-top: 0.5mm; }
+    .value-lg { font-size: 22pt; font-weight: 800; font-family: 'Outfit', sans-serif; color: #FFD700; }
+    .value-white { color: #fff !important; }
+    .text-muted { color: #64748b; font-size: 8pt; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .mb-4 { margin-bottom: 4mm; }
+    .mt-4 { margin-top: 4mm; }
+    .mb-8 { margin-bottom: 8mm; }
+    .p-4 { padding: 4mm; }
+    .font-sm { font-size: 8pt; }
+    .font-lg { font-size: 12pt; }
+    .font-bold { font-weight: 700; }
+    .tag { display: inline-block; background: #f1f5f9; padding: 1mm 4mm; border-radius: 10px; font-size: 7pt; color: #64748b; }
   </style>
-  <script type="module" crossorigin src="./assets/pdf-BAwit-1t.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/utils-g9sFxRsc.js">
+  <script type="module" crossorigin src="./assets/pdf-Die4jbp0.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/utils-BESuGCCH.js">
 </head>
 <body>
 
-  <div id="loading-screen">
-    <div class="spinner"></div>
-    <p>Buscando simulação e gerando proposta comercial em PDF...</p>
-  </div>
+<div id="loading-screen" class="loading-screen">
+  <div class="spinner"></div>
+  <p>Gerando proposta profissional...</p>
+</div>
 
-  <div class="pdf-container" id="pdf-content">
-    
-    <!-- PAGE 1 -->
-    <div class="pdf-page">
-      
-      <!-- Banner Cabeçalho -->
-      <div class="header-banner">
-        <div class="header-top">
-<div class="brand-logo">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 48 48" fill="none">
-              <rect width="48" height="48" rx="6" fill="#000"/>
-              <path d="M28 6L16 26h9l-2 16 14-20h-9l2-16z" fill="#FFD700"/>
-              <path d="M36 40V26l-2.5-2.5L30.5 26l-2.5-4-2.5 4-2.5-2.5v14" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>
-            <span>Spark</span>
-          </div>
-          <div>
-            <span class="badge-proposal">Proposta Comercial</span>
-            <h1 class="proposal-title">Simulação Solar Personalizada</h1>
-          </div>
-        </div>
+<div id="pdf-content">
 
-        <div class="header-bottom">
-          <div class="info-block">
-            <h4>Preparado para:</h4>
-            <p id="lead-nome">-</p>
-            <span id="lead-contato">-</span>
-          </div>
-          <div class="info-block" style="max-width: 45%;">
-            <h4>Endereço de Instalação:</h4>
-            <p id="lead-endereco" style="font-weight: 400; font-size: 0.8rem; line-height: 1.25;">-</p>
-          </div>
-          <div class="info-block" style="text-align: right;">
-            <h4>Validade:</h4>
-            <p style="color: #ff5e00;">15 dias</p>
-            <span id="prop-data">-</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Financial Highlights -->
-      <div class="highlights-grid">
-        <div class="highlight-card border-orange">
-          <span class="highlight-label">Economia Estimada (Anual)</span>
-          <h2 class="highlight-value" id="prop-economia-anual" style="color: #ff5e00;">R$ 0,00</h2>
-          <span class="highlight-sub" id="prop-economia-25anos">R$ 0,00 em 25 anos</span>
-        </div>
-        
-        <div class="highlight-card orange">
-          <span class="highlight-label">Investimento Total</span>
-          <h2 class="highlight-value" id="prop-preco-final">R$ 0,00</h2>
-          <span class="highlight-sub">Instalação e Engenharia inclusas</span>
-        </div>
-
-        <div class="highlight-card border-green">
-          <span class="highlight-label">Retorno do Investimento</span>
-          <h2 class="highlight-value" id="prop-payback" style="color: #0f172a;">-</h2>
-          <span class="highlight-sub">Tempo estimado de Payback</span>
-        </div>
-      </div>
-
-      <!-- Specs Section -->
-      <div class="section-title">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
-        </svg>
-        Especificação Técnica do Gerador
-      </div>
-
-      <div class="specs-grid">
-        <!-- Painéis -->
-        <div class="spec-card">
-          <div class="spec-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
-          </div>
-          <div class="spec-details">
-            <h5>Módulos Fotovoltaicos</h5>
-            <p id="spec-paineis">-</p>
-            <span id="preco-paineis">-</span>
-          </div>
-        </div>
-
-        <!-- Inversor -->
-        <div class="spec-card">
-          <div class="spec-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-          </div>
-          <div class="spec-details">
-            <h5>Inversor Grid-Tie</h5>
-            <p id="spec-inversor">-</p>
-            <span id="preco-inversor">-</span>
-          </div>
-        </div>
-
-        <!-- Estrutura -->
-        <div class="spec-card">
-          <div class="spec-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 2 18 2 18 6 6 6"/><rect x="3" y="6" width="18" height="16" rx="2"/></svg>
-          </div>
-          <div class="spec-details">
-            <h5>Estrutura de Fixação</h5>
-            <p id="spec-estrutura">-</p>
-            <span id="preco-estrutura">-</span>
-          </div>
-        </div>
-
-        <!-- Frete -->
-        <div class="spec-card">
-          <div class="spec-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          </div>
-          <div class="spec-details">
-            <h5>Logística e Frete</h5>
-            <p id="spec-frete">-</p>
-            <span id="preco-frete">-</span>
-          </div>
-        </div>
-
-        <!-- Serviços -->
-        <div class="spec-card span-2">
-          <div class="spec-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-          </div>
-          <div class="spec-details">
-            <h5>Mão de Obra, Engenharia e Homologação</h5>
-            <p>Instalação padrão, Projeto Técnico e trâmites junto à distribuidora inclusos.</p>
-            <span id="preco-servicos">-</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Page 1 Footer -->
-      <div class="page-footer-meta">
-        <span>Spark - Simulador de Economia Solar</span>
-        <span>Página 1 de 2</span>
-      </div>
-
+  <!-- ====== PAGE 1 - CAPA ====== -->
+  <div class="page page-cover">
+    <div class="logo" style="margin-bottom: 30mm;">
+      <img src="./assets/logospark-f2niuQAy.png" alt="Spark" style="height:24px; margin-right:2mm;">
+      Spark Engenharia Elétrica
     </div>
 
-    <!-- PAGE 2 -->
-    <div class="pdf-page">
-      
-      <!-- Geração e Ecologia -->
-      <div class="section-title">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-        Geração de Energia e Impacto Ecológico
-      </div>
+    <span class="badge">Proposta Comercial</span>
+    <h1>Gerador Solar <span class="gold">On Grid</span><br><span id="cover-potencia" style="font-size: 36pt;">0 kWp</span></h1>
+    <p style="font-size: 9pt; color: rgba(255,255,255,0.5); margin-top: 2mm;">Fone: (66) 9.9651-7782 | CNPJ: 36.380.037/0001-30</p>
+    <p style="font-size: 9pt; color: rgba(255,255,255,0.5);">E-mail: contato@sparkengenharia.net</p>
+    <p style="font-size: 9pt; color: rgba(255,255,255,0.5);">Rua das Primaveras, 2690 Sala B - Sinop-MT</p>
 
-      <div class="impact-container">
-        <div class="metric-row">
-          <span class="metric-label">Geração Mensal Estimada</span>
-          <span class="metric-value" id="prop-geracao-kwh">0 kWh/mês</span>
-        </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill"></div>
-        </div>
-        <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem; line-height: 1.3;">
-          * A geração real pode variar de acordo com fatores climáticos locais, limpeza das placas e orientação solar do telhado.
-        </p>
-
-        <div class="eco-box">
-          <div class="eco-box-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 22h20"/><path d="M12 2v20"/><path d="M12 10a4 4 0 0 1 8-4h-8"/><path d="M12 14a4 4 0 0 0-8-4h8"/></svg>
-          </div>
-          <div class="eco-box-text">
-            Com este sistema, você evitará a emissão de aproximadamente <strong id="eco-co2">0.0</strong> toneladas de CO₂ na atmosfera anualmente, o equivalente a plantar cerca de <strong id="eco-arvores">0</strong> árvores por ano!
-          </div>
-        </div>
-      </div>
-
-      <!-- FAQ Box -->
-      <div class="section-title">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
-        Por que Investir em Energia Solar Fotovoltaica?
-      </div>
-
-      <div class="faq-card">
-        <ul class="faq-list">
-          <li><strong>Economia Imediata:</strong> Sua conta de luz reduz em até 95% já no primeiro mês de uso do gerador solar.</li>
-          <li><strong>Valorização Patrimonial:</strong> Imóveis com energia solar são valorizados comercialmente de forma imediata.</li>
-          <li><strong>Garantia de Geração:</strong> Nossos painéis solares têm durabilidade estimada e garantia de geração de até 25 anos.</li>
-          <li><strong>Proteção Tarifária:</strong> Fique imune às tarifas extras de bandeiras vermelhas e reajustes tarifários da distribuidora.</li>
-        </ul>
-      </div>
-
-      <!-- Signatures -->
-      <div class="signatures">
-        <div class="signature-card">
-          <div class="signature-line"></div>
-          <p class="signature-name">Spark</p>
-          <p class="signature-title">Consultor Responsável</p>
-        </div>
-        <div class="signature-card">
-          <div class="signature-line"></div>
-          <p class="signature-name" id="pdf-signature-client-name">Cliente</p>
-          <p class="signature-title">Aceite da Proposta</p>
-        </div>
-      </div>
-
-      <!-- Page 2 Footer -->
-      <div class="page-footer-meta">
-        <span>Spark - Proposta Comercial</span>
-        <span>Página 2 de 2</span>
-      </div>
-
+    <div class="client-info">
+      <h4>Cliente</h4>
+      <p id="lead-nome" style="font-size: 13pt; font-weight: 700;">—</p>
+      <p id="lead-contato">—</p>
+      <p id="lead-endereco" style="margin-top: 1mm;">—</p>
+      <p id="lead-cidade" style="font-size: 8pt; color: rgba(255,255,255,0.5); margin-top: 0;">—</p>
     </div>
 
+    <div style="position: absolute; bottom: 25mm; right: 18mm; text-align: right;">
+      <p id="prop-data" style="font-size: 8pt; color: rgba(255,255,255,0.5);">—</p>
+    </div>
+
+    <div class="company-info">
+      Spark Engenharia Elétrica - Proposta Comercial - Validade: 15 dias
+    </div>
   </div>
+
+  <!-- ====== PAGE 2 - VANTAGENS + QUEM SOMOS ====== -->
+  <div class="page">
+    <div class="section-title"><span class="num">1</span> VANTAGENS</div>
+    <div class="pros-grid">
+      <div class="pro-item"><span class="icon">1</span><p><strong>Energia limpa:</strong> os painéis solares têm baixíssimo impacto no meio ambiente, gerando energia com menos emissões de carbono.</p></div>
+      <div class="pro-item"><span class="icon">2</span><p><strong>Economia:</strong> investimento com retorno rápido e você não fica mais sujeito às variações de bandeiras tarifárias das concessionárias.</p></div>
+      <div class="pro-item"><span class="icon">3</span><p><strong>Valorização do imóvel:</strong> investir em sistemas de energia solar agrega valor ao imóvel, são diferenciais competitivos.</p></div>
+      <div class="pro-item"><span class="icon">4</span><p><strong>Material de qualidade:</strong> na Spark Engenharia Elétrica, trabalhamos com equipamentos de primeira linha.</p></div>
+    </div>
+
+    <div class="section-title mt-4"><span class="num">2</span> QUEM SOMOS?</div>
+    <p style="font-size: 9pt; line-height: 1.5; margin-bottom: 4mm;">Atendemos toda a região norte-matogrossense com soluções sustentáveis em geração e consumo de energia elétrica.</p>
+    <p style="font-size: 9pt; line-height: 1.5; margin-bottom: 8mm;">Oferecemos aos nossos clientes produtos e serviços personalizados, com atenção a todos os detalhes, visando sempre obter os melhores resultados.</p>
+    <p style="font-size: 8pt; color: #64748b;">Acesse nosso site: <strong>sparkengenharia.net</strong></p>
+
+    <div class="section-title mt-4"><span class="num">3</span> O QUE ENTREGAMOS?</div>
+    <p style="font-size: 9pt; line-height: 1.5;">Geradores Fotovoltaicos são nossa especialidade, se tratam de sistemas que convertem a energia proveniente dos raios solares em energia elétrica. Com isso você economiza em suas faturas de energia ao mesmo tempo que ajuda a preservar o meio ambiente.</p>
+
+    <div class="card-row mt-4">
+      <div class="card" style="text-align:center;">
+        <p class="text-muted">Geração Anual Garantida</p>
+        <p class="value-lg" id="eco-geracao-anual" style="color:#0f172a;">0</p>
+        <p class="text-muted">kWh / ano</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <p class="text-muted">CO₂ Evitado por Ano</p>
+        <p class="value-lg" id="eco-co2" style="color:#16a34a;">0</p>
+        <p class="text-muted">toneladas</p>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Spark Engenharia Elétrica</span>
+      <span>Página 2</span>
+    </div>
+  </div>
+
+  <!-- ====== PAGE 3 - ESPECIFICAÇÕES + GRÁFICO + PREÇO ====== -->
+  <div class="page">
+    <div class="section-title"><span class="num">4</span> ESTIMATIVA DE PRODUÇÃO - GERADOR SOLAR</div>
+
+    <div class="graph-box" style="height:50mm;">
+      <div id="graficoGeracao" style="width:100%; height:100%;"></div>
+    </div>
+
+    <p style="font-size: 8pt; line-height: 1.5; margin-bottom: 5mm;">Este sistema solar de <strong id="spec-potencia">0 kWp</strong>, apresentará uma geração máxima de <strong id="spec-geracao-max">0 kWh</strong> e uma geração anual garantida de <strong id="spec-geracao-anual">0 kWh/ano</strong>, o que corresponde a uma média mensal de <strong id="spec-geracao-mensal">0 kWh</strong>. Isso é equivalente a uma fatura de <strong id="spec-equivalente">R$ 0,00/mês</strong>, com tarifa de <strong id="spec-tarifa">R$ 0,00/kWh</strong>. Os módulos têm eficiência de <strong id="spec-eficiencia">0%</strong>, serão instalados sobre o telhado e ocuparão área de aproximadamente <strong id="spec-area">0 m²</strong>.</p>
+
+    <div class="section-title"><span class="num">5</span> EQUIPAMENTOS INCLUSOS</div>
+    <div id="spec-list" style="margin-bottom: 5mm;"></div>
+
+    <div class="card highlight-price" style="text-align:center; margin-top: 5mm;">
+      <p style="font-size: 8pt; text-transform: uppercase; letter-spacing: 0.5mm;">Valor Total do Investimento</p>
+      <p class="value-lg value-white" id="prop-preco-final" style="margin: 1mm 0;">R$ 0,00</p>
+      <p style="font-size: 7pt;">*Valor válido por 5 dias corridos, não inclui adequações no padrão de entrada</p>
+      <p class="text-muted" style="color:rgba(255,255,255,0.8) !important; font-size: 7pt;">Geração Max. de <span id="cover-geracao-max">0 kWh</span></p>
+    </div>
+
+    <div class="page-footer">
+      <span>Spark Engenharia Elétrica</span>
+      <span>Página 3</span>
+    </div>
+  </div>
+
+  <!-- ====== PAGE 4 - ANÁLISE FINANCEIRA ====== -->
+  <div class="page">
+    <div class="section-title"><span class="num">6</span> ANÁLISE FINANCEIRA</div>
+
+    <p style="font-size: 7.5pt; line-height: 1.4; margin-bottom: 5mm; color: #64748b;">Este orçamento já se encontra em conformidade com a Lei 14.300/22, que instituiu alterações na cobrança da conta de energia dos consumidores com geração própria, passando a cobrar um percentual da taxa de uso do sistema de distribuição (Fio B). Essa cobrança é gradual e progressiva, iniciando em 15% em 2023 e chegará a 90% em 2028.</p>
+
+    <p class="font-sm font-bold mb-4">Conta de energia e Retorno do investimento</p>
+    <table style="margin-bottom: 5mm;">
+      <thead>
+        <tr><th>Ano</th><th style="text-align:center;">Sem energia solar (R$)</th><th style="text-align:center;">Com energia Solar (R$)</th><th style="text-align:right;">Caixa acumulado (R$)</th></tr>
+      </thead>
+      <tbody id="projecaoTable"></tbody>
+    </table>
+
+    <div class="two-col mb-4">
+      <div class="card" style="text-align:center;">
+        <p class="text-muted">Payback</p>
+        <p class="font-lg font-bold" id="prop-payback" style="color:#0f172a; margin-top:1mm;">0 anos</p>
+        <p class="text-muted" id="prop-payback-meses" style="font-size:7pt;">—</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <p class="text-muted">TIR (Taxa Interna de Retorno)</p>
+        <p class="font-lg font-bold" id="prop-tir" style="color:#16a34a; margin-top:1mm;">—</p>
+        <p class="text-muted" style="font-size:7pt;">ao mês</p>
+      </div>
+    </div>
+
+    <p style="font-size: 7pt; color: #64748b; line-height: 1.4;">Para essa simulação foi utilizado o valor da tarifa de energia cobrado pela Energisa-MT como <strong id="fio-tarifa">—</strong> R$/kWh, foi considerado <strong id="fio-percentual">—</strong>% como valor do Fio B, autoconsumo estimado em <strong id="fio-autoconsumo">—</strong>% e custo de disponibilidade como <strong id="fio-disponibilidade">—</strong> kWh/mês.</p>
+    <p style="font-size: 7pt; color: #64748b; line-height: 1.4; margin-top: 2mm;">A taxa de retorno (TIR) mostra a rentabilidade mensal do investimento. Para comparação, uma aplicação de renda fixa de baixo risco (CDB pré-fixado) costuma render entre 0,7% e 1,0% ao mês, já descontando os impostos.</p>
+
+    <div class="page-footer">
+      <span>Spark Engenharia Elétrica</span>
+      <span>Página 4</span>
+    </div>
+  </div>
+
+  <!-- ====== PAGE 5 - GARANTIAS + ASSINATURAS ====== -->
+  <div class="page">
+    <div class="section-title"><span class="num">7</span> GARANTIAS</div>
+    <div class="warranty-grid">
+      <div class="warranty-card">
+        <h5>Inversor <span id="garantia-inversor-marca">Solis</span></h5>
+        <p style="font-size:7.5pt;line-height:1.4;margin-bottom:2mm;">Empresa fundada em 2005, conta com equipamentos de qualidade excepcional.</p>
+        <p class="tag">Garantia de fábrica: <strong id="garantia-inversor-anos">10 anos</strong></p>
+      </div>
+      <div class="warranty-card">
+        <h5>Módulo <span id="garantia-modulo-marca">Ronma Solar</span></h5>
+        <p style="font-size:7.5pt;line-height:1.4;margin-bottom:2mm;">Empresa fundada em 2018, conta com equipamentos de extrema durabilidade e qualidade.</p>
+        <p class="tag">Fábrica: <strong id="garantia-modulo-fabrica">15 anos</strong></p>
+        <p class="tag" style="margin-top:1mm;">Produtividade: <strong id="garantia-modulo-produtividade">30 anos</strong></p>
+      </div>
+    </div>
+
+    <div style="margin-top: 5mm; font-size: 7.5pt; line-height: 1.4; color: #475569;">
+      <p style="margin-bottom: 2mm;"><strong>Demais Componentes:</strong> condutores, disjuntores, DPS, hastes de aterramento e conectores contam com <strong>1 ano de garantia</strong> pela Spark Engenharia Elétrica.</p>
+      <p style="margin-bottom: 4mm;"><strong>Manutenções:</strong> a manutenção consiste apenas na limpeza periódica dos módulos fotovoltaicos, visando manter o sistema com maior eficiência. Tal manutenção é de responsabilidade do CLIENTE, cabendo a Spark informá-lo sobre sua necessidade.</p>
+
+      <p style="margin-bottom: 1mm;"><strong>Observações:</strong></p>
+      <ol style="padding-left: 5mm; margin-bottom: 0;">
+        <li style="margin-bottom: 1mm;">Orçamento básico, passível de alteração.</li>
+        <li style="margin-bottom: 1mm;">Orçamento válido para 15 dias.</li>
+        <li>Definição efetiva com elaboração do projeto detalhado e estudo de sombreamento.</li>
+      </ol>
+    </div>
+
+    <div style="display:flex; justify-content: space-between; margin-top: 20mm;">
+      <div style="text-align:center; width:45%;">
+        <div class="signature-line"></div>
+        <p style="font-weight: 700; font-size: 9pt;">Spark Engenharia Elétrica</p>
+        <p style="font-size: 7pt; color: #64748b;">Consultor Responsável</p>
+      </div>
+      <div style="text-align:center; width:45%;">
+        <div class="signature-line"></div>
+        <p id="pdf-signature-client-name" style="font-weight: 700; font-size: 9pt;">Cliente</p>
+        <p style="font-size: 7pt; color: #64748b;">Aceite da Proposta</p>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Spark Engenharia Elétrica - sparkengenharia.net</span>
+      <span>Página 5</span>
+    </div>
+  </div>
+
+</div>
 
 </body>
 </html>

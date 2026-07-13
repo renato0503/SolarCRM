@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spark - Proposta Comercial</title>
   <meta name="description" content="Confira o seu projeto de energia solar personalizado, economia estimada e retorno sobre o investimento.">
-  <link rel="icon" type="image/svg+xml" href="./assets/favicon-D6n-THbx.svg">
+  <link rel="icon" type="image/png" href="./assets/logospark-f2niuQAy.png">
   
   <!-- html2pdf.js CDN (Loaded only when needed, but declared in header for simplicity) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   
   <!-- ApexCharts Local -->
-  <script src="./src/vendor/apexcharts.min.js"></script>
+  <script src="./apexcharts.min.js"></script>
 
   <style>
     /* Estilos específicos para a Proposta Comercial (Tema Light por padrão) */
@@ -257,10 +257,11 @@
       }
     }
   </style>
-  <script type="module" crossorigin src="./assets/proposta-Bda1dUxm.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/utils-g9sFxRsc.js">
-  <link rel="modulepreload" crossorigin href="./assets/config-CqeZwvZi.js">
-  <link rel="stylesheet" crossorigin href="./assets/style-BUx2I9AU.css">
+  <script type="module" crossorigin src="./assets/proposta-6iGBbg5t.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/utils-BESuGCCH.js">
+  <link rel="modulepreload" crossorigin href="./assets/config-BjIB13fx.js">
+  <link rel="modulepreload" crossorigin href="./assets/financeiro-53MVziVA.js">
+  <link rel="stylesheet" crossorigin href="./assets/style-CoCL7Yrt.css">
 </head>
 <body>
 
@@ -268,12 +269,7 @@
   <div class="no-print" style="background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.75rem 0; position: sticky; top: 0; z-index: 100;">
     <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
       <a href="./index.html" class="brand-logo" style="font-size: 1.25rem;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" fill="none">
-          <rect width="48" height="48" rx="8" fill="#000"/>
-          <path d="M28 6L16 26h9l-2 16 14-20h-9l2-16z" fill="#FFD700"/>
-          <path d="M36 40V26l-2.5-2.5L30.5 26l-2.5-4-2.5 4-2.5-2.5v14" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
-        <span>Spark</span>
+        <img src="./assets/logospark-f2niuQAy.png" alt="Spark" style="height:36px;">
       </a>
       
       <div style="display: flex; gap: 0.75rem;">
@@ -372,9 +368,39 @@
         <div class="glass-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-left: 5px solid var(--status-fechado);">
           <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Retorno do Investimento</span>
           <h2 id="prop-payback" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin: 0.5rem 0;">0 anos</h2>
-          <p style="font-size: 0.875rem; color: var(--text-muted);">Tempo estimado para quitar o sistema</p>
+          <p id="prop-payback-detail" style="font-size: 0.875rem; color: var(--text-muted);">—</p>
         </div>
 
+      </div>
+
+      <!-- System Info Grid -->
+      <div class="grid grid-cols-3" style="margin-bottom: 2rem; gap: 1rem;">
+        <div class="glass-card" style="text-align:center;padding:1rem;">
+          <span style="font-size:0.75rem;color:var(--text-muted);">Potência do Sistema</span>
+          <h3 id="prop-potencia" style="font-size:1.25rem;font-weight:700;color:var(--solar-orange);margin:0.25rem 0;">—</h3>
+        </div>
+        <div class="glass-card" style="text-align:center;padding:1rem;">
+          <span style="font-size:0.75rem;color:var(--text-muted);">Área Necessária</span>
+          <h3 id="prop-area" style="font-size:1.25rem;font-weight:700;color:var(--solar-orange);margin:0.25rem 0;">—</h3>
+        </div>
+        <div class="glass-card" style="text-align:center;padding:1rem;">
+          <span style="font-size:0.75rem;color:var(--text-muted);">Rendimento Sistema</span>
+          <h3 id="prop-rendimento" style="font-size:1.25rem;font-weight:700;color:var(--solar-orange);margin:0.25rem 0;">—</h3>
+        </div>
+      </div>
+
+      <!-- TIR and HSP row -->
+      <div class="grid grid-cols-2" style="margin-bottom: 2rem; gap: 1rem;">
+        <div class="glass-card" style="text-align:center;padding:1rem;border-left:5px solid #9333ea;">
+          <span style="font-size:0.75rem;color:var(--text-muted);">Taxa Interna de Retorno (TIR)</span>
+          <h3 id="prop-tir" style="font-size:1.25rem;font-weight:700;color:#9333ea;margin:0.25rem 0;">—</h3>
+          <p style="font-size:0.75rem;color:var(--text-muted);">Rentabilidade mensal do investimento</p>
+        </div>
+        <div class="glass-card" style="text-align:center;padding:1rem;border-left:5px solid #3b82f6;">
+          <span style="font-size:0.75rem;color:var(--text-muted);">Irradiação / Ligação</span>
+          <h3 style="font-size:1rem;font-weight:700;margin:0.25rem 0;"><span id="prop-hsp">—</span> | <span id="prop-ligacao">—</span></h3>
+          <p style="font-size:0.75rem;color:var(--text-muted);">HSP médio diário | Tipo de rede</p>
+        </div>
       </div>
 
       <!-- Parcelas Table -->
@@ -382,6 +408,11 @@
         <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
           💳 Opções de Parcelamento
         </h3>
+        <div style="margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
+          <span style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Entrada:</span>
+          <input type="range" id="entradaSlider" min="0" max="50" value="0" step="5" style="flex:1;height:6px;cursor:pointer;accent-color:var(--solar-orange);">
+          <strong id="entradaVal" style="font-size:0.85rem;color:var(--solar-orange);min-width:45px;">R$ 0</strong>
+        </div>
         <div style="overflow-x: auto;">
           <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
             <thead>
@@ -518,6 +549,33 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- Projeção Financeira 6 Anos -->
+      <div class="glass-card" style="margin-bottom: 2.5rem; border-left: 5px solid #3b82f6;">
+        <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+          📈 Análise Financeira - Lei 14.300/22
+        </h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Projeção com cobrança progressiva do Fio B (uso do sistema de distribuição), conforme legislação vigente. Inflação projetada de 8% a.a. na tarifa de energia.
+        </p>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.03);">
+                <th style="padding: 0.6rem 0.75rem; text-align: left; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border-color);">Ano</th>
+                <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border-color);">Sem Solar (R$)</th>
+                <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border-color);">Com Solar (R$)</th>
+                <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border-color);">Caixa Acumulado</th>
+              </tr>
+            </thead>
+            <tbody id="projecaoTable">
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; text-align: center;">
+          * Caixa positivo indica retorno total do investimento | Fio B: 15% em 2023 até 90% em 2028
+        </p>
       </div>
 
       <!-- FAQ / Info Block -->

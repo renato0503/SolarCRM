@@ -424,6 +424,34 @@ Após validação → seguir para SPRINT 26.
 
 ---
 
-**Versão deste documento:** 1.0 · **Data:** 13/07/2026  
-**Autor da auditoria:** Análise técnica automatizada  
+## 🚀 Deploy e Infraestrutura (Atualizações Recentes)
+
+### Deploy Firebase Hosting
+- **Projeto**: `solarcrm-60ce1`
+- **URL**: https://solarcrm-60ce1.web.app
+- **Configuração**: `firebase.json` com rewrite `/` → `/spark-site/index.html`
+- **Fluxo deploy**: `firebase deploy --only hosting`
+
+### Estrutura de Rotas
+| Rota | Destino | Descrição |
+|------|---------|-----------|
+| `/` | `/spark-site/index.html` | Landing page (site institucional) |
+| `/simulador.html` | `simulador.html` | Simulador público de economia solar |
+| `/login.html` | `login.html` | Autenticação de vendedores/admin |
+| `/dashboard.html` | `dashboard.html` | Painel de vendas (requer auth) |
+
+### Arquivos .gitignore
+- `firebase.json` adicionado ao `.gitignore`
+- `.firebase/` adicionado ao `.gitignore`
+- `nul` (arquivo dispositivo Windows) adicionado ao `.gitignore`
+
+### Correções de Deploy
+- Removido `node_modules` do commit acidental
+- Corrigido `nul` file que impedia `git add`
+- Ajustado paths relativos para funcionar em produção
+
+---
+
+**Versão deste documento:** 2.0 · **Data:** 15/07/2026  
+**Autor da auditoria:** Análise técnica automatizada + atualizações manuais  
 **Próxima revisão:** após implementação de Sprint 25

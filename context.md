@@ -120,6 +120,21 @@ Resumo consolidado do que já foi implementado na **Spark** (CRM Solar da Spark 
 - `public/favicon.svg` e `public/icons.svg` substituídos.
 - CSS `.brand-logo` atualizado para `<img>`.
 
+### 25. Site Institucional spark-site (Fase 25) ✅
+- Páginas públicas: `index.html`, `blog.html`, `orcamento.html`, `capacitores.html`, `industrial.html`, `solar.html`, `servicos.html`, `sobre.html`, `login.html`.
+- Header e footer padronizados em todas as páginas.
+- Emojis removidos e substituídos por ícones SVG inline.
+- Botão "Solicite um Orçamento" redireciona para `simulador.html`.
+- Menu mobile com contraste corrigido (texto branco sobre fundo escuro).
+- Hero banner com imagem de fundo atualizada (`img/hero-bg.avif`).
+
+### 26. Reorganização de Rotas e Deploy (Fase 26) ✅
+- `index.html` da raiz convertido em redirect para `/spark-site/index.html`.
+- Simulador renomeado de `index.html` para `simulador.html`.
+- Todos os links internos atualizados (`simulador.html`, `login.html`, `dashboard.html`).
+- `firebase.json` ajustado: rewrite `/` → `/spark-site/index.html`.
+- Deploy Firebase Hosting atualizado com nova estrutura de rotas.
+
 ---
 
 ## 🔴 PENDÊNCIAS (requerem credenciais/ações externas)

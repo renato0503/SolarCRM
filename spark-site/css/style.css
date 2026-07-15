@@ -246,7 +246,6 @@ p:last-child { margin-bottom: 0; }
 .header__logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   font-family: var(--font-title);
   font-weight: 700;
   font-size: 1.2rem;
@@ -270,7 +269,7 @@ p:last-child { margin-bottom: 0; }
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--text);
+  color: #000;
   border-radius: var(--radius);
   transition: var(--transition);
   position: relative;
@@ -679,7 +678,7 @@ section {
 }
 
 .footer__brand img {
-  height: 50px;
+  height: 60px;
   margin-bottom: 1rem;
   filter: brightness(0) invert(1);
 }
@@ -965,6 +964,7 @@ section {
   }
 
   .footer__brand img {
+    height: 60px;
     margin: 0 auto 1rem;
   }
 
@@ -1026,11 +1026,18 @@ section {
 }
 
 /* Ícones SVG inline */
-.icon-sun::before { content: '☀️'; }
-.icon-industry::before { content: '⚡'; }
-.icon-capacitor::before { content: '🔋'; }
-.icon-clipboard::before { content: '📋'; }
-.icon-bulb::before { content: '💡'; }
-.icon-handshake::before { content: '🤝'; }
-.icon-shield::before { content: '🛡️'; }
-.icon-leaf::before { content: '🌱'; }
+.icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.icon-sun::before { content: ''; }
+.icon-industry::before { content: ''; }
+.icon-capacitor::before { content: ''; }
+.icon-clipboard::before { content: ''; }
+.icon-bulb::before { content: ''; }
+.icon-handshake::before { content: ''; }
+.icon-shield::before { content: ''; }
+.icon-leaf::before { content: ''; }

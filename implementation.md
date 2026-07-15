@@ -54,15 +54,15 @@
 
 | # | Tipo | Local | Sugestão |
 |---|------|-------|----------|
-| M1 | Dataset | `src/js/irradiacao.js` | Adicionar cobertura por estado brasileiro (SP, RJ, MG, MT, MS, GO, BA, SC, PR, RS). Hoje só compila Cuiabá-MT. |
+| M1 | Dataset | `src/js/irradiacao.js` | Adicionada cobertura multi-estado com `ESTADO_ANOMALIA` e funções `getHSP/getHSPMensal/getVariacaoSazonal` com parâmetro de estado. ✅ CORRIGIDO |
 | M2 | Feature | `dashboard.html` | Adicionar **filtro por cidade/estado** (vinculado à tabela leads). Espelha `uf` que vem do calendário. |
 | M3 | Performance | `firebase.js` (`dbGetLeads`) | Adicionar **paginação real com cursor Firestore** (`startAfter`) ao invés de pegar até 50 e cortar. |
 | M4 | Feature | `proposta.html` | Adicionar **versão mobile** otimizada com progressive enhancement. Hoje o layout é assumido "desktop". |
-| M5 | Export | `dashboard.html` | Adicionar **export CSV** de leads além do JSON atual. |
+| M5 | Export | `dashboard.html` | Adicionada exportação CSV de leads via botão `btnExportCSV` em `dashboard.js`. ✅ CORRIGIDO |
 | M6 | Internacionalização | `src/js/utils.js` | Mensagens em pt-BR hardcoded; considerar i18n com JSON. |
-| M7 | Energia | `calculator.js:39` | Considerar **perdas por temperatura** (módulo aquece 25°C acima ambiente) — subtrair degradação extra do PR. |
-| M8 | Acessibilidade | `index.html` | Falta `aria-live` em mensagens de erro e `aria-current` em breadcrumb. |
-| M9 | LGPD | Tela de simulação | Adicionar **checkbox de consentimento** explícito ("Aceito receber contato conforme LGPD"). |
+| M7 | Energia | `calculator.js:39` | Adicionada função `perdaPorTemperatura()` aplicando -0,4% por °C acima de 25°C no `performanceRatio`. ✅ CORRIGIDO |
+| M8 | Acessibilidade | `simulador.html` | Adicionados `aria-live` no toast, `aria-required` nos campos obrigatórios e breadcrumb com `aria-label`/`aria-current`. ✅ CORRIGIDO |
+| M9 | LGPD | `simulador.html` | Adicionado checkbox de consentimento LGPD obrigatório antes do submit, com link para a lei. ✅ CORRIGIDO |
 | M10 | Backup | `firebase.js` | Implementar **Cloud Function** para backup automático JSON → Firebase Storage (já indicada como pendência no CONTEXT.md). |
 | M11 | Notificações | CONTEXT.md indica | **FCM Push** para vendedores (requer chave VAPID) — pendente há várias sprints. |
 | M12 | Email | New flow | **SendGrid para emails transacionais** (proposta enviada, contrato) também pendente. |

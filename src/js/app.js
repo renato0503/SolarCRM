@@ -92,6 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
         vendedorNome = profile?.nome || user.displayName || user.email;
       }
 
+      const estado = document.getElementById('estado')?.value || 'MT';
+      const lgpdConsent = document.getElementById('lgpdConsent');
+      if (!lgpdConsent?.checked) {
+        showToast("Você precisa aceitar o consentimento LGPD para continuar.", "error");
+        return;
+      }
+
       const leadData = {
         nome,
         telefone,
@@ -99,7 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
         endereco: `${freteInfo.cep.slice(0, 5)}-${freteInfo.cep.slice(5)} (${freteInfo.cidade}/${freteInfo.uf})`,
         consumo_mensal_kwh: Number(consumoKwh),
         tipo_ligacao: tipoLigacao,
-        tipo_cliente: tipoCliente
+        tipo_cliente: tipoCliente,
+        estado
       };
 
       const savedLead = await dbAddLead(leadData, vendedorId, vendedorNome);
@@ -111,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inclinacao: Number(inclinacao),
         tipo_ligacao: tipoLigacao,
         tipo_cliente: tipoCliente,
+        estado,
         frete_valor: freteInfo.freteValor,
         distancia_km: freteInfo.distanciaKm
       };
@@ -124,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inclinacao: Number(inclinacao),
         tipo_ligacao: tipoLigacao,
         tipo_cliente: tipoCliente,
+        estado,
 
         // Flat fields for quick queries (backward compat)
         preco_final: proposalCalculated.precificacao.precoFinal,

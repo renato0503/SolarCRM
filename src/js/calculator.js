@@ -31,6 +31,15 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
     return new Date(ano, mes, 0).getDate();
   }
 
+  function perdaPorTemperatura(performanceRatio, temperaturaAmbiente = 30) {
+    const temperaturaReferencia = 25;
+    const perdaPorGrau = 0.004;
+    const deltaT = Math.max(0, temperaturaAmbiente - temperaturaReferencia);
+    return performanceRatio * (1 - deltaT * perdaPorGrau);
+  }
+
+  const prComPerdaTemperatura = perdaPorTemperatura(settings.performanceRatio);
+
   // ===== 1. HSP E IRRADIAÇÃO =====
   const hsp = getHSP(orientacao, inclinacao);
   const hspMensal = getHSPMensal(orientacao, inclinacao);
@@ -40,7 +49,7 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
   const custoDisponibilidadeKwh = ligacaoInfo.custoDisponibilidadeKwh;
 
   // ===== 2. DIMENSIONAMENTO =====
-  const potenciaNecessariaKwp = consumo_mensal_kwh / (hsp * 30.44 * settings.performanceRatio);
+  const potenciaNecessariaKwp = consumo_mensal_kwh / (hsp * 30.44 * prComPerdaTemperatura);
   const painel = EQUIPAMENTOS.paineis[0];
   const potenciaPainelKw = painel.potenciaW / 1000;
   const numeroPaineis = Math.ceil(potenciaNecessariaKwp / potenciaPainelKw);
@@ -101,10 +110,10 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
     : 0;
 
   // ===== 11. GERAÇÃO DE ENERGIA =====
-  const geracaoEstimadaKwh = Math.round(potenciaRealKwp * hsp * 30.44 * settings.performanceRatio);
+  const geracaoEstimadaKwh = Math.round(potenciaRealKwp * hsp * 30.44 * prComPerdaTemperatura);
   const geracaoAnual = geracaoEstimadaKwh * 12;
   const geracaoMensalDetalhada = hspMensal.map(
-    (irr, i) => Math.round(potenciaRealKwp * irr * diasNoMes(i + 1, new Date().getFullYear()) * settings.performanceRatio)
+    (irr, i) => Math.round(potenciaRealKwp * irr * diasNoMes(i + 1, new Date().getFullYear()) * prComPerdaTemperatura)
   );
   const geracaoMaximaMensal = Math.max(...geracaoMensalDetalhada);
 
@@ -159,6 +168,7 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
       hspMensal,
       tarifaEnergia: settings.tarifaEnergia,
       performanceRatio: settings.performanceRatio,
+      performanceRatioAjustado: prComPerdaTemperatura,
       fatorPreco,
       margemLucroNominal: settings.margemLucro,
       aliquotaImposto,

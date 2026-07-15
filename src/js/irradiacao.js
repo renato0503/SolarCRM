@@ -89,35 +89,25 @@ function getInclinacao(inclinacao) {
   );
 }
 
-export function getHSPMensal(orientacao = 'norte', inclinacao = 10) {
+export function getHSPMensal(orientacao, inclinacao, estado = 'MT') {
   const oriKey = getOrientacaoKey(orientacao);
   const incKey = getInclinacao(inclinacao);
   const dados = IRRADIACAO_MENSAL[oriKey]?.[incKey];
   if (!dados) return IRRADIACAO_MENSAL['N'][10];
-  return dados;
+  const anomalia = ESTADO_ANOMALIA[estado] || 1;
+  return dados.map(v => Number((v * anomalia).toFixed(3)));
 }
 
-export function getHSP(orientacao = 'norte', inclinacao = 10) {
-  const mensal = getHSPMensal(orientacao, inclinacao);
+export function getHSP(orientacao = 'norte', inclinacao = 10, estado = 'MT') {
+  const mensal = getHSPMensal(orientacao, inclinacao, estado);
   const soma = mensal.reduce((acc, v) => acc + v, 0);
   return Number((soma / 12).toFixed(2));
 }
 
-export function getVariacaoSazonal(orientacao = 'norte', inclinacao = 10) {
-  const mensal = getHSPMensal(orientacao, inclinacao);
+export function getVariacaoSazonal(orientacao = 'norte', inclinacao = 10, estado = 'MT') {
+  const mensal = getHSPMensal(orientacao, inclinacao, estado);
   const media = mensal.reduce((acc, v) => acc + v, 0) / 12;
-  return mensal.map(v => Number((v / media).toFixed(3)));
+  const min = Math.min(...mensal);
+  const max = Math.max(...mensal);
+  return Number(((max - min) / media).toFixed(3));
 }
-
-export const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-
-export const ORIENTACAO_LABELS = {
-  'norte': 'Norte (Ideal)',
-  'nordeste': 'Nordeste',
-  'leste': 'Leste',
-  'sudeste': 'Sudeste',
-  'sul': 'Sul (Menor rendimento)',
-  'sudoeste': 'Sudoeste',
-  'oeste': 'Oeste',
-  'noroeste': 'Noroeste'
-};

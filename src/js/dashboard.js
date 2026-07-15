@@ -112,6 +112,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     showToast('Backup exportado com sucesso!', 'success');
   });
 
+  document.getElementById('btnExportCSV')?.addEventListener('click', () => {
+    if (!leads.length) { showToast('Nenhum lead para exportar.', 'error'); return; }
+    const headers = ['Nome', 'Telefone', 'Email', 'Endereço', 'Consumo (kWh)', 'Data', 'Status'];
+    const rows = leads.map(l => [
+      l.nome || '', l.telefone || '', l.email || '', l.endereco || '', l.consumo_mensal_kwh || '', l.data_criacao || '', l.status || ''
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `leads-spark-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast('CSV exportado com sucesso!', 'success');
+  });
+
   document.getElementById('btnRestore')?.addEventListener('click', () => {
     const input = document.createElement('input');
     input.type = 'file'; input.accept = '.json';

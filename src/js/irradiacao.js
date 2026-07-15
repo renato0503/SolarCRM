@@ -111,3 +111,25 @@ export function getVariacaoSazonal(orientacao = 'norte', inclinacao = 10, estado
   const max = Math.max(...mensal);
   return Number(((max - min) / media).toFixed(3));
 }
+
+export const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+export const ORIENTACAO_LABELS = {
+  'norte': 'Norte (Ideal)',
+  'nordeste': 'Nordeste',
+  'leste': 'Leste',
+  'sudeste': 'Sudeste',
+  'sul': 'Sul (Menor rendimento)',
+  'sudoeste': 'Sudoeste',
+  'oeste': 'Oeste',
+  'noroeste': 'Noroeste'
+};
+
+export const ESTADO_ANOMALIA = {
+  'AC': 1.05, 'AL': 0.98, 'AM': 1.08, 'AP': 1.02, 'BA': 1.00,
+  'CE': 1.01, 'DF': 1.00, 'ES': 0.97, 'GO': 1.02, 'MA': 1.03,
+  'MG': 0.98, 'MS': 1.04, 'MT': 1.00, 'PA': 1.05, 'PB': 0.99,
+  'PE': 0.99, 'PI': 1.02, 'PR': 0.96, 'RJ': 0.97, 'RN': 1.00,
+  'RO': 1.06, 'RR': 1.04, 'RS': 0.94, 'SC': 0.95, 'SE': 0.98,
+  'SP': 0.95, 'TO': 1.03
+};

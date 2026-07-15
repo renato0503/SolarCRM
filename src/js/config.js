@@ -16,7 +16,6 @@ const defaultSettings = {
   tipoLigacao: 'bifasico',
 
   inflacaoAnual: 0.08,
-  percentualAutoconsumo: 0.25,
   fioB: 0.285,
   aliquotaImposto: 0.085
 };

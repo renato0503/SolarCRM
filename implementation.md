@@ -13,28 +13,28 @@
 | A1 | ✅ Resolvido | `src/js/irradiacao.js` | Tabelas de irradiação `S ≡ SE` e `E ≡ O` foram corrigidas; agora cada orientação tem dados corretos. |
 | A2 | ✅ Resolvido | `src/js/irradiacao.js` | Dados para inclinação 5° na orientação Norte foram adicionados com valores otimizados (0°, 14°, 30°). |
 | A3 | ✅ Resolvido | `src/js/proposta.html` | Card "Investimento Total" agora tem contraste garantido via estilo inline com `!important` e cores ajustadas. |
-| A4 | 🔴 Crítico | `src/js/proposta.js:64` | Acesso direto a `lead-cidade` que não existe em `proposta.html` (apenas em `pdf.html`). Lançava `TypeError: Cannot set properties of null`. ✅ JÁ CORRIGIDO |
+| A4 | ✅ Resolvido | `src/js/proposta.js:64` | Acesso direto a `lead-cidade` que não existe em `proposta.html` (apenas em `pdf.html`). Lançava `TypeError: Cannot set properties of null`. ✅ JÁ CORRIGIDO |
 
 ### Categoria B — Bugs Moderados (causam inconsistência ou duplicação)
 
 | # | Severidade | Local | Problema |
 |---|------------|-------|----------|
-| B1 | 🟠 Alto | `src/js/equipamentos.js` × `src/js/firebase.js:getEquipamentosLocais()` | Bancos de equipamentos **duplicados e ligeiramente divergentes**: `equipamentos.js:6-12` lista 6 painéis (DAH 620, Ronma 610, Sunova 590, Sunova 570, Jinko 585, JA Solar 550w), enquanto `firebase.js:566-571` (em `getEquipamentosLocais`) lista só 5 (sem Sunova 570W). Inversores: `equipamentos.js` tem 19; `firebase.js` tem 16 (sem `inv_gro_25`, `inv_gro_30` e `inv_fro_20`). |
-| B2 | 🟠 Alto | `src/js/config.js:19` | `percentualAutoconsumo: 0.25` é definido em `defaultSettings` mas **NÃO é mais usado**. O código usa `TIPO_CLIENTE_CONFIG[autoconsumo]` em `calculator.js:114-115`. Campo órfão que pode dar correção enganosa se voltar a ser usado. |
-| B3 | 🟠 Alto | `src/js/calculator.js:114-115` | A constante `autoconsumo` tem codificação manual por tipo de cliente (`tipo_cliente === 'comercial' ? 0.70`...). Deveria consumir `getTipoClienteConfig(tipoClie nte)` (definida em `config.js:86`) para manter **fonte única de verdade** (`Single Source of Truth`). |
-| B4 | 🟠 Alto | `src/js/equipamentos.js` × `src/js/firebase.js:getEquipamentosLocais()` | Banco `equipamentos.js` é exportado mas **NUNCA IMPORTADO** em nenhum lugar. Está morto, agravando o problema B1. Apenas `getEquipamentosLocais()` (no firebase.js) é usado. |
-| B5 | 🟠 Alto | `src/js/firebase.js:566` (em `getEquipamentosLocais()`) | Campo `area: 2.76` hardcoded para DAH Solar; usa fórmula alternativa só se faltar (`calc ulator.js:46`), sem padronizar com `equipamentos.js` que pode ter dados divergentes (área 2.58 ou 2.16). |
-| B6 | 🟠 Alto | `src/js/financeiro.js:5-12` (Newton-Raphson) | Cálculo de TIR opera com **fluxos anuais mas converte para mensal** (`tirAnual = ((1+tirMensal)^12 - 1) × 100` em `calculator.js:135`). Assumindo economia ANUAL recebida em uma única parcela ao fim do ano. **Deveria** ser fluxo mensal ou aplicar matemática anual direta. |
-| B7 | 🟠 Alto | `src/js/pdf.js:117` | `fio-percentual` exibe fallback hardcoded `28.5` quando `configs` não existe (proposta antiga). Se um cliente sem `dados_completos` for chamado, mostrará valor errado. |
-| B8 | 🟡 Médio | `src/js/calculator.js:39` | Fórmula de dimensionamento usa **30 dias fixos por mês**. Não considera meses de 28-31 dias — diferença de até 10% em fevereiro. |
-| B9 | 🟡 Médio | `src/js/financeiro.js:116-125` (`gerarFluxoCaixaAcumulado`) | Nome da função diz "acumulado" mas **retorna lista de saldos pontuais ano a ano**, não o acumulado mês a mês. Clientes podem interpretar errado se virem o nome. |
+| B1 | ✅ Resolvido | `src/js/equipamentos.js` × `src/js/firebase.js:getEquipamentosLocais()` | Bancos de equipamentos **unificados**: `firebase.js` agora importa `EQUIPAMENTOS` de `equipamentos.js` como fonte única. ✅ CORRIGIDO |
+| B2 | ✅ Resolvido | `src/js/config.js:19` | Campo `percentualAutoconsumo: 0.25` removido de `defaultSettings`. Agora usa apenas `getTipoClienteConfig()`. ✅ CORRIGIDO |
+| B3 | ✅ Resolvido | `src/js/calculator.js:114-115` | Agora usa `getTipoClienteConfig(tipo_cliente)` ao invés de codificação manual por tipo de cliente. ✅ CORRIGIDO |
+| B4 | ✅ Resolvido | `src/js/equipamentos.js` × `src/js/firebase.js:getEquipamentosLocais()` | Banco `equipamentos.js` é agora a **fonte única** importada por `firebase.js`. Eliminada duplicação. ✅ CORRIGIDO |
+| B5 | ✅ Resolvido | `src/js/firebase.js:566` (em `getEquipamentosLocais()`) | Campo `area` padronizado via importação de `equipamentos.js`. ✅ CORRIGIDO |
+| B6 | ✅ Resolvido | `src/js/financeiro.js:5-12` (Newton-Raphson) | `calcularTIR` agora retorna TIR anual nativa. Em `calculator.js`, `tirAnual` é calculado diretamente e `tirMensal` é derivado por `(1+tirAnual)^(1/12)-1`. ✅ CORRIGIDO |
+| B7 | ✅ Resolvido | `src/js/pdf.js:117` | Removidos fallbacks hardcoded (`28.5`, `25`, `50`) para `fio-percentual`, `fio-autoconsumo` e `fio-disponibilidade`. Agora exibe `—` quando `configs` não existe. ✅ CORRIGIDO |
+| B8 | ✅ Resolvido | `src/js/calculator.js:39` | Adicionada função `diasNoMes(mes, ano)` e aplicada no cálculo de geração mensal detalhada. Dimensionamento agora usa média anual de 30.44 dias. ✅ CORRIGIDO |
+| B9 | ✅ Resolvido | `src/js/financeiro.js:116-125` (`gerarFluxoCaixaAcumulado`) | Função renomeada para `gerarSaldoAnoAAno`. Todos os imports e usos atualizados em `calculator.js`. ✅ CORRIGIDO |
 | B10 | 🟡 Médio | `src/js/dashboard.js` | Não auditado nesta revisão, mas provável que tenha referências inconsistentes a `profile.role` sem checar `null` (caso admin não tenha perfil). |
-| B11 | 🟡 Médio | `src/js/proposta.js:155` | Chama `gerarTabelaFinanciamento` quando slider de entrada muda, mas **não atualiza automaticamente** o valor do parcelamento se a tarifa do slider mudar (já está OK, só verificar). |
-| B12 | 🟡 Médio | `src/css/style.css:1` | Importa `https://fonts.googleapis.com/css2?...&family=Outfit...` no `@import`. Google Fonts é bloqueado em algumas redes corporativas; precisa self-host ou fallback. |
-| B13 | 🟡 Médio | `public/firebase.ts` (analytics) | `Measurement ID` local `G-XQQZCQQ1FE9` diverge do servidor `G-XQQZCQ1FE9` (faltou um `Q`). Analytics events podem cair no projeto errado. |
-| B14 | 🟡 Médio | `index.html:11` | Meta tag `apple-mobile-web-app-capable="yes"` está marcada como **deprecated**. Console mostra warning constante. Migrar para `mobile-web-app-capable`. |
-| B15 | 🟡 Médio | `firebase.json` | Não tem **rewrites** para SPA fallback. Refresh em rotas como `dashboard.html` funciona, mas rotas com hash tipo `#/alguma-coisa` falham em production. |
-| B16 | 🟡 Médio | Firestore rules (locais) | `firestore.rules` local foi atualizado, mas o **deploy via CLI** ainda não foi feito (separadamente do `firebase deploy --only hosting`). Apenas Console foi atualizado. |
+| B11 | ✅ Resolvido | `src/js/proposta.js:155` | Slider de entrada já atualiza `gerarTabelaFinanciamentoHtml` e tabela de parcelas imediatamente. ✅ CORRIGIDO |
+| B12 | 🟡 Médio | `src/css/style.css:1` | Importa Google Fonts via `@import`. Recomenda-se self-host ou fallback para redes corporativas bloqueadas. |
+| B13 | 🟡 Médio | `public/firebase.ts` (analytics) | Measurement ID local `G-XQQZCQQ1FE9` diverge do servidor `G-XQQZCQ1FE9`. Recomenda-se remover `measurementId` da config local para usar o valor do servidor. |
+| B14 | ✅ Resolvido | `simulador.html:11` | Meta tag `mobile-web-app-capable` adicionada, mantendo `apple-mobile-web-app-capable` como fallback legacy. ✅ CORRIGIDO |
+| B15 | ✅ Resolvido | `firebase.json` | Adicionados rewrites para rotas principais (`/simulador`, `/login`, `/dashboard`, `/proposta`, `/historico`, `/lead`). ✅ CORRIGIDO |
+| B16 | ✅ Resolvido | Firestore rules (locais) | Regras `firestore.rules` deployadas via CLI (`firebase deploy --only firestore:rules`). ✅ CORRIGIDO |
 
 ### Categoria C — Bugs de UX/UI/Mensagens
 
@@ -415,12 +415,15 @@ function exportLeadsToCSV(leads) {
 
 ## ✅ Próxima Ação Imediata
 
-Iniciar **SPRINT 25** com:
+Iniciar **SPRINT 26** com:
 
-1. **Tarefa 25.1** — Recriar tabelas de irradiação com dados CRESESB (A1+A2) ✅ INICIAR
-2. **Tarefa 25.2** — Corrigir CSS `pricing-card` (A3) → já parcialmente corrigido com `!important`
+1. **Tarefa 26.1** — Banco de equipamentos unificado (B1, B4, B5) ✅ CONCLUÍDO
+2. **Tarefa 26.2** — Remover campo órfão `percentualAutoconsumo` (B2) ✅ CONCLUÍDO
+3. **Tarefa 26.3** — Usar `getTipoClienteConfig` no calculator (B3) ✅ CONCLUÍDO
+4. **Tarefa 26.4** — Refatorar TIR para matemática anual nativa (B6) ✅ CONCLUÍDO
+5. **Tarefa 26.5** — Remover fallback hardcoded em `pdf.js` (B7) ✅ CONCLUÍDO
 
-Após validação → seguir para SPRINT 26.
+Após validação → seguir para SPRINT 27.
 
 ---
 

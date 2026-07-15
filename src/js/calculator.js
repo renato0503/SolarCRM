@@ -1,9 +1,9 @@
 import { getEquipamentosLocais } from './firebase.js';
-import { getSettings, getLigacaoInfo, getFioBTUSD, getFioBProgressivo } from './config.js';
+import { getSettings, getLigacaoInfo, getFioBTUSD, getFioBProgressivo, getTipoClienteConfig } from './config.js';
 import { getHSP, getHSPMensal, getVariacaoSazonal, MESES } from './irradiacao.js';
 import {
   calcularTIR, calcularPaybackDetalhado,
-  gerarProjecao6Anos, gerarTabelaFinanciamento, gerarFluxoCaixaAcumulado
+  gerarProjecao6Anos, gerarTabelaFinanciamento, gerarSaldoAnoAAno
 } from './financeiro.js';
 
 export async function gerarPropostaAsync(dadosLead, configsCustom = {}) {
@@ -27,6 +27,10 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
     tipo_cliente = 'residencial'
   } = dadosLead;
 
+  function diasNoMes(mes, ano) {
+    return new Date(ano, mes, 0).getDate();
+  }
+
   // ===== 1. HSP E IRRADIAÇÃO =====
   const hsp = getHSP(orientacao, inclinacao);
   const hspMensal = getHSPMensal(orientacao, inclinacao);
@@ -36,7 +40,7 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
   const custoDisponibilidadeKwh = ligacaoInfo.custoDisponibilidadeKwh;
 
   // ===== 2. DIMENSIONAMENTO =====
-  const potenciaNecessariaKwp = consumo_mensal_kwh / (hsp * 30 * settings.performanceRatio);
+  const potenciaNecessariaKwp = consumo_mensal_kwh / (hsp * 30.44 * settings.performanceRatio);
   const painel = EQUIPAMENTOS.paineis[0];
   const potenciaPainelKw = painel.potenciaW / 1000;
   const numeroPaineis = Math.ceil(potenciaNecessariaKwp / potenciaPainelKw);
@@ -97,10 +101,10 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
     : 0;
 
   // ===== 11. GERAÇÃO DE ENERGIA =====
-  const geracaoEstimadaKwh = Math.round(potenciaRealKwp * hsp * 30 * settings.performanceRatio);
+  const geracaoEstimadaKwh = Math.round(potenciaRealKwp * hsp * 30.44 * settings.performanceRatio);
   const geracaoAnual = geracaoEstimadaKwh * 12;
   const geracaoMensalDetalhada = hspMensal.map(
-    (irr, i) => Math.round(potenciaRealKwp * irr * 30 * settings.performanceRatio)
+    (irr, i) => Math.round(potenciaRealKwp * irr * diasNoMes(i + 1, new Date().getFullYear()) * settings.performanceRatio)
   );
   const geracaoMaximaMensal = Math.max(...geracaoMensalDetalhada);
 
@@ -111,8 +115,8 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
 
   const contaSemSistema = consumo_mensal_kwh * settings.tarifaEnergia;
 
-  const autoconsumo = tipo_cliente === 'comercial' ? 0.70
-    : (tipo_cliente === 'rural' ? 0.30 : 0.25);
+  const tipoClienteConfig = getTipoClienteConfig(tipo_cliente);
+  const autoconsumo = tipoClienteConfig.autoconsumo;
 
   const tusdGAtual = fioBRaw * getFioBProgressivo(anoAtual).percFioB;
   const creditoInjecao = geracaoEstimadaKwh * (1 - autoconsumo) * (settings.tarifaEnergia - tusdGAtual);
@@ -131,11 +135,11 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
   // ===== 14. TIR E PAYBACK =====
   const fluxos = [-precoFinal, ...projecao6Anos.map(a => a.economiaAnual)];
   const tirCalculada = calcularTIR(fluxos);
-  const tirMensal = Number((tirCalculada * 100).toFixed(2));
-  const tirAnual = Number(((Math.pow(1 + tirCalculada, 12) - 1) * 100).toFixed(2));
+  const tirAnual = Number((tirCalculada * 100).toFixed(2));
+  const tirMensal = Number(((Math.pow(1 + tirCalculada, 1 / 12) - 1) * 100).toFixed(2));
 
   const payback = calcularPaybackDetalhado(precoFinal, economiaAnual, settings.inflacaoAnual);
-  const caixaAcumulado = gerarFluxoCaixaAcumulado(precoFinal, projecao6Anos);
+  const caixaAcumulado = gerarSaldoAnoAAno(precoFinal, projecao6Anos);
 
   // ===== 15. FINANCIAMENTO =====
   const tabelaFinanciamento = gerarTabelaFinanciamento(precoFinal, 0);

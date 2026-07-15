@@ -113,13 +113,13 @@ export function gerarTabelaFinanciamento(valorTotal, entrada = 0) {
   });
 }
 
-export function gerarFluxoCaixaAcumulado(investimento, projecao) {
-  let acumulado = -investimento;
-  const fluxos = [acumulado];
+export function gerarSaldoAnoAAno(investimento, projecao) {
+  let saldo = -investimento;
+  const fluxos = [saldo];
 
   projecao.forEach(ano => {
-    acumulado += ano.economiaAnual;
-    fluxos.push(Number(acumulado.toFixed(2)));
+    saldo += ano.economiaAnual;
+    fluxos.push(Number(saldo.toFixed(2)));
   });
 
   return fluxos;

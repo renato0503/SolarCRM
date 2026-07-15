@@ -114,9 +114,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('prop-tir').textContent = tirMensal !== null ? `${tirMensal}%` : '—';
 
     document.getElementById('fio-tarifa').textContent = configs ? formatCurrency(configs.tarifaEnergia) : '—';
-    document.getElementById('fio-percentual').textContent = configs ? `${(configs.fioBTUSD * 100).toFixed(1)}` : '28.5';
-    document.getElementById('fio-autoconsumo').textContent = configs ? `${(configs.autoconsumo * 100).toFixed(0)}` : '25';
-    document.getElementById('fio-disponibilidade').textContent = configs ? configs.custoDisponibilidadeKwh : '50';
+    document.getElementById('fio-percentual').textContent = configs ? `${(configs.fioBTUSD * 100).toFixed(1)}` : '—';
+    document.getElementById('fio-autoconsumo').textContent = configs ? `${(configs.autoconsumo * 100).toFixed(0)}` : '—';
+    document.getElementById('fio-disponibilidade').textContent = configs ? configs.custoDisponibilidadeKwh : '—';
 
     // Page 5 - Warranties
     if (inversorInfo) {

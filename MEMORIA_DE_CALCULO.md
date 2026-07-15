@@ -1,6 +1,6 @@
 # 📋 Memória de Cálculo — Proposta Comercial Solar
 
-> Documento técnico auditado em **13/07/2026** para validação do cliente.  
+> Documento técnico auditado em **15/07/2026** para validação do cliente.  
 > Mostra **a origem de cada número** exibido na proposta comercial, garantindo transparência total sobre o cálculo.
 
 ---
@@ -36,13 +36,14 @@ Antes de entrarmos nas fórmulas, três conceitos precisam estar claros:
 ### 3.1 HSP — Horas de Sol Pleno
 > É o **número de horas por dia em que o sol brilha com intensidade suficiente** para o painel funcionar no máximo da capacidade.
 >
-> - **HSP 5,04** significa: o painel de 620W gera **5,04 horas × 620W = 3,12 kWh por dia**, nas condições ideias.
+> - **HSP 5,04** significa: o painel de 620W gera **5,04 horas × 620W = 3,12 kWh por dia**, nas condições ideais.
 
 A tabela oficial usada (`src/js/irradiacao.js`) contém **480 valores únicos** de irradiação medidos:
 - **8 orientações cardeais × 5 ângulos × 12 meses do ano**
 
 Esses dados são tabelados e foram calibrados para Cuiabá-MT e o Centro-Oeste brasileiro. Variações sazonais (menos sol em junho/julho, mais em outubro/dezembro) já estão embutidas mês a mês.
 Atualização 13/07/2026: Dados de inclinação 5° para orientação Norte foram adicionados e as tabelas de orientação S/SE e E/O corrigidas.
+Atualização 15/07/2026: Adicionado fator de correção por estado (`ESTADO_ANOMALIA`) para todas as UFs brasileiras.
 
 ### 3.2 Performance Ratio (PR)
 > É uma porcentagem que **corrige as perdas reais**.
@@ -50,6 +51,7 @@ Atualização 13/07/2026: Dados de inclinação 5° para orientação Norte fora
 > Tudo o que diminui a eficiência do sistema na vida real: poeira sobre os módulos, perdas nos cabos, eficiência do inversor, calor excessivo, sombras parciais.
 >
 > - Usamos **PR = 0,78 (78%)** — valor conservador e compatível com o padrão ANEEL/INPE para fins de simulação financeira.
+> - Aplica-se também **perda por temperatura**: -0,4% por °C acima de 25°C no ambiente, refletindo a queda de eficiência dos módulos em temperaturas elevadas.
 
 ### 3.3 Lei 14.300 / Fio B
 > Desde 2023, **toda energia injetada na rede paga pelo uso desta rede** (chamado "Fio B" — Uso do Sistema de Distribuição). O percentual aumenta progressivamente:
@@ -155,10 +157,10 @@ A Spark CRM utiliza um **fluxo de cálculo em 16 etapas**, executado em `src/js/
 
 **Fórmula:**
 ```
-Potência necessária (kWp)     = Consumo mensal ÷ (HSP × 30 × PR)
-                                          500 ÷ (5,04 × 30 × 0,78)
-                                          500 ÷ 117,94
-                                       =  4,24 kWp
+Potência necessária (kWp)     = Consumo mensal ÷ (HSP × 30,44 × PR)
+                                           500 ÷ (5,04 × 30,44 × 0,78)
+                                           500 ÷ 119,79
+                                        =  4,17 kWp
 ```
 
 **Número de painéis:**
@@ -318,9 +320,9 @@ Margem efetiva (%)          = (Preço Final − Custo direto) ÷ Preço Final ×
 
 **Fórmula:**
 ```
-Geração estimada (kWh/mês)  = Potência real × HSP × 30 × PR
-                            = 4,34 kWp × 5,04 × 30 × 0,78
-                            = 512 kWh/mês
+Geração estimada (kWh/mês)  = Potência real × HSP × 30,44 × PR
+                             = 4,34 kWp × 5,04 × 30,44 × 0,78
+                             = 517 kWh/mês
 ```
 
 > **Como interpretar:** um sistema que gera **512 kWh/mês** cobre **102,4%** do consumo de 500 kWh. A sobra de 12 kWh vira crédito acumulado para compensar meses futuros (inverno com menos sol).
@@ -359,6 +361,7 @@ A conta **com sistema** considera **autoconsumo** (uso direto da energia gerada 
 - **Autoconsumo residencial = 25%** (cliente está em casa durante o dia, consome direto da geração)
 - **Autoconsumo comercial = 70%** (commerce tem consumo alto em horário solar)
 - **Autoconsumo rural = 30%**
+- Esses valores são carregados de `getTipoClienteConfig()` em `config.js` e podem ser ajustados por configuração.
 
 **Cálculo (exemplo residencial, ano 2026, Fio B = 60%):**
 ```
@@ -421,7 +424,7 @@ Quando o payback excede 25 anos, é mostrado como **25 anos** com aviso de que o
 
 ### 6.5 TIR (Taxa Interna de Retorno)
 
-A TIR é calculada via método **Newton-Raphson** numérico. Representa a taxa de retorno mensal que faz o VPL (Valor Presente Líquido) dos fluxos futuros ser igual a zero.
+A TIR é calculada via método **Newton-Raphson** numérico. Representa a taxa de retorno anual que faz o VPL (Valor Presente Líquido) dos fluxos futuros ser igual a zero. A partir da TIR anual, deriva-se a TIR mensal por `(1 + TIR_anual)^(1/12) - 1`.
 
 ```
 Fluxos de caixa:
@@ -433,8 +436,8 @@ Período 4: +R$ 8.163 (ano 4)
 Período 5: +R$ 8.816 (ano 5)
 Período 6: +R$ 9.521 (ano 6)
 
-Resultado (exemplo): TIR mensal ≈ 2,2% a.m.
-TIR anual = (1 + 0,022)^12 − 1 ≈ 29,6% a.a.
+Resultado (exemplo): TIR anual ≈ 29,6% a.a.
+TIR mensal ≈ 2,2% a.m.
 ```
 
 **Interpretação:**
@@ -543,11 +546,10 @@ Para total transparência, o PDF mostra **cada item cobrado e seu preço de vend
 
 ### 🔴 Limitações Conhecidas da Ferramenta
 
-1. **Tabela de irradiação** é calibrada para **Cuiabá/MT** (região do Cerrado brasileiro). Para outras regiões, considerar fator de correção regional.
-2. **Tabela de irradiação S/SE e E/O** estão idênticas na matriz. Isso é uma **simplificação** usada na primeira versão — para precisão física absoluta, recomenda-se consultar dados do CRESESB/SWAN para cada estado.
-3. **Frota de inversores** abrange bifásicos até 10 kW e trifásicos até 25 kW. Sistemas maiores necessitam combinação paralela de inversores.
-4. **Não há correção automática de inflação** no payback se o cliente atrasar parcelas financiadas.
-5. **Cache de CEP** de 24h pode retornar valores defasados caso o cliente tenha mudado de endereço recentemente.
+1. **Tabela de irradiação** é calibrada para **Cuiabá/MT** (região do Cerrado brasileiro). Para outras regiões, considerar fator de correção regional aplicado automaticamente por estado.
+2. **Frota de inversores** abrange bifásicos até 10 kW e trifásicos até 25 kW. Sistemas maiores necessitam combinação paralela de inversores.
+3. **Não há correção automática de inflação** no payback se o cliente atrasar parcelas financiadas.
+4. **Cache de CEP** de 24h pode retornar valores defasados caso o cliente tenha mudado de endereço recentemente.
 
 ---
 

@@ -20,9 +20,14 @@
       <a href="./index.html" class="brand-logo">
         <img src="./logospark.png" alt="Spark" style="height:42px;">
       </a>
-      <a href="./dashboard.html" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.875rem;">
-        Painel de Vendas
-      </a>
+      <nav style="display: flex; gap: 0.5rem; align-items: center;">
+        <a href="#simulacao" style="color: #fff; text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">Home</a>
+        <a href="./spark-site/sobre.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">Sobre</a>
+        <a href="./spark-site/servicos.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">Serviços</a>
+        <a href="./spark-site/solar.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">Energia Solar</a>
+        <a href="./spark-site/blog.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">Blog</a>
+        <a href="./spark-site/login.html" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.875rem;">Login</a>
+      </nav>
       <button id="btnInstallPWA" onclick="installPWA()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.8rem; display: none; align-items: center; gap: 4px;">
         📲 Instalar App
       </button>
@@ -48,7 +53,7 @@
       <!-- Glass Form Container -->
       <div class="glass-card" style="max-width: 680px; margin: 0 auto; border-radius: var(--radius-lg);">
         <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; font-weight: 700; color: #fff;">
-          📐 Faça sua Simulação Gratuita
+          🧮 Faça sua Simulação Gratuita
         </h2>
         
         <form id="simulationForm" novalidate>
@@ -184,8 +189,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Footer -->
-  <footer style="border-top: 1px solid var(--border-color); padding: 2.5rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6);">
+  <footer style="border-top: 1px solid var(--border-color); padding: 2.5rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6); margin-top: 5rem;">
     <div class="container">
+      <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <a href="./spark-site/sobre.html" style="color: var(--text-muted); text-decoration: none;">Sobre Nós</a>
+        <a href="./spark-site/servicos.html" style="color: var(--text-muted); text-decoration: none;">Serviços</a>
+        <a href="./spark-site/solar.html" style="color: var(--text-muted); text-decoration: none;">Energia Solar</a>
+        <a href="./spark-site/blog.html" style="color: var(--text-muted); text-decoration: none;">Blog</a>
+        <a href="./index.html" style="color: var(--text-muted); text-decoration: none;">Solicite Orçamento</a>
+      </div>
       <p>&copy; 2026 Spark - Todos os direitos reservados.</p>
       <p style="margin-top: 0.5rem; font-size: 0.75rem;">Desenvolvido com HTML5, CSS3, Vanilla JS & Firebase</p>
     </div>

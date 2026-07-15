@@ -1,0 +1,207 @@
+# PLANO DE REFATORAÇÃO - Site Spark Engenharia Elétrica
+## Objetivo: Recriar o site institucional em HTML/CSS/JS puro (leve, simples, moderno)
+
+---
+
+## 1. ESTRUTURA DO SITE (8 páginas)
+
+```
+spark-site/
+├── index.html          # Home - Página principal
+├── sobre.html          # Sobre Nós
+├── servicos.html       # Serviços (visão geral)
+├── solar.html          # Projetos de Energia Solar
+├── industrial.html     # Projetos de Elétrica Industrial
+├── capacitores.html    # Projetos de Banco de Capacitores
+├── orcamento.html      # Solicite um Orçamento (formulário)
+├── blog.html           # Blog
+├── css/
+│   └── style.css       # Único arquivo CSS (tudo)
+├── js/
+│   └── main.js         # Único arquivo JS (navegação, formulário, animações)
+└── img/                # Imagens otimizadas do site legado
+    ├── hero-bg.avif
+    ├── solar.avif
+    ├── industrial.avif
+    ├── capacitores.avif
+    ├── logo-spark.png
+    └── ...
+```
+
+---
+
+## 2. MAPEAMENTO DE CONTEÚDO POR PÁGINA
+
+### index.html (Home)
+- **Hero**: "Spark Engenharia Elétrica - Soluções sustentáveis em energia"
+- **Diferenciais**: 4 cards (Energia Solar, Elétrica Industrial, Banco de Capacitores, Assessoria)
+- **CTA**: "Solicite um Orçamento" → leva para orcamento.html
+- **Botão Login**: "Acesso Cliente" → leva para login.html (painel admin CRM)
+- **Footer**: Contato, endereço, redes sociais
+
+### sobre.html (Sobre Nós)
+- Missão, Visão, Valores
+- História da Spark no cenário norte-mato-grossense
+- Equipe / Diferenciais
+
+### servicos.html (Serviços)
+- Visão geral: usinas solares, laudos, eficiência energética, qualidade de energia, compartilhamento de infraestrutura, projetos elétricos
+
+### solar.html (Energia Solar)
+- Etapas de implantação de usinas fotovoltaicas
+- Benefícios da energia solar
+- Tipos de sistemas (on-grid, off-grid, híbrido)
+
+### industrial.html (Elétrica Industrial)
+- Projetos elétricos industriais
+- Comandos elétricos, quadros de distribuição
+- Automação e eficiência
+
+### capacitores.html (Banco de Capacitores)
+- Correção de fator de potência
+- Redução de perdas elétricas
+- Economia na conta de energia (demanda reativa)
+
+### orcamento.html (Solicitar Orçamento)
+- Formulário: Nome, Email, Telefone, Tipo de Serviço (select), Mensagem
+- Link para o CRM: "Solicite agora mesmo pelo nosso sistema"
+
+### blog.html (Blog)
+- Estrutura de posts estáticos (futuramente dinâmico)
+
+---
+
+## 3. INTEGRAÇÕES COM O CRM
+
+### Botão "Solicite um Orçamento"
+- **Na Home e páginas**: Abre orcamento.html
+- **No orcamento.html**: Formulário envia para o CRM
+  - Opção A (simples): Formulário salva no Firestore → lead criado
+  - Opção B (recomendada): Botão "Solicitar via CRM" → redireciona para lead.html?novo=true
+  - Opção C: Formulário envia email via mailto: ou serviço externo
+
+### Botão "Login" / "Acesso Cliente"
+- Leva direto para: login.html (já existente no projeto raiz)
+- Pode ser: `./login.html` no mesmo domínio
+
+### Integração via API (Recomendado)
+- `orcamento.html` faz POST para API do CRM (Firebase Functions ou endpoint)
+- Cria lead automaticamente com status "Novo"
+- Redireciona para página de sucesso
+
+---
+
+## 4. DESIGN SYSTEM
+
+### Cores (baseado na identidade Spark)
+- **Primária**: #1a5276 (azul escuro - confiança/engenharia)
+- **Secundária**: #f39c12 (laranja - energia/sol)
+- **Fundo claro**: #f8f9fa
+- **Texto**: #2c3e50
+- **Branco**: #ffffff
+
+### Tipografia
+- Títulos: 'Poppins', sans-serif (ou 'Montserrat')
+- Corpo: 'Inter', sans-serif (ou 'Roboto')
+- Monospace: código/documentação
+
+### Componentes
+- Navbar fixa com scroll suave
+- Hero com gradiente + imagem de fundo
+- Cards de serviço com ícone + hover
+- Timeline para história/etapas
+- Formulário estilizado com validação
+- Footer 3 colunas
+- Botões CTA com gradiente
+- Responsivo (mobile-first)
+
+---
+
+## 5. ETAPAS DE IMPLEMENTAÇÃO
+
+### Fase 1: Estrutura Base
+- [ ] Criar estrutura de pastas (spark-site/)
+- [ ] Criar style.css com design system (variáveis CSS, reset, grid)
+- [ ] Criar main.js (navegação, scroll suave, menu mobile)
+- [ index.html - Hero, diferenciais, CTA
+
+### Fase 2: Páginas Internas
+- [ ] sobre.html
+- [ ] servicos.html
+- [ ] solar.html
+- [ ] industrial.html
+- [ ] capacitores.html
+- [ ] orcamento.html (com formulário)
+- [ ] blog.html
+
+### Fase 3: Integração CRM
+- [ ] Formulário de orçamento → enviar lead para Firestore
+- [ ] Botão Login → redirecionar para login.html
+- [ ] Feedback visual de envio (toast/sucesso)
+
+### Fase 4: Refinamentos
+- [ ] Animações CSS (fade-in, scroll reveal)
+- [ ] Meta tags SEO (title, description, OG)
+- [ ] Favicon
+- [ ] Performance (lazy loading imagens, minificação)
+- [ ] Responsividade (testar mobile, tablet, desktop)
+
+### Fase 5: Deploy
+- [ ] Subir para GitHub Pages / Vercel / Netlify
+- [ ] Apontar domínio sparkengenharia.net
+- [ ] Redirect do Wix para o novo site
+
+---
+
+## 6. IMAGENS DO SITE LEGADO
+
+As imagens .avif na pasta `site legado/` serão otimizadas:
+- `ba650e_9d7793f958fa415288d70f59b38abfed~mv2.avif` → hero-bg.avif
+- `ba650e_d41fdf2fc8ff490aa0787f4f32c6cd53~mv2.avif` → solar.avif
+- `11062b_6d0881d113554690899a2cfeebfa521f~mv2.avif` → banner.avif
+- `logospark.png` (raiz) → logo.png
+
+Manteremos formato .avif (moderno, leve) e .webp como fallback.
+
+---
+
+## 7. TECNOLOGIAS
+
+| Tecnologia | Uso |
+|-----------|-----|
+| HTML5 | Estrutura semântica (header, nav, main, section, footer) |
+| CSS3 | Flexbox, Grid, Variáveis, Animações, Media Queries |
+| Vanilla JS | Navegação, formulário, interações, fetch API |
+| Firebase (opcional) | Envio do formulário para o CRM Firestore |
+| ApexCharts (opcional) | Gráficos no blog/dashboard futuros |
+
+**Zero dependências externas.** Framework-free, bibliotecas-free (exceto Firebase se optar).
+
+---
+
+## 8. FLUXO DO USUÁRIO
+
+```
+[Visitante] → Home → Serviços → Solicitar Orçamento → 
+                ↓                                 ↓
+           Sobre Nós ←                      [Formulário] → Lead no CRM
+                ↓                                 ↓
+         Blog / Projetos                    Redireciona sucesso
+
+[Cliente] → Login (/login.html) → Painel Admin CRM
+```
+
+---
+
+## 9. PRÓXIMOS PASSOS
+
+1. Aguardar sua aprovação do plano ✔️
+2. Iniciar Fase 1: Estrutura base + CSS + JS
+3. Implementar página por página
+4. Integrar com CRM
+5. Testar e refinar
+6. Preparar para deploy
+
+---
+
+*Plano criado em 14/07/2026 para refatoração completa do site Spark Engenharia Elétrica (Wix → HTML/CSS/JS puro)*

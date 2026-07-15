@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CERRADO - Proposta de Implementação</title>
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="icon" type="image/png" href="./logospark.png">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -118,8 +118,7 @@
     }
 
     .brand-logo svg {
-      stroke: #22c55e;
-      fill: #22c55e;
+      fill: #FFD700;
     }
 
     .badge-proposal {
@@ -495,11 +494,8 @@
         <div class="header-top">
           <div class="brand-section">
             <div class="brand-logo">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="4"/>
-                <path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
-              </svg>
-              <span>CERRADO Solar</span>
+              <img src="./logospark.png" alt="Spark" style="height:22px;">
+              <span>Spark</span>
             </div>
             <span class="badge-proposal">Proposta de Implementação</span>
           </div>
@@ -743,15 +739,22 @@
         const dataProp = proposta.data_criacao ? new Date(proposta.data_criacao) : new Date();
         document.getElementById('prop-data').textContent = dataProp.toLocaleDateString('pt-BR');
 
-        document.getElementById('prop-preco-final').textContent = formatCurrency(proposta.preco_final);
-        document.getElementById('prop-economia-anual').textContent = formatCurrency(proposta.economia_anual);
-        document.getElementById('prop-payback').textContent = `${proposta.payback_anos} anos`;
+        const dc = proposta.dados_completos;
 
-        document.getElementById('spec-paineis').textContent = `${proposta.numero_paineis}x ${proposta.painel_selecionado || 'Módulos'}`;
-        document.getElementById('spec-inversor').textContent = proposta.inversor_selecionado || '-';
-        document.getElementById('prop-geracao-kwh').textContent = `${proposta.geracao_estimada_kwh} kWh/mês`;
+        document.getElementById('prop-preco-final').textContent = formatCurrency(dc ? dc.precificacao.precoFinal : proposta.preco_final);
+        document.getElementById('prop-economia-anual').textContent = formatCurrency(dc ? dc.energia.economiaAnual : proposta.economia_anual);
+        document.getElementById('prop-payback').textContent = `${dc ? dc.financeiro.paybackAnos : proposta.payback_anos} anos`;
 
-        const geracaoAnual = (proposta.geracao_estimada_kwh || 0) * 12;
+        const numPaineis = dc ? dc.sistema.numeroPaineis : proposta.numero_paineis;
+        const painelNome = dc ? dc.sistema.painel.nome : (proposta.painel_selecionado || 'Módulos');
+        const inversorNome = dc ? dc.sistema.inversor.nome : (proposta.inversor_selecionado || '-');
+        const geracaoKwh = dc ? dc.energia.geracaoEstimadaKwh : proposta.geracao_estimada_kwh;
+
+        document.getElementById('spec-paineis').textContent = `${numPaineis}x ${painelNome}`;
+        document.getElementById('spec-inversor').textContent = inversorNome;
+        document.getElementById('prop-geracao-kwh').textContent = `${geracaoKwh} kWh/mês`;
+
+        const geracaoAnual = geracaoKwh * 12;
         const co2Tons = ((geracaoAnual * 0.12) / 1000).toFixed(1);
         document.getElementById('eco-co2').textContent = co2Tons;
 
@@ -768,7 +771,7 @@
 
     function generatePDF() {
       const element = document.getElementById('pdf-content');
-      const filename = `CERRADO_SolarCRM_Proposta_Implementacao_${Date.now()}.pdf`;
+      const filename = `SPARK_Proposta_Implementacao_${Date.now()}.pdf`;
 
       const opt = {
         margin: 0,

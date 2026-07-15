@@ -1,4 +1,4 @@
-import { dbAddLead, dbAddProposal } from './firebase.js';
+import { dbAddLead, dbAddProposal, authGetCurrentUser, getUserProfile } from './firebase.js';
 import { gerarProposta } from './calculator.js';
 import { showToast, formatPhone, cleanPhone, calcularFretePorCEP } from './utils.js';
 
@@ -9,12 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnText = submitBtn.querySelector('span');
   const btnSpinner = submitBtn.querySelector('.spinner');
 
-  // Máscara de telefone dinâmica
   phoneInput.addEventListener('input', (e) => {
     e.target.value = formatPhone(e.target.value);
   });
 
-  // Máscara de CEP dinâmica
   const cepInput = document.getElementById('endereco');
   cepInput.addEventListener('input', (e) => {
     let val = e.target.value.replace(/\D/g, '');
@@ -26,11 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Evento de submissão do formulário
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Reset de erros anteriores
     const errorFeedbacks = form.querySelectorAll('.error-feedback');
     errorFeedbacks.forEach(el => {
       el.style.display = 'none';
@@ -39,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputs = form.querySelectorAll('.form-control');
     inputs.forEach(input => input.style.borderColor = '');
 
-    // Validação de campos
     let isValid = true;
     const errors = {};
 
@@ -50,40 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const consumoKwh = document.getElementById('consumo_mensal').value;
     const endereco = document.getElementById('endereco').value.trim();
     const tipoTelha = document.getElementById('tipo_telha').value;
-    const orientacao = document.getElementById('orientacao').value;
+    const orientacao = document.getElementById('orientacao')?.value || 'norte';
+    const inclinacao = document.getElementById('inclinacao')?.value || '10';
+    const tipoLigacao = document.getElementById('tipo_ligacao')?.value || 'bifasico';
+    const tipoCliente = document.getElementById('tipo_cliente')?.value || 'residencial';
 
-    if (!nome) {
-      errors.nome = "Nome é obrigatório.";
-      isValid = false;
-    }
-    
-    if (telefone.length < 10) {
-      errors.telefone = "Telefone inválido (insira DDD + número).";
-      isValid = false;
-    }
-
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = "E-mail inválido.";
-      isValid = false;
-    }
-
-    if (!consumoKwh || consumoKwh <= 0) {
-      errors.consumo_mensal = "Insira um valor de consumo válido maior que zero.";
-      isValid = false;
-    }
+    if (!nome) { errors.nome = "Nome é obrigatório."; isValid = false; }
+    if (telefone.length < 10) { errors.telefone = "Telefone inválido (insira DDD + número)."; isValid = false; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errors.email = "E-mail inválido."; isValid = false; }
+    if (!consumoKwh || consumoKwh <= 0) { errors.consumo_mensal = "Insira um valor de consumo válido maior que zero."; isValid = false; }
 
     const cepClean = endereco.replace(/\D/g, '');
-    if (cepClean.length !== 8) {
-      errors.endereco = "CEP inválido (digite os 8 números).";
-      isValid = false;
-    }
+    if (cepClean.length !== 8) { errors.endereco = "CEP inválido (digite os 8 números)."; isValid = false; }
+    if (!tipoTelha) { errors.tipo_telha = "Selecione o tipo de telhado."; isValid = false; }
 
-    if (!tipoTelha) {
-      errors.tipo_telha = "Selecione o tipo de telhado.";
-      isValid = false;
-    }
-
-    // Exibe erros se houver
     if (!isValid) {
       Object.keys(errors).forEach(fieldId => {
         const input = document.getElementById(fieldId);
@@ -100,66 +75,92 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Fluxo de envio do Lead e Proposta
     try {
-      // Ativa spinner de loading
       submitBtn.disabled = true;
       btnText.style.display = 'none';
       btnSpinner.style.display = 'block';
 
-      // 1. Calcular frete por CEP
       const freteInfo = await calcularFretePorCEP(cepClean);
 
-      // 2. Salvar Lead no Firestore / MockDB
+      const user = authGetCurrentUser();
+      let vendedorId = null;
+      let vendedorNome = null;
+
+      if (user) {
+        const profile = await getUserProfile(user.uid);
+        vendedorId = user.uid;
+        vendedorNome = profile?.nome || user.displayName || user.email;
+      }
+
       const leadData = {
         nome,
         telefone,
         email,
         endereco: `${freteInfo.cep.slice(0, 5)}-${freteInfo.cep.slice(5)} (${freteInfo.cidade}/${freteInfo.uf})`,
-        consumo_mensal_kwh: Number(consumoKwh)
+        consumo_mensal_kwh: Number(consumoKwh),
+        tipo_ligacao: tipoLigacao,
+        tipo_cliente: tipoCliente
       };
 
-      const savedLead = await dbAddLead(leadData);
+      const savedLead = await dbAddLead(leadData, vendedorId, vendedorNome);
 
-      // 3. Gerar proposta baseada nos dados do Lead + Frete
       const dadosLeadCalculo = {
         consumo_mensal_kwh: Number(consumoKwh),
         tipo_telha: tipoTelha,
+        orientacao: orientacao,
+        inclinacao: Number(inclinacao),
+        tipo_ligacao: tipoLigacao,
+        tipo_cliente: tipoCliente,
         frete_valor: freteInfo.freteValor,
         distancia_km: freteInfo.distanciaKm
       };
-      
+
       const proposalCalculated = gerarProposta(dadosLeadCalculo);
-      
-      // Adiciona referências extras para a proposta
+
       const proposalData = {
         lead_id: savedLead.id,
         tipo_telha: tipoTelha,
         orientacao: orientacao,
-        potencia_kwp: proposalCalculated.potenciaRealKwp,
-        custo_equipamentos: proposalCalculated.custoEquipamentos,
-        custo_servicos: proposalCalculated.custoServicos,
-        frete_valor: proposalCalculated.frete_valor,
-        distancia_km: proposalCalculated.distancia_km,
-        margem_lucro: proposalCalculated.margemLucro,
-        preco_final: proposalCalculated.precoFinal,
-        economia_mensal: proposalCalculated.economiaMensal,
-        economia_anual: proposalCalculated.economiaAnual,
-        payback_anos: proposalCalculated.paybackAnos,
-        geracao_estimada_kwh: proposalCalculated.geracaoEstimadaKwh,
-        numero_paineis: proposalCalculated.numeroPaineis,
-        inversor_selecionado: proposalCalculated.inversorSelecionado,
-        painel_selecionado: proposalCalculated.painelSelecionado,
-        estrutura_selecionada: proposalCalculated.estruturaSelecionada,
-        status: "Novo"
+        inclinacao: Number(inclinacao),
+        tipo_ligacao: tipoLigacao,
+        tipo_cliente: tipoCliente,
+
+        // Flat fields for quick queries (backward compat)
+        preco_final: proposalCalculated.precificacao.precoFinal,
+        valor_kit: proposalCalculated.precificacao.valorKit,
+        fator_preco: proposalCalculated.precificacao.fatorPreco,
+        preco_calculado: proposalCalculated.precificacao.precoCalculado,
+        valor_imposto: proposalCalculated.precificacao.valorImposto,
+        margem_lucro_efetiva: proposalCalculated.precificacao.margemLucroEfetiva,
+        economia_mensal: proposalCalculated.energia.economiaMensal,
+        economia_anual: proposalCalculated.energia.economiaAnual,
+        payback_anos: proposalCalculated.financeiro.paybackAnos,
+        geracao_estimada_kwh: proposalCalculated.energia.geracaoEstimadaKwh,
+        potencia_kwp: proposalCalculated.sistema.potenciaRealKwp,
+        numero_paineis: proposalCalculated.sistema.numeroPaineis,
+        painel_selecionado: proposalCalculated.sistema.painel.nome,
+        inversor_selecionado: proposalCalculated.sistema.inversor.nome,
+        estrutura_selecionada: proposalCalculated.sistema.estrutura.nome,
+        frete_valor: proposalCalculated.precificacao.freteValor,
+        distancia_km: proposalCalculated.precificacao.distanciaKm,
+        custo_equipamentos: proposalCalculated.precificacao.valorKit,
+        custo_servicos: proposalCalculated.precificacao.custoServicos,
+        margem_lucro: proposalCalculated.configuracoes.margemLucroNominal,
+        preco_paineis: proposalCalculated.precosVenda.precoPaineisKit,
+        preco_inversor: proposalCalculated.precosVenda.precoInversor,
+        preco_estrutura: proposalCalculated.precosVenda.precoEstrutura,
+        preco_servicos: proposalCalculated.precosVenda.precoServicos,
+        preco_frete: proposalCalculated.precosVenda.precoFrete,
+        taxa_localidade_venda: proposalCalculated.precosVenda.taxaLocalidadeVenda,
+        status: "Novo",
+
+        dados_completos: proposalCalculated
       };
 
-      // 3. Salvar Proposta no Firestore / MockDB
       const savedProposal = await dbAddProposal(proposalData);
 
       showToast("Simulação realizada com sucesso! Redirecionando...", "success");
 
-      // Redireciona para a página da proposta
       setTimeout(() => {
         window.location.href = `./proposta.html?id=${savedProposal.id}`;
       }, 1000);
@@ -167,8 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       console.error("Erro no envio da simulação:", error);
       showToast("Ocorreu um erro ao salvar sua simulação. Verifique sua conexão e tente novamente.", "error");
-      
-      // Desativa spinner de loading
       submitBtn.disabled = false;
       btnText.style.display = 'block';
       btnSpinner.style.display = 'none';

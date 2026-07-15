@@ -1,4 +1,4 @@
-// Utilitários de formatação e interface do SolarCRM
+// Utilitários de formatação e interface da Spark
 
 /**
  * Exibe um toast temporário na tela.
@@ -107,7 +107,19 @@ const CENTROS_CIDADES = {
  * @param {string} cep - CEP limpo (8 dígitos)
  * @returns {Promise<Object>} Dados de frete e geolocalização
  */
+const CEP_CACHE_KEY = 'solarcrm_cep_cache';
+const CEP_CACHE_TTL = 86400000; // 24h
+
 export async function calcularFretePorCEP(cep) {
+  // Cache check
+  try {
+    const cache = JSON.parse(localStorage.getItem(CEP_CACHE_KEY) || '{}');
+    const cached = cache[cep];
+    if (cached && (Date.now() - cached.ts) < CEP_CACHE_TTL) {
+      console.log('CEP cache hit:', cep);
+      return cached.data;
+    }
+  } catch (e) {}
   const clean = cep.replace(/\D/g, '');
   
   // 1. Determinar cidade/UF fallback baseado nas faixas de CEP brasileiras (para garantia absoluta)

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicite um Orçamento | Spark Engenharia Elétrica</title>
+  <meta name="description" content="Solicite um orçamento personalizado com a Spark Engenharia Elétrica. Energia solar, elétrica industrial, banco de capacitores, assessoria e mais.">
+  <meta name="keywords" content="orçamento, energia solar, engenharia elétrica, Spark, Mato Grosso, solicitar orçamento">
+  <meta property="og:title" content="Solicite um Orçamento | Spark Engenharia Elétrica">
+  <meta property="og:description" content="Solicite um orçamento personalizado com a Spark Engenharia Elétrica.">
+  <meta property="og:url" content="https://www.sparkengenharia.net/orcamento">
+  <link rel="canonical" href="https://www.sparkengenharia.net/orcamento">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+  <header class="header" role="banner">
+    <div class="container header__inner">
+      <a href="index.html" class="header__logo">
+        <img src="logo.png" alt="Spark" width="40" height="40" loading="eager">
+        <span>Spark Engenharia</span>
+      </a>
+      <nav class="nav" role="navigation">
+        <ul class="nav__list">
+          <li><a href="index.html" class="nav__link">Home</a></li>
+          <li><a href="sobre.html" class="nav__link">Sobre</a></li>
+          <li><a href="servicos.html" class="nav__link">Serviços</a></li>
+          <li><a href="solar.html" class="nav__link">Energia Solar</a></li>
+          <li><a href="blog.html" class="nav__link">Blog</a></li>
+          <li><a href="orcamento.html" class="nav__link nav__link--btn">Solicite Orçamento</a></li>
+        </ul>
+      </nav>
+      <div class="header__actions">
+        <a href="login.html" class="btn btn--outline btn--small">🔐 Login</a>
+        <button class="menu-toggle" aria-label="Abrir menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero hero--small" style="background: var(--gradient-hero);">
+    <div class="container fade-in">
+      <h1>Solicite um Orçamento</h1>
+      <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; max-width: 600px; margin: 1rem auto 0;">
+        Preencha o formulário abaixo que em breve retornaremos seu contato 
+        com uma proposta personalizada.
+      </p>
+    </div>
+  </section>
+
+  <!-- Contato Info -->
+  <section class="section--alt">
+    <div class="container container--narrow">
+      <div class="contact-info fade-in">
+        <div class="contact-info__item">
+          <div class="contact-info__icon">📱</div>
+          <div>
+            <div class="contact-info__label">Telefone</div>
+            <div class="contact-info__value">(66) 9 9999-9999</div>
+          </div>
+        </div>
+        <div class="contact-info__item">
+          <div class="contact-info__icon">📧</div>
+          <div>
+            <div class="contact-info__label">E-mail</div>
+            <div class="contact-info__value">contato@sparkengenharia.net</div>
+          </div>
+        </div>
+        <div class="contact-info__item">
+          <div class="contact-info__icon">📍</div>
+          <div>
+            <div class="contact-info__label">Endereço</div>
+            <div class="contact-info__value">Sinop - MT</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Formulário -->
+  <section aria-labelledby="form-title">
+    <div class="container container--narrow">
+      <div class="section-title fade-in">
+        <h2 id="form-title">Formulário de Orçamento</h2>
+        <p>Todos os campos são obrigatórios</p>
+      </div>
+
+      <form class="form fade-in" action="#" method="POST" novalidate>
+        <div class="form__group">
+          <label for="nome" class="form__label">Nome Completo</label>
+          <input type="text" id="nome" name="nome" class="form__input" required placeholder="Seu nome completo">
+          <div class="form__error"></div>
+        </div>
+
+        <div class="form__group">
+          <label for="email" class="form__label">E-mail</label>
+          <input type="email" id="email" name="email" class="form__input" required placeholder="seu@email.com">
+          <div class="form__error"></div>
+        </div>
+
+        <div class="form__group">
+          <label for="telefone" class="form__label">Telefone</label>
+          <input type="tel" id="telefone" name="telefone" class="form__input" required placeholder="(66) 99999-9999">
+          <div class="form__error"></div>
+        </div>
+
+        <div class="form__group">
+          <label for="tipo_servico" class="form__label">Tipo de Serviço</label>
+          <select id="tipo_servico" name="tipo_servico" class="form__select" required>
+            <option value="">Selecione...</option>
+            <option value="energia_solar">Energia Solar</option>
+            <option value="eletrica_industrial">Elétrica Industrial</option>
+            <option value="banco_capacitores">Banco de Capacitores</option>
+            <option value="assessoria">Assessoria / Consultoria</option>
+            <option value="outro">Outro</option>
+          </select>
+          <div class="form__error"></div>
+        </div>
+
+        <div class="form__group">
+          <label for="mensagem" class="form__label">Mensagem</label>
+          <textarea id="mensagem" name="mensagem" class="form__textarea" required placeholder="Descreva sua necessidade em detalhes..."></textarea>
+          <div class="form__error"></div>
+        </div>
+
+        <button type="submit" class="btn btn--secondary btn--large btn--block">
+          📩 Solicitar Orçamento
+        </button>
+
+        <p style="text-align: center; color: var(--text-light); font-size: 0.85rem; margin-top: 1rem;">
+          Seu contato será registrado em nosso CRM e responderemos em até 24h.
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <!-- CTA Alternativo -->
+  <section class="text-center" style="background: var(--gradient-hero);">
+    <div class="container container--narrow fade-in" style="color: var(--text-white);">
+      <h2 style="color: var(--text-white);">Prefere falar conosco agora?</h2>
+      <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; margin-bottom: 2rem;">
+        Entre em contato diretamente pelo WhatsApp para um atendimento mais rápido.
+      </p>
+      <a href="https://wa.me/5566999999999" target="_blank" class="btn btn--secondary btn--large" rel="noopener">
+        📱 Fale pelo WhatsApp
+      </a>
+    </div>
+  </section>
+
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <img src="logo.png" alt="Spark" loading="lazy" width="50" height="50">
+          <p>Soluções sustentáveis em engenharia elétrica no norte mato-grossense.</p>
+        </div>
+        <div>
+          <h4>Navegação</h4>
+          <ul class="footer__links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="sobre.html">Sobre Nós</a></li>
+            <li><a href="servicos.html">Serviços</a></li>
+            <li><a href="solar.html">Energia Solar</a></li>
+            <li><a href="blog.html">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Serviços</h4>
+          <ul class="footer__links">
+            <li><a href="solar.html">Energia Solar</a></li>
+            <li><a href="industrial.html">Elétrica Industrial</a></li>
+            <li><a href="capacitores.html">Banco de Capacitores</a></li>
+            <li><a href="servicos.html">Assessoria</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contato</h4>
+          <ul class="footer__links">
+            <li><a href="orcamento.html">Solicite Orçamento</a></li>
+            <li><a href="login.html">Acesso Cliente</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>&copy; <span id="year">2026</span> Spark Engenharia Elétrica.</span>
+        <div class="footer__social">
+          <a href="#" aria-label="Instagram">📸</a>
+          <a href="#" aria-label="Facebook">👍</a>
+          <a href="#" aria-label="LinkedIn">💼</a>
+          <a href="#" aria-label="WhatsApp">📱</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="form-toast" class="toast" role="alert" aria-live="polite"></div>
+  <script src="js/main.js"></script>
+</body>
+</html>

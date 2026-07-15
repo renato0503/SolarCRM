@@ -1,348 +1,176 @@
 # Contexto do Projeto - Spark
 
-Este documento apresenta um resumo consolidado de tudo o que já foi implementado na **Spark** e quais são os próximos passos sugeridos para levar a aplicação ao ambiente de produção.
+Resumo consolidado do que já foi implementado na **Spark** (CRM Solar da Spark Engenharia Elétrica pela CerradoTech) e pendências.
 
 ---
 
-## 📅 O que já foi FEITO
+## 📅 O que já foi FEITO (Fases 1-24)
 
-### 1. Fundação e Estrutura do Projeto (Fase 1)
-- **Scaffolding**: Inicialização da estrutura de arquivos utilizando Vite com template Vanilla JS (`npm create vite`).
-- **Organização Modular**: Criação de diretórios estruturados para separar o código CSS (`src/css`) e o código de lógica JS (`src/js`).
-- **Vite Multi-page**: Configuração do arquivo `vite.config.js` para suportar o empacotamento Rollup de múltiplas páginas independentes.
+### 1. Fundação (Fase 1)
+- Scaffolding Vite + Vanilla JS, estrutura modular `src/js/` e `src/css/`, multi-page config.
 
-### 2. Lógica de Negócio e Dimensionamento Solar (Fase 2)
-- **Banco de Equipamentos (`equipamentos.js`)**: Cadastro local estruturado contendo especificações técnicas e preços de custo de módulos fotovoltaicos (550W), inversores grid-tie de diversas potências, kits de fixação estrutural e custos estimados de engenharia e instalação.
-- **Configurações Dinâmicas (`config.js`)**: Parametrização dos coeficientes globais de cálculo (Horas de Sol Pleno - HSP, Tarifa média de energia da distribuidora e Margem de Lucro global aplicada) salvos no `localStorage`.
-- **Módulo de Cálculo (`calculator.js`)**: Algoritmo que recebe o consumo em kWh e calcula potência, painéis, inversor, custos e payback.
+### 2. Dimensionamento Solar (Fase 2)
+- `equipamentos.js`, `config.js`, `calculator.js` com HSP, tarifa, margem e payback.
 
-### 3. Apresentação Comercial Visual da Proposta (Fase 3)
-- **Interface da Proposta (`proposta.html`)**: Tela com design limpo e moderno (modo claro padrão) otimizada para o cliente.
-- **Animações Fluidas (`proposta.js` + Motion One)**: Contagem animada numérica e fade-in/slide-up dos painéis.
-- **Geração de PDF**: Integração da biblioteca `html2pdf.js` para exportar a proposta formatada.
+### 3. Proposta Comercial (Fase 3)
+- `proposta.html` com design light, animações Motion One, exportação PDF via `html2pdf.js`.
 
-### 4. Integração com WhatsApp (Fase 4)
-- **Gerador de Mensagem Inteligente**: Função que formata automaticamente os dados da proposta em texto persuasivo.
-- **Transição de Status Automatizada**: No clique de disparo do WhatsApp, a proposta atualiza para status **"Enviado"**.
+### 4. WhatsApp (Fase 4)
+- Mensagem formatada automática, atualização de status para "Enviado".
 
-### 5. CRM, Autenticação e Configurações (Fase 5)
-- **Painel Administrativo (`dashboard.html` & `dashboard.js`)**: Tela em tema escuro premium com:
-  - Indicadores de desempenho (Total Leads, Propostas Enviadas, Faturamento, Vendas Fechadas)
-  - Tabela com filtros por status e busca dinâmica
-  - Ações rápidas: Ver Proposta, WhatsApp, Excluir
-  - Modal de configurações
-- **Controle de Acesso (`auth.js` & `login.html`)**: Firebase Auth com rotas e telas protegidas.
-- **MockDB Fallback (`firebase.js`)**: Fallback automático para localStorage quando Firebase não disponível.
+### 5. CRM e Auth (Fase 5)
+- Dashboard premium dark, indicadores KPIs, tabela com filtros/busca, ações rápidas, modal config.
+- Firebase Auth com `login.html`, `auth.js`, proteção de rotas.
+- MockDB fallback localStorage.
 
-### 6. Configuração e Publicação (Fase 6)
-- **Vite Subdirectory Base**: Parâmetro `base: '/SolarCRM/'` para subpastas.
-- **Caminhos Relativos Portáveis**: Todas referências absolutas substituídas por relativas.
-- **Automação de Deploy**: Scripts `predeploy` e `deploy` com gh-pages.
-- **Deploy no Firebase Hosting**: URL produção: `https://solarcrm-60ce1.web.app`
+### 6. Publicação (Fase 6)
+- Vite base subdirectory, caminhos relativos, deploy Firebase Hosting + GitHub Pages.
 
-### 7. Cálculo de Frete por CEP e Robustez de PDF (Fase 7)
-- **CEP no Formulário**: Campo com máscara automática (`99999-999`) e validação estrita.
-- **Cálculo de Distância por Geolocalização**: APIs ViaCEP, BrasilAPI e Nominatim OpenStreetMap.
-- **Tabela de Frete Proporcional**: Até 15km (R$ 350), 15-25km (R$ 650), acima de 25km (R$ 1.100).
-- **Robustez na Emissão do PDF**: Try-catch-finally, fallback para `window.print()`, 2 páginas A4 perfeitas.
-- **Taxa Local de Deslocamento**: R$ 0 (até 15km), R$ 250 (15-25km), R$ 450 (acima de 25km).
+### 7. Frete por CEP (Fase 7)
+- Máscara CEP, APIs ViaCEP/BrasilAPI/Nominatim, tabela de frete proporcional (3 faixas), taxa de deslocamento.
 
-### 8. Aprimoramento e Resolução da API de CEP (Fase 8)
-- **Dicionário Local de Capitais**: Cache local com coordenadas das capitais brasileiras.
-- **Fallback Inteligente de APIs**: ViaCEP → BrasilAPI como fallback.
-- **Detector de Região por Prefixo**: Algoritmo baseado nas faixas de CEP brasileiras.
+### 8. API de CEP Robusta (Fase 8)
+- Dicionário local de capitais, fallback inteligente, detector de região por prefixo.
 
-### 9. Otimização do Layout e Dimensões do PDF (Fase 9)
-- **Compactação de Margens, Paddings e Fontes**: Dimensionamento preciso para escala A4.
-- **Layout Multicolunas**: Grid de 2 colunas para especificações técnicas.
-- **Enquadramento Perfeito em 2 Páginas**: CSS para controle de quebras de página.
-- **Área de Assinaturas Alinhada**: Flex-box paralelo para rodapé.
+### 9. Layout PDF (Fase 9)
+- Compactação A4, multicolunas, quebras de página, área de assinaturas.
 
-### 10. Arquitetura Isolada de Impressão (`pdf.html`) (Fase 10)
-- **Template Dedicado**: `pdf.html` isolado da página interativa.
-- **Páginas A4 Rígidas**: Altura de 296mm para evitar transbordo.
-- **Download Inteligente**: Abre aba `pdf.html`, gera PDF e fecha automaticamente.
+### 10. pdf.html Isolado (Fase 10)
+- Template dedicado, páginas A4 rígidas 296mm, download automático.
 
-### 11. Estratégia de Arquivos Estáticos e Eliminação de Bare Imports (Fase 11)
-- **CDN Imports**: Todos os imports via Google GStatic e JSDelivr ESM (sem bare imports).
-- **Fallbacks de JSON**: Arquivos `api/leads.json` e `api/propostas.json` como fallback estático.
+### 11. Arquivos Estáticos (Fase 11)
+- CDN imports (GStatic/JSDelivr), fallbacks JSON estáticos.
 
-### 12. Sistema CRM Completo com Kanban e Páginas Públicas (Fase 12)
-- **Conexão Firebase Ativa**: Firestore e Analytics ativos.
-- **Kanban com 6 colunas**: Novo, Qualificação, Proposta, Negociação, Fechado, Perdido.
-- **Drag-and-drop**: Cards arrastáveis entre colunas para atualizar status.
-- **Páginas Públicas**: `lead.html`, `historico.html`, `tv.html` sem autenticação.
-- **Tabela de Parcelas**: 12x, 24x, 36x, 48x, 60x com taxa de 1,49% a.m.
+### 12. CRM Kanban (Fase 12)
+- Kanban 6 colunas drag-and-drop, páginas públicas (`lead.html`, `historico.html`, `tv.html`), tabela de parcelas.
 
-### 13. Autenticação e Segurança (Fase 13)
-- **Recuperação de Senha**: Modal "Esqueci minha senha" no `login.html` com envio via Firebase Auth.
-- **Roles e Permissões (RBAC)**:
-  - Campo `role` (admin/vendedor) no documento do usuário na coleção `users` do Firestore.
-  - Middleware `protegerRota(allowedRoles)` em `auth.js` para verificação de roles.
-  - Admin: acesso total (configurações, CRUD equipamentos, todos leads).
-  - Vendedor: apenas seus próprios leads.
-- **Criação Automática de Profile**: Ao fazer login, cria automaticamente `users/{uid}` com role.
-- **Auditoria (`logAudit`)**:
-  - Coleção `audit_log` no Firestore para logs de alterações.
-  - Funções `auditAction()`, `auditLogin()`, `auditLogout()` em `auth.js`.
-  - localStorage para fallback em modo mock.
+### 13. Auth e Segurança (Fase 13)
+- Recuperação de senha, RBAC (admin/vendedor), criação auto de profile, auditoria (`audit_log`).
 
-### 14. Banco de Equipamentos Dinâmico (Fase 14)
-- **Migração para Firestore**: Funções `getEquipamentos()`, `saveEquipamento()`, `deleteEquipamento()` em `firebase.js`.
-- **Cache em Memória**: `equipamentosCache` com invalidação quando admin edita.
-- **Interface de Gestão Admin**: Página `admin/equipamentos.html` com:
-  - Lista de equipamentos por tipo (painéis, inversores, estruturas, kits, serviços).
-  - Modal de edição com campos dinâmicos.
-  - Filtros por categoria.
-- **Sincronização com Calculator**: `calculator.js` refatorado para suportar `getEquipamentosLocais()` síncrono com fallback.
+### 14. Equipamentos Dinâmicos (Fase 14)
+- Firestore CRUD, cache em memória, página `admin/equipamentos.html`, filtros por categoria.
 
 ### 15. Multi-Vendedores (Fase 15)
-- **Atribuição de Leads**: Campos `vendedorId` e `vendedorNome` adicionados aos leads.
-- **Auto-atribuição**: Ao criar lead via `app.js`, captura usuário logado como vendedor responsável.
-- **Isolamento de Dados**: `dbGetLeads(vendedorId, isAdminUser)` filtra leads por vendedor.
-- **Exibição no Dashboard**: Tag visual com nome do vendedor responsável pelo lead.
-- **RBAC Funcional**: Vendedores veem apenas seus leads, admins veem todos.
+- Atribuição automática, isolamento de dados, tag visual no dashboard.
 
-### 16. Gráficos com ApexCharts (Fase 16)
-> **Biblioteca usada**: ApexCharts (v3.45.2 via CDN local `src/vendor/apexcharts.min.js`)
-- **Proposta (`proposta.html`)**: Gráfico de barras com projeção de geração mensal (12 meses com variação sazonal).
-- **Dashboard (`dashboard.html`)**:
-  - Gráfico de funil de vendas (barras horizontais por status).
-  - Gráfico de faturamento mensal com filtros de período (3M, 6M, 12M).
-- **TV (`tv.html`)**: Gráfico de área com crescimento de leads nos últimos 6 meses.
-- **Local**: ApexCharts baixado localmente para evitar bloqueios de Tracking Prevention.
+### 16. Gráficos ApexCharts (Fase 16)
+- Proposta: barras geração mensal. Dashboard: funil + faturamento com filtros. TV: área crescimento.
+- Biblioteca local em `src/vendor/apexcharts.min.js`.
 
-### 17. Timeline de Interações (Fase 17)
-- **Modelo de Dados**: Coleção `interacoes` no Firestore com campos:
-  - `leadId`, `vendedorId`, `vendedorNome`
-  - `tipo`: ligacao|whatsapp|email|reuniao|nota
-  - `descricao`, `data`, `proximoContato`
-- **Interface no Dashboard**: Modal de interações com:
-  - Lista cronológica de interações por lead.
-  - Formulário para nova interação (tipo, descrição, próximo contato).
-  - Ícones por tipo de interação.
-- **Botão no Card**: Relógio no dashboard para abrir histórico do lead.
-- **Funções `dbAddInteracao()` e `dbGetInteracoes()`** em firebase.js.
+### 17. Timeline Interações (Fase 17)
+- Coleção `interacoes` no Firestore, modal com histórico + formulário, ícones por tipo, `dbAddInteracao()`.
 
-### 18. Follow-up e Alertas (Fase 18)
-- **Badges Visuais**: Sistema de alertas baseado em dias sem interação:
-  - 3+ dias sem contato: badge "👀 Atenção" azul
-  - 7+ dias sem contato: badge "⚠️ 7+dias" amarelo
-  - 14+ dias sem resposta: badge "❄️ Frio" vermelho
-- **Cálculo Inteligente**: Considera data da última interação ou data de criação do lead.
-- **Exibição no Kanban e Tabela**: Badges visíveis em ambos os layouts.
+### 18. Motor de Cálculo Avançado (Sprint 18) ✅
+- `irradiacao.js`: irradiação por orientação (N/NE/E/SE/S/SO/O/NO) × inclinação (5°-25°) × 12 meses.
+- `financeiro.js`: TIR (Newton-Raphson), payback mensal, projeção 6 anos Fio B, tabela Price multi-banco.
+- `config.js` expandido: Fio B progressivo 2023-2031, tipos de ligação (mono/bi/tri), autoconsumo, imposto.
+- `equipamentos.js`: 6 painéis (DAH 620W, Ronma 610W, Sunova, Jinko, JA) + 19 inversores (Sofar, Solis, Growatt, Deye, Fronius) + garantias.
+- `calculator.js` reescrito: HSP lookup → Valor Kit → Fator Preço → Imposto → Preço Final → Margem Efetiva.
+- `pdf.html` 5 páginas profissionais (Capa, Vantagens, Especificações+Gráfico, Financeiro, Garantias+Assinaturas).
+- `proposta.html`: +Info sistema, +TIR, +projeção 6 anos, +Fio B.
+- `index.html`: +8 orientações, +5 inclinações, +tipo ligação, +tipo cliente.
+- Estrutura: `precificacao.valorKit`, `precificacao.fatorPreco`, `precificacao.margemLucroEfetiva`, `precificacao.valorImposto`.
+- Campo `dados_completos` + campos flat para backward compat.
 
----
+### 19. Follow-up e Notificações (Sprint 19) ✅ (parcial)
+- Sino de notificações com contador de leads pendentes no header do dashboard.
+- Dropdown com lista ordenada por criticidade (3d/7d/14d).
+- Filtro "⚠️ Precisa Atenção" no dashboard e Kanban.
+- Badges visuais nos cards (👀 Atenção / ⚠️ 7+dias / ❄️ Frio).
+- 🔴 FCM Push: pendente (requer chave VAPID).
 
-## 📋 O que FALTA fazer
+### 20. Integrações (Sprint 20) ✅ (parcial)
+- Slider de entrada (0-50%) no financiamento com recálculo dinâmico.
+- Tabela Price com taxas por banco (BV, Santander, Bradesco, BB, Sicoob, Sicredi, BTG).
+- Prazos: 12x a 120x.
+- 🔴 Email (SendGrid): pendente (requer API key).
+- 🔴 WhatsApp Business API: pendente (requer token Meta).
+- 🔴 Pix/Boleto: pendente (requer gateway Mercado Pago/Asaas).
 
----
+### 21. UI/UX Premium (Sprint 21) ✅ (parcial)
+- Preview PDF funcional no modal da proposta (clona conteúdo + imprimir).
+- Config modal com sliders (HSP, Tarifa, Margem, PR) + preview em tempo real.
+- Labels ARIA em grupos de filtros, Escape fecha modais.
+- Dark/Light mode toggle + skeleton loading (fases anteriores).
+- 🔴 Tour guiado onboarding: pendente (escolher biblioteca).
 
-### 🔔 FASE 18 - Automação de Follow-up
+### 22. PWA e Performance (Sprint 22) ✅ (parcial)
+- `manifest.json` + `sw.js` (cache offline de assets estáticos).
+- Botão "Instalar App" com prompt nativo (`beforeinstallprompt`).
+- Meta tags PWA (theme-color, apple-mobile-web-app).
+- Paginação: 50 leads por vez + botão "Carregar mais" com contador.
+- 🔴 Índices Firestore: pendente (criar no console).
 
-#### 18.1 Regras de Alerta ✅
-- [x] Lead sem interação há 3 dias: badge "Atenção" azul
-- [x] Lead há 7 dias sem contato: badge "⚠️ 7+dias" amarelo
-- [x] Lead há 14 dias sem resposta: badge "❄️ Frio" vermelho
+### 23. Infraestrutura (Sprint 23) ✅ (parcial)
+- Backup: export JSON (leads, propostas, equipamentos, config) com download.
+- Restore: upload de arquivo JSON com validação.
+- Cache de CEP 24h em localStorage.
+- Botões admin-only: 💾 Backup, 📥 Restore, 📦 Fornecedores.
+- 🔴 Cloud Functions backup automático: pendente.
+- 🔴 Crashlytics/Sentry: pendente.
 
-#### 18.2 Notificações
-- [ ] Firebase Cloud Messaging (FCM) para push
-- [ ] Notificação no dashboard ao fazer login
-- [ ] Badge no ícone do lead pendente
+### 24. Fornecedores e Estoque (Sprint 24) ✅ (parcial)
+- Página `admin/fornecedores.html` com CRUD (nome, CNPJ, contato, telefone, site, obs).
+- Armazenamento em localStorage (`solarcrm_fornecedores`).
+- 🔴 Cotação automática: pendente (integrar com cálculo).
+- 🔴 Gestão de estoque: pendente.
 
-#### 18.3 Lembrete Automático
-- [ ] Agendar lembrete para `proximoContato`
-- [ ] Email ou WhatsApp automático (futuro)
-
----
-
-### 📧 FASE 19 - Integrações
-
-#### 19.1 Email
-- [ ] Enviar proposta por email direto do dashboard
-- [ ] Template HTML profissional
-- [ ] Anexo do PDF
-
-#### 19.2 WhatsApp Business API
-- [ ] Resposta automática para mensagens
-- [ ] Status de entrega da mensagem
-- [ ] Webhook para receber respostas
-
-#### 19.3 Pix/Boleto
-- [ ] Gerar carnê de parcelas
-- [ ] Links de pagamento via Pix
-- [ ] Status: pendente/pago
+### Extras
+- Logo Spark (`logospark.png`) em toda a plataforma (favicon + headers + PDF).
+- `public/favicon.svg` e `public/icons.svg` substituídos.
+- CSS `.brand-logo` atualizado para `<img>`.
 
 ---
 
-### 🎨 FASE 20 - UI/UX
+## 🔴 PENDÊNCIAS (requerem credenciais/ações externas)
 
-#### 20.1 Dark/Light Mode ✅
-- [x] Toggle no dashboard (botão sol/lua)
-- [x] Salvar preferência no localStorage (key: solarcrm_theme)
-- [x] Respeita preferência do sistema inicialmente
-
-#### 20.2 Skeleton Loading ✅
-- [x] Skeleton CSS com animação shimmer
-- [x] Substituir spinners genéricos por placeholders de tabela
-- [x] Feedback visual durante fetch no dashboard
-
-#### 20.3 Preview PDF
-- [ ] Modal com preview antes de baixar
-- [ ] Botões: Baixar PDF, Imprimir, Enviar Email
-
-#### 20.4 Configurações com Preview
-- [ ] Sliders de HSP, Tarifa, Margem com preview em tempo real
-- [ ] Testar cálculo instantâneo
+| Item | O que falta | Responsável |
+|------|-------------|-------------|
+| FCM Push Notifications | Criar chave VAPID no Firebase Console → Cloud Messaging | Admin Firebase |
+| Cloud Function Follow-up | `firebase deploy --only functions` com scheduler | Dev |
+| Envio de Email (SendGrid) | Criar conta SendGrid, obter API key, configurar template | Admin |
+| WhatsApp Business API | Criar app no Meta Business, verificar número, obter token | Admin Spark |
+| Pix/Boleto (Mercado Pago) | Criar conta Mercado Pago, obter access token | Financeiro |
+| Tour guiado (Onboarding) | Escolher biblioteca (driver.js/intro.js) e criar passos | Dev |
+| Índices Firestore | Criar no console: `vendedorId+status+createdAt`, `status+updatedAt` | Admin Firebase |
+| Crashlytics | Ativar no Firebase Console, adicionar SDK | Admin Firebase |
+| Cloud Function backup | Scheduler semanal export JSON → Firebase Storage | Dev |
+| Cotação automática | Integrar fornecedores ao calculator.js para menor preço | Dev |
+| Gestão de estoque | Adicionar quantidade disponível por SKU, reserva ao fechar lead | Dev |
 
 ---
 
-### 📱 FASE 21 - PWA
+## 🏗️ Arquivos do Projeto
 
-#### 21.1 Service Worker
-- [ ] Cache de assets estáticos
-- [ ] Funcionar offline (read-only)
-- [ ] Atualizar quando nova versão disponível
-
-#### 21.2 "Instalar App"
-- [ ] Prompt de install native
-- [ ] Ícone na home screen
-
-#### 21.3 Push Notifications
-- [ ] Solicitar permissão
-- [ ] Receber notificações de novos leads
-
----
-
-### ⚡ FASE 22 - Performance
-
-#### 22.1 Paginação
-- [ ] Infinite scroll no Kanban
-- [ ] Limite de 50 leads por load
-- [ ] Botão "Carregar mais"
-
-#### 22.2 Índices Firestore
-- [ ] Criar índice composto para buscas:
-  - `vendedorId` + `status`
-  - `createdAt` + `status`
-
-#### 22.3 Lazy Loading
-- [ ] Carregar imagens de perfil sob demanda
-- [ ] Defer de scripts não críticos
-
----
-
-### 📦 FASE 23 - Relatórios e Exportação
-
-#### 23.1 Exportar CSV ✅
-- [x] Botão "Exportar Leads" no dashboard
-- [x] Colunas: Nome, Telefone, Email, Cidade/UF, Consumo, Potência, Painéis, Valor Final, Status, Vendedor, Data
-- [x] Download de arquivo `.csv` com encoding UTF-8 e separador `;`
-
-#### 23.2 Relatório de Faturamento ✅
-- [x] Página `relatorios.html` com filtros de período (3M/6M/12M)
-- [x] KPIs: Total Leads, Taxa de Conversão, Faturamento, Ticket Médio
-- [x] Gráfico de faturamento mensal (area chart)
-- [x] Gráfico de leads por status (donut chart)
-- [x] Gráfico de evolução de leads vs fechados (bar chart)
-- [x] Performance por vendedor com barra de progresso
-
-#### 23.3 Métricas de Conversão ✅
-- [x] Taxa de conversão por vendedor (fechados/total)
-- [x] Comparativo de faturamento entre vendedores
-- [x] Evolução mensal de leads e fechamentos
-
----
-
-### 🔧 FASE 24 - Infraestrutura
-
-#### 24.1 Backup Manual
-- [ ] Botão "Exportar Backup" no admin
-- [ ] Download de JSON com todos os dados
-- [ ] Restore via upload de JSON
-
-#### 24.2 Rate Limiting
-- [ ] Limite de chamadas às APIs externas
-- [ ] Cache de CEP por 24h
-
-#### 24.3 Monitoramento
-- [ ] Analytics de uso
-- [ ] Erros capturados (Sentry?)
-- [ ] Uptime monitoring
-
----
-
-## 📊 Resumo de Fases
-
-| Fase | Descrição | Status | Items |
-|------|-----------|--------|-------|
-| 1-12 | Fundação e CRM Completo | ✅ Feito | 60+ |
-| 13 | Autenticação e Segurança | ✅ Feito | 8 |
-| 14 | Banco de Equipamentos Dinâmico | ✅ Feito | 9 |
-| 15 | Multi-Vendedores | ✅ Feito | 7 |
-| 16 | Gráficos com ApexCharts | ✅ Feito | 8 |
-| 17 | Timeline de Interações | ✅ Feito | 6 |
-| 18 | Automação de Follow-up | ⏳ Pendente | 7 |
-| 19 | Integrações | ⏳ Pendente | 6 |
-| 20 | UI/UX | ⏳ Pendente | 8 |
-| 21 | PWA | ⏳ Pendente | 6 |
-| 22 | Performance | ⏳ Pendente | 6 |
-| 23 | Relatórios e Exportação | ✅ Feito | 7 |
-| 24 | Infraestrutura | ⏳ Pendente | 6 |
-
-**Total implementado: ~900+ linhas de código**
-**Total pendente: 54 itens organizados em 7 fases**
-
----
-
-## 🎯 Ordem de Implementação Sugerida (Próximas Fases)
-
-1. **Fase 20** (UI/UX) → Dark/Light mode e preview PDF
-2. **Fase 18** (Follow-up) → Alertas e automação de contato
-3. **Fase 19, 21-22, 24** → Conforme necessidade
-
----
-
-## 🏗️ Arquivos Criados/Modificados Recentemente
-
-| Arquivo | Ação | Descrição |
-|---------|------|-----------|
-| `src/js/firebase.js` | Modificado | Auth reset, profiles, audit, interações, equipamentos |
-| `src/js/auth.js` | Modificado | resetPassword, checkRole, auditAction |
-| `src/js/calculator.js` | Modificado | Refatorado para equipamentos async |
-| `src/js/dashboard.js` | Modificado | Gráficos ApexCharts, interações, filtros, skeleton loading |
-| `src/js/proposta.js` | Modificado | Gráfico de geração ApexCharts |
-| `src/js/tv.js` | Modificado | Gráfico de crescimento ApexCharts |
-| `src/js/app.js` | Modificado | vendedorId ao criar lead |
-| `src/js/admin/equipamentos.js` | Criado | CRUD de equipamentos |
-| `src/js/relatorios.js` | Criado | Lógica de relatórios, KPIs, gráficos de evolução |
-| `src/vendor/apexcharts.min.js` | Criado | Biblioteca ApexCharts local (522KB) |
-| `src/css/style.css` | Modificado | Skeleton loading styles com shimmer animation |
-| `login.html` | Modificado | Modal recuperação senha |
-| `dashboard.html` | Modificado | Gráficos, coluna data, filtros período, link relatórios |
-| `proposta.html` | Modificado | Canvas → div para ApexCharts |
-| `tv.html` | Modificado | Canvas → div para ApexCharts |
-| `admin/equipamentos.html` | Criado | Página de gestão de equipamentos |
-| `relatorios.html` | Criado | Página de relatórios com gráficos ApexCharts |
-| `vite.config.js` | Modificado | +admin/equipamentos.html +relatorios.html |
-| `CONTEXT.md` | Atualizado | Fases 18, 20.1, 20.2, 23 completas |
-| **Rebranding para Spark** | | |
-| `favicon.svg` | Modificado | Novo ícone com raio e árvore |
-| `src/css/style.css` | Modificado | Cores Spark (preto, amarelo, cinza, branco) |
-| `dashboard.html`, `index.html`, etc. | Modificado | Nome e logo atualizados para Spark |
-| `src/js/config.js` | Modificado | empresaNome: "Spark" |
-| `src/js/*.js` | Modificado | Mensagens atualizadas |
+| Arquivo | Descrição |
+|---------|-----------|
+| `src/js/irradiacao.js` | Dados irradiação solar (8 orientações × 5 inclinações × 12 meses) |
+| `src/js/financeiro.js` | TIR, payback, projeção Fio B, tabela Price |
+| `src/js/calculator.js` | Motor de cálculo avançado (Valor Kit → Fator Preço → Imposto → Margem Efetiva) |
+| `src/js/config.js` | Configurações + Fio B progressivo + tipos de ligação |
+| `src/js/equipamentos.js` | Banco expandido: 6 painéis + 19 inversores + garantias |
+| `src/js/firebase.js` | Firestore + MockDB + equipamentos + interações + audit |
+| `src/js/auth.js` | RBAC, protegerRota, resetPassword, auditAction |
+| `src/js/dashboard.js` | Notificações, filtros, paginação, config sliders, backup |
+| `src/js/proposta.js` | Leitura dados_completos, preview modal, entrada slider, gráfico |
+| `src/js/pdf.js` | Popula template 5 páginas, geração html2pdf |
+| `src/js/app.js` | Formulário público, cálculo, salvamento Firestore |
+| `src/js/utils.js` | showToast, formatCurrency, formatPhone, calcularFretePorCEP + cache |
+| `src/css/style.css` | Temas dark/light, skeleton loading, glass cards, brand-logo |
+| `public/logospark.png` | Logo oficial Spark (363KB) |
+| `public/manifest.json` | PWA manifest |
+| `public/sw.js` | Service Worker cache offline |
+| `admin/fornecedores.html` | CRUD de fornecedores |
+| `admin/equipamentos.html` | CRUD de equipamentos |
 
 ---
 
 ## 🔑 Credenciais Firebase
-
 - **Projeto**: solarcrm-60ce1
 - **Auth Domain**: solarcrm-60ce1.firebaseapp.com
 - **Database**: Firestore ativo
 - **Usuários**: Admin criado via Firebase Console (admin@admin.com)
 
-## 🌐 URLs de Deploy
-
+## 🌐 URLs
 - **Firebase Hosting**: https://solarcrm-60ce1.web.app
 - **GitHub Pages**: https://renato0503.github.io/Spark/

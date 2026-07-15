@@ -2,24 +2,33 @@
 
 /* Base System Variables */
 :root {
-  /* Colors */
-  --solar-gradient: linear-gradient(135deg, hsl(24, 100%, 50%) 0%, hsl(45, 100%, 50%) 100%);
-  --solar-orange: hsl(24, 100%, 50%);
-  --solar-yellow: hsl(45, 100%, 50%);
-  --solar-orange-rgb: 255, 94, 0;
+  /* Spark Brand Colors */
+  --spark-yellow: #FFD700;
+  --spark-yellow-light: #FFEC80;
+  --spark-yellow-dark: #E6C200;
+  --spark-black: #000000;
+  --spark-gray: #4A4A4A;
+  --spark-gray-light: #808080;
+  --spark-white: #FFFFFF;
   
-  --primary: hsl(24, 100%, 50%);
-  --primary-hover: hsl(20, 100%, 45%);
-  --primary-glow: rgba(255, 94, 0, 0.15);
+  /* Brand Gradients */
+  --solar-gradient: linear-gradient(135deg, var(--spark-yellow) 0%, var(--spark-yellow-light) 100%);
+  --solar-orange: var(--spark-yellow);
+  --solar-yellow: var(--spark-yellow-light);
+  --solar-orange-rgb: 255, 215, 0;
+  
+  --primary: var(--spark-yellow);
+  --primary-hover: var(--spark-yellow-dark);
+  --primary-glow: rgba(255, 215, 0, 0.15);
   
   /* Status Colors */
-  --status-novo: hsl(210, 100%, 50%);
-  --status-novo-bg: rgba(0, 102, 255, 0.15);
-  --status-enviado: hsl(35, 100%, 50%);
-  --status-enviado-bg: rgba(255, 153, 0, 0.15);
-  --status-fechado: hsl(142, 70%, 45%);
+  --status-novo: #3B82F6;
+  --status-novo-bg: rgba(59, 130, 246, 0.15);
+  --status-enviado: var(--spark-yellow);
+  --status-enviado-bg: rgba(255, 215, 0, 0.15);
+  --status-fechado: #22C55E;
   --status-fechado-bg: rgba(34, 197, 94, 0.15);
-  --status-perdido: hsl(0, 84%, 60%);
+  --status-perdido: #EF4444;
   --status-perdido-bg: rgba(239, 68, 68, 0.15);
 
   /* Fonts */
@@ -39,30 +48,30 @@
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.2);
 }
 
-/* Dark Theme Variables (CRM/Dashboard & Form base) */
+/* Dark Theme Variables (CRM/Dashboard) */
 [data-theme="dark"] {
-  --bg-main: hsl(222, 47%, 11%);
-  --bg-card: hsl(223, 47%, 16%);
-  --bg-card-hover: hsl(223, 47%, 20%);
-  --bg-input: hsl(223, 47%, 13%);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --text-main: hsl(210, 40%, 98%);
-  --text-muted: hsl(215, 20%, 65%);
-  --glass-bg: rgba(15, 23, 42, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.06);
+  --bg-main: #0A0A0A;
+  --bg-card: #141414;
+  --bg-card-hover: #1E1E1E;
+  --bg-input: #1A1A1A;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-main: #FFFFFF;
+  --text-muted: #A0A0A0;
+  --glass-bg: rgba(20, 20, 20, 0.8);
+  --glass-border: rgba(255, 215, 0, 0.1);
 }
 
-/* Light Theme Variables (Default for proposal viewer, optional for app) */
+/* Light Theme Variables (Proposal Viewer) */
 [data-theme="light"] {
-  --bg-main: hsl(210, 40%, 98%);
-  --bg-card: hsl(0, 0%, 100%);
-  --bg-card-hover: hsl(210, 40%, 96%);
-  --bg-input: hsl(0, 0%, 100%);
-  --border-color: rgba(0, 0, 0, 0.08);
-  --text-main: hsl(222, 47%, 11%);
-  --text-muted: hsl(215, 16%, 47%);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.05);
+  --bg-main: #F5F5F5;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FAFAFA;
+  --bg-input: #FFFFFF;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --text-main: #000000;
+  --text-muted: #666666;
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.08);
 }
 
 /* Document Resets & Base Styles */
@@ -290,17 +299,20 @@ button, input, select, textarea {
   font-family: var(--font-headings);
   font-weight: 800;
   font-size: 1.75rem;
-  background: var(--solar-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  text-decoration: none;
 }
 
-.brand-logo svg {
-  stroke: var(--solar-orange);
-  fill: var(--solar-yellow);
+.brand-logo span {
+  background: var(--solar-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-logo img {
+  flex-shrink: 0;
 }
 
 /* Loader Spinner */
@@ -315,6 +327,72 @@ button, input, select, textarea {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.skeleton-text.sm { height: 10px; width: 60%; }
+.skeleton-text.md { height: 14px; width: 80%; }
+.skeleton-text.lg { height: 18px; width: 100%; }
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.skeleton-row:last-child {
+  border-bottom: none;
+}
+
+.skeleton-table-row {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.skeleton-table-row > div {
+  height: 14px;
+  border-radius: 4px;
 }
 
 /* Toast System */

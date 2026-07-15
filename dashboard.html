@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SolarCRM - Painel de Vendas</title>
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <title>Spark - Painel de Vendas</title>
+  <link rel="icon" type="image/png" href="./logospark.png">
   <link rel="stylesheet" href="./src/css/style.css">
+  
+  <!-- ApexCharts Local -->
+  <script src="./apexcharts.min.js"></script>
   <style>
-    /* Estilos Adicionais do Painel */
     .dashboard-header {
       background-color: var(--bg-card);
       border-bottom: 1px solid var(--border-color);
@@ -112,7 +114,6 @@
       background: var(--status-perdido-bg);
     }
 
-    /* Modal Styling */
     .modal {
       display: none;
       position: fixed;
@@ -153,7 +154,6 @@
       font-size: 1.5rem;
     }
 
-    /* Filter buttons styling */
     .filter-btn {
       padding: 0.5rem 1rem;
       border-radius: 50px;
@@ -172,6 +172,218 @@
       border-color: transparent;
       box-shadow: 0 4px 10px rgba(255, 94, 0, 0.2);
     }
+
+    .view-toggle {
+      display: flex;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .view-toggle button {
+      padding: 0.5rem 1.25rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+    }
+
+    .view-toggle button.active {
+      background: var(--solar-gradient);
+      color: #fff;
+    }
+
+    .view-toggle button:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Kanban Styles */
+    .kanban-container {
+      display: none;
+      gap: 1rem;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+    }
+
+    .kanban-container.active {
+      display: flex;
+    }
+
+    .kanban-column {
+      flex: 0 0 280px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      max-height: calc(100vh - 350px);
+      overflow-y: auto;
+    }
+
+    .kanban-column-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .kanban-column-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .kanban-column.novo .kanban-column-title { color: var(--status-novo); }
+    .kanban-column.qualificacao .kanban-column-title { color: var(--status-enviado); }
+    .kanban-column.proposta .kanban-column-title { color: #9333ea; }
+    .kanban-column.negociacao .kanban-column-title { color: #f59e0b; }
+    .kanban-column.fechado .kanban-column-title { color: var(--status-fechado); }
+    .kanban-column.perdido .kanban-column-title { color: var(--status-perdido); }
+
+    .kanban-count {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+    }
+
+    .kanban-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-height: 100px;
+    }
+
+    .kanban-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      cursor: grab;
+      transition: all var(--transition-fast);
+    }
+
+    .kanban-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .kanban-card.dragging {
+      opacity: 0.5;
+      transform: rotate(3deg);
+    }
+
+    .kanban-card-name {
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .kanban-card-phone {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: monospace;
+      margin-bottom: 0.5rem;
+    }
+
+    .kanban-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .kanban-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+    }
+
+    .kanban-tag.residencial { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .kanban-tag.comercial { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+    .kanban-tag.rural { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .kanban-tag.urbano { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+    .kanban-card-value {
+      font-weight: 700;
+      color: var(--solar-orange);
+      font-size: 0.95rem;
+    }
+
+    .kanban-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .kanban-card-actions button {
+      flex: 1;
+      padding: 0.4rem;
+      font-size: 0.75rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      transition: all var(--transition-fast);
+    }
+
+    .kanban-card-actions .btn-view {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .kanban-card-actions .btn-view:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .kanban-card-actions .btn-zap {
+      background: var(--status-fechado-bg);
+      color: var(--status-fechado);
+    }
+
+    .kanban-card-actions .btn-zap:hover {
+      background: rgba(34, 197, 94, 0.3);
+    }
+
+    .kanban-drop-zone {
+      min-height: 80px;
+      border: 2px dashed transparent;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .kanban-drop-zone.drag-over {
+      border-color: var(--solar-orange);
+      background: rgba(255, 94, 0, 0.1);
+    }
+
+    /* Table View */
+    .table-container {
+      display: block;
+    }
+
+    .table-container.hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -181,11 +393,7 @@
     <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
       <div style="display: flex; align-items: center; gap: 2rem;">
         <a href="./index.html" class="brand-logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="4"/>
-            <path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/>
-          </svg>
-          <span>SolarCRM</span>
+            <img src="./logospark.png" alt="Spark" style="height:42px; vertical-align:middle;">
         </a>
         <span style="font-size: 0.75rem; background-color: var(--border-color); color: var(--text-muted); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">PAINEL INTERNO</span>
       </div>
@@ -194,7 +402,40 @@
         <span id="userEmail" style="font-size: 0.875rem; color: var(--text-muted);">vendedor@solarcrm.com.br</span>
         <button id="btnConfig" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem; display: flex; align-items: center; gap: 4px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Configurações
+          Config
+        </button>
+        <button id="btnThemeToggle" class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;" title="Alternar Tema">
+          <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <!-- Notification Bell -->
+        <div style="position:relative;">
+          <button id="btnNotificacoes" class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.875rem; position:relative;" title="Notificações" aria-label="Notificações">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span id="notifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--status-perdido,#ef4444);color:#fff;border-radius:10px;min-width:18px;height:18px;font-size:10px;font-weight:700;line-height:18px;text-align:center;padding:0 4px;">0</span>
+          </button>
+          <div id="notifDropdown" style="display:none;position:absolute;right:0;top:42px;width:340px;max-height:400px;overflow-y:auto;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.4);z-index:200;padding:0.5rem 0;">
+            <div style="padding:0.75rem 1rem;border-bottom:1px solid var(--border-color);">
+              <span style="font-weight:700;font-size:0.875rem;color:var(--text-main);">Notificações</span>
+              <button id="btnNotifDismissAll" style="float:right;font-size:0.7rem;color:var(--text-muted);background:none;border:none;cursor:pointer;">Limpar todas</button>
+            </div>
+            <div id="notifList" style="padding:0.25rem 0;">
+              <div style="padding:1.5rem 1rem;text-align:center;color:var(--text-muted);font-size:0.8rem;">Nenhuma notificação pendente</div>
+            </div>
+          </div>
+        </div>
+        <button id="btnAdminEquip" class="btn btn-warning" style="padding: 0.5rem 1rem; font-size: 0.875rem; display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Equipamentos
+        </button>
+        <a href="./admin/fornecedores.html" class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.875rem;display:none;" id="btnFornecedores">
+          📦 Fornecedores
+        </a>
+        <button id="btnBackup" class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.875rem;display:none;" title="Exportar Backup">
+          💾 Backup
+        </button>
+        <button id="btnRestore" class="btn btn-secondary" style="padding:0.5rem 0.75rem;font-size:0.875rem;display:none;" title="Importar Backup">
+          📥
         </button>
         <button id="btnLogout" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
           Sair
@@ -208,26 +449,35 @@
     <div class="container">
       
       <!-- Page Title -->
-      <div style="margin-bottom: 2rem;">
-        <h1 style="font-size: 1.75rem; font-weight: 700; color: #fff;">Painel CRM de Leads e Propostas</h1>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">Monitore as simulações enviadas, altere status e contate leads direto pelo WhatsApp.</p>
+      <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1 style="font-size: 1.75rem; font-weight: 700; color: #fff;">Painel CRM de Leads e Propostas</h1>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">Monitore as simulações enviadas, altere status e contate leads direto pelo WhatsApp.</p>
+        </div>
+        <div class="view-toggle">
+          <button id="viewTable" class="active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Tabela
+          </button>
+          <button id="viewKanban">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Kanban
+          </button>
+        </div>
       </div>
 
       <!-- Stats Grid -->
       <div class="grid grid-cols-3" style="margin-bottom: 2.5rem;">
-        <!-- Total Leads -->
         <div class="stat-card">
           <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">Simulações / Leads</span>
           <div id="statTotal" class="stat-value">0</div>
           <span style="font-size: 0.75rem; color: var(--status-novo);">Cadastros recebidos</span>
         </div>
-        <!-- Enviadas -->
         <div class="stat-card">
           <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">Propostas Enviadas</span>
           <div id="statEnviadas" class="stat-value">0</div>
           <span style="font-size: 0.75rem; color: var(--status-enviado);">Aguardando retorno</span>
         </div>
-        <!-- Fechadas / Faturamento -->
         <div class="stat-card" style="border-left: 3px solid var(--status-fechado);">
           <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">Projetos Fechados / Faturamento</span>
           <div id="statFaturamento" class="stat-value">R$ 0,00</div>
@@ -235,46 +485,138 @@
         </div>
       </div>
 
+      <!-- Gráficos de Performance -->
+      <div class="grid grid-cols-2" style="margin-bottom: 2rem; gap: 1.5rem;">
+        <div class="glass-card" style="padding: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin: 0;">Funil de Vendas</h4>
+          </div>
+          <div id="graficoFunil"></div>
+        </div>
+        <div class="glass-card" style="padding: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin: 0;">Faturamento Mensal</h4>
+            <div style="display: flex; gap: 0.25rem;">
+              <button class="filter-btn active" data-periodo="3" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;">3M</button>
+              <button class="filter-btn" data-periodo="6" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;">6M</button>
+              <button class="filter-btn" data-periodo="12" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;">12M</button>
+            </div>
+          </div>
+          <div id="graficoFaturamento"></div>
+        </div>
+      </div>
+
       <!-- Filter Controls & Search -->
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
-        <!-- Filter Tabs -->
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" role="group" aria-label="Filtros de status">
           <button class="filter-btn active" data-filter="Todos">Todos</button>
           <button class="filter-btn" data-filter="Novo">Novos</button>
+          <button class="filter-btn" data-filter="Qualificação">Qualificação</button>
           <button class="filter-btn" data-filter="Enviado">Enviados</button>
+          <button class="filter-btn" data-filter="Negociação">Negociação</button>
           <button class="filter-btn" data-filter="Fechado">Fechados</button>
           <button class="filter-btn" data-filter="Perdido">Perdidos</button>
+          <button class="filter-btn" data-filter="Atencao" style="border-color:var(--status-perdido);">⚠️ Precisa Atenção</button>
         </div>
         
-        <!-- Search -->
+        <div style="display: flex; gap: 0.5rem;">
+          <button id="btnExportCSV" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar CSV
+          </button>
+          <a href="./relatorios.html" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+            Relatórios
+          </a>
+        </div>
+        
         <div style="max-width: 300px; width: 100%;">
           <input type="text" id="crmSearch" class="form-control" placeholder="Buscar por nome ou fone..." style="padding: 0.5rem 1rem; font-size: 0.875rem;">
         </div>
       </div>
 
-      <!-- Table Container -->
-      <div class="crm-table-container">
-        <table class="crm-table">
-          <thead>
-            <tr>
-              <th>Lead / Cliente</th>
-              <th>Consumo</th>
-              <th>Dimensionamento</th>
-              <th>Custo Total</th>
-              <th>Status</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="crmTableBody">
-            <!-- Dynamic CRM Rows here -->
-            <tr>
-              <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
-                <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
-                Carregando Leads...
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Table View -->
+      <div class="table-container" id="tableView">
+        <div class="crm-table-container">
+          <table class="crm-table">
+            <thead>
+              <tr>
+                <th>Lead / Cliente</th>
+                <th>Consumo</th>
+                <th>Dimensionamento</th>
+                <th>Custo Total</th>
+                <th>Status</th>
+                <th>Data</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="crmTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                  <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
+                  Carregando Leads...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="text-align: center; padding: 1rem; display: none;" id="loadMoreContainer">
+          <button id="btnLoadMore" class="btn btn-secondary" style="padding: 0.6rem 2rem; font-size: 0.875rem;">
+            Carregar mais leads (50 por vez)
+          </button>
+          <span id="loadMoreInfo" style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;"></span>
+        </div>
+      </div>
+
+      <!-- Kanban View -->
+      <div class="kanban-container" id="kanbanView">
+        <div class="kanban-column novo" data-status="Novo">
+          <div class="kanban-column-header">
+            <span class="kanban-column-title">Novo</span>
+            <span class="kanban-count" id="kanbanNovoCount">0</span>
+          </div>
+          <div class="kanban-cards" data-status="Novo"></div>
+        </div>
+
+        <div class="kanban-column qualificacao" data-status="Qualificação">
+          <div class="kanban-column-header">
+            <span class="kanban-column-title">Qualificação</span>
+            <span class="kanban-count" id="kanbanQualificacaoCount">0</span>
+          </div>
+          <div class="kanban-cards" data-status="Qualificação"></div>
+        </div>
+
+        <div class="kanban-column proposta" data-status="Enviado">
+          <div class="kanban-column-header">
+            <span class="kanban-column-title">Proposta</span>
+            <span class="kanban-count" id="kanbanPropostaCount">0</span>
+          </div>
+          <div class="kanban-cards" data-status="Enviado"></div>
+        </div>
+
+        <div class="kanban-column negociacao" data-status="Negociação">
+          <div class="kanban-column-header">
+            <span class="kanban-column-title">Negociação</span>
+            <span class="kanban-count" id="kanbanNegociacaoCount">0</span>
+          </div>
+          <div class="kanban-cards" data-status="Negociação"></div>
+        </div>
+
+        <div class="kanban-column fechado" data-status="Fechado">
+          <div class="kanban-column-header">
+            <span class="kanban-column-title">Fechado</span>
+            <span class="kanban-count" id="kanbanFechadoCount">0</span>
+          </div>
+          <div class="kanban-cards" data-status="Fechado"></div>
+        </div>
+
+        <div class="kanban-column perdido" data-status="Perdido">
+          <div class="kanban-column-header">
+            <span class="kanban-column-title">Perdido</span>
+            <span class="kanban-count" id="kanbanPerdidoCount">0</span>
+          </div>
+          <div class="kanban-cards" data-status="Perdido"></div>
+        </div>
       </div>
 
     </div>
@@ -282,39 +624,51 @@
 
   <!-- Settings Modal -->
   <div id="configModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 600px;">
       <button class="close-modal" id="btnCloseConfig">&times;</button>
       <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: #fff;">
         ⚙️ Configurações do CRM Solar
       </h3>
       
       <form id="configForm">
-        <!-- HSP -->
         <div class="form-group">
-          <label for="cfgHsp" class="form-label">Horas de Sol Pleno Média (HSP)</label>
-          <input type="number" id="cfgHsp" class="form-control" step="0.1" min="1" max="10" required>
-          <small style="color: var(--text-muted); font-size: 0.75rem;">Utilizado para calcular a potência necessária em kWp.</small>
+          <label for="cfgHsp" class="form-label">Horas de Sol Pleno (HSP): <strong id="cfgHspVal">4.5</strong></label>
+          <input type="range" id="cfgHsp" class="form-control" min="3" max="7" step="0.1" style="padding:0;height:6px;cursor:pointer;accent-color:var(--solar-orange);">
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Impacto direto na potência. Ex: para 600 kWh/mês, cada +0.5 HSP reduz ~1.2 kWp.</small>
         </div>
 
-        <!-- Tarifa -->
         <div class="form-group">
-          <label for="cfgTarifa" class="form-label">Tarifa de Energia Média (R$ / kWh)</label>
-          <input type="number" id="cfgTarifa" class="form-control" step="0.01" min="0.1" max="3" required>
-          <small style="color: var(--text-muted); font-size: 0.75rem;">Preço por kWh cobrado pela distribuidora de energia.</small>
+          <label for="cfgTarifa" class="form-label">Tarifa de Energia (R$/kWh): <strong id="cfgTarifaVal">1,08</strong></label>
+          <input type="range" id="cfgTarifa" class="form-control" min="0.5" max="2.0" step="0.01" style="padding:0;height:6px;cursor:pointer;accent-color:var(--solar-orange);">
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Afeta economia projetada. Tarifa Energisa-MT ≈ R$ 1,08/kWh.</small>
         </div>
 
-        <!-- Margem -->
         <div class="form-group">
-          <label for="cfgMargem" class="form-label">Margem de Lucro Padrão (%)</label>
-          <input type="number" id="cfgMargem" class="form-control" min="5" max="100" required>
-          <small style="color: var(--text-muted); font-size: 0.75rem;">Acrescada sobre o custo dos materiais e da instalação.</small>
+          <label for="cfgMargem" class="form-label">Margem de Lucro (%): <strong id="cfgMargemVal">45</strong>%</label>
+          <input type="range" id="cfgMargem" class="form-control" min="10" max="80" step="1" style="padding:0;height:6px;cursor:pointer;accent-color:var(--solar-orange);">
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Fator de preço = 1 + margem/100. Ex: 45% → fator 1.45.</small>
         </div>
 
-        <!-- Telefone Consultor -->
+        <div class="form-group">
+          <label for="cfgPR" class="form-label">Performance Ratio: <strong id="cfgPRVal">0,78</strong></label>
+          <input type="range" id="cfgPR" class="form-control" min="0.65" max="0.90" step="0.01" style="padding:0;height:6px;cursor:pointer;accent-color:var(--solar-orange);">
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Eficiência global. 0,78 = 78% após perdas elétricas e térmicas.</small>
+        </div>
+
+        <div class="form-group" id="previewBox" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:1rem;margin-top:1rem;">
+          <h4 style="font-size:0.875rem;font-weight:600;color:var(--text-main);margin-bottom:0.75rem;">📊 Preview Rápido (600 kWh/mês, Norte, 10°)</h4>
+          <div style="display:flex;justify-content:space-between;gap:1rem;font-size:0.8rem;">
+            <div><span style="color:var(--text-muted);">Potência:</span> <strong id="previewPotencia" style="color:var(--solar-orange);">—</strong></div>
+            <div><span style="color:var(--text-muted);">Painéis:</span> <strong id="previewPaineis">—</strong></div>
+            <div><span style="color:var(--text-muted);">Preço:</span> <strong id="previewPreco" style="color:var(--status-fechado);">—</strong></div>
+            <div><span style="color:var(--text-muted);">Payback:</span> <strong id="previewPayback">—</strong></div>
+          </div>
+        </div>
+
         <div class="form-group" style="margin-bottom: 2rem;">
           <label for="cfgTelefone" class="form-label">WhatsApp Padrão da Empresa (DDD+Número)</label>
           <input type="text" id="cfgTelefone" class="form-control" required>
-          <small style="color: var(--text-muted); font-size: 0.75rem;">Para onde o cliente será redirecionado ao clicar em "Falar com Consultor".</small>
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Redirecionamento ao clicar em "Falar com Consultor".</small>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
@@ -325,12 +679,55 @@
     </div>
   </div>
 
+  <!-- Interações Modal -->
+  <div id="interacoesModal" class="modal">
+    <div class="modal-content" style="max-width: 550px; max-height: 80vh; overflow-y: auto;">
+      <button class="close-modal" id="btnCloseInteracoes">&times;</button>
+      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff;">
+        📋 Histórico de Interações
+      </h3>
+      <p id="interacoesLeadName" style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;"></p>
+      
+      <div id="interacoesList" style="margin-bottom: 1.5rem;"></div>
+      
+      <div style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+        <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; color: #fff;">Nova Interação</h4>
+        <form id="interacaoForm">
+          <input type="hidden" id="interacaoLeadId">
+          
+          <div class="form-group">
+            <label for="interacaoTipo" class="form-label">Tipo</label>
+            <select id="interacaoTipo" class="form-control" required>
+              <option value="ligacao">📞 Ligação</option>
+              <option value="whatsapp">💬 WhatsApp</option>
+              <option value="email">📧 E-mail</option>
+              <option value="reuniao">🤝 Reunião</option>
+              <option value="nota">📝 Nota</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="interacaoDesc" class="form-label">Descrição</label>
+            <textarea id="interacaoDesc" class="form-control" rows="3" placeholder="Descreva o contato..." required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="interacaoProximo" class="form-label">Próximo Contato (opcional)</label>
+            <input type="date" id="interacaoProximo" class="form-control">
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Registrar Interação</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Footer -->
   <footer style="border-top: 1px solid var(--border-color); padding: 2rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6); margin-top: 5rem;">
-    <p>&copy; 2026 SolarCRM - CRM de Negócios Solares.</p>
+    <p>&copy; 2026 Spark - CRM de Negócios Solares.</p>
   </footer>
 
   <script type="module" src="./src/js/dashboard.js"></script>

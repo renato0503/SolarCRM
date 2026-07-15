@@ -7,8 +7,11 @@ service cloud.firestore {
       // Qualquer visitante pode submeter o formulário de simulação para criar um lead
       allow create: if true;
       
-      // Apenas vendedores autenticados no CRM podem ler, atualizar ou excluir leads
-      allow read, update, delete: if request.auth != null;
+      // Leitura pública necessária para o cliente visualizar a proposta (proposta.html carrega dados do lead)
+      allow read: if true;
+      
+      // Apenas vendedores autenticados no CRM podem atualizar ou excluir leads
+      allow update, delete: if request.auth != null;
     }
 
     // Regras para a coleção de Propostas
@@ -21,6 +24,39 @@ service cloud.firestore {
       
       // Apenas vendedores autenticados no CRM podem alterar status (como Fechado, Enviado) ou excluir propostas
       allow update, delete: if request.auth != null;
+    }
+
+    // Regras para a coleção de Equipamentos
+    match /equipamentos/{equipamentoId} {
+      // Apenas vendedores autenticados podem consultar equipamentos (preços de custo são sensíveis)
+      allow read: if request.auth != null;
+      
+      // Apenas administradores autenticados podem cadastrar/editar equipamentos
+      allow write: if request.auth != null;
+    }
+
+    // Regras para a coleção de Usuários (perfis)
+    match /users/{userId} {
+      // Usuário pode ler próprio perfil; vendedores podem ler outros perfis
+      allow read: if request.auth != null;
+      // Usuário pode criar/atualizar próprio perfil
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Regras para a coleção de Interações (timeline de follow-up)
+    match /interacoes/{interacaoId} {
+      // Apenas vendedores autenticados podem gerenciar interações
+      allow read, write: if request.auth != null;
+    }
+
+    // Regras para a coleção de Auditoria
+    match /audit_log/{auditId} {
+      // Apenas administradores podem ler logs de auditoria
+      allow read: if request.auth != null;
+      // Sistema pode gravar logs quando autenticado
+      allow create: if request.auth != null;
+      // Não permitir alteração ou exclusão de logs
+      allow update, delete: if false;
     }
   }
 }

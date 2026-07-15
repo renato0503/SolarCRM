@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark - Meus Orçamentos</title>
+  <meta name="description" content="Consulte seus orçamentos de energia solar.">
+  <link rel="icon" type="image/png" href="./logospark.png">
+  <link rel="stylesheet" href="./src/css/style.css">
+</head>
+<body>
+  
+  <!-- Header -->
+  <header style="border-bottom: 1px solid var(--border-color); padding: 1.25rem 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(10px);">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <a href="./index.html" class="brand-logo">
+        <img src="./logospark.png" alt="Spark" style="height:38px;">
+      </a>
+      <a href="./lead.html" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+        Solicitar Novo
+      </a>
+    </div>
+  </header>
+
+  <!-- History Search -->
+  <main style="padding: 3rem 0 5rem 0; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(255, 94, 0, 0.12) 0%, rgba(255, 94, 0, 0) 70%); z-index: -1; pointer-events: none; border-radius: 50%;"></div>
+
+    <div class="container">
+      <div style="max-width: 600px; margin: 0 auto; text-align: center; margin-bottom: 2.5rem;">
+        <span style="background: var(--solar-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.875rem;">Histórico de Orçamentos</span>
+        <h1 style="font-size: 2.5rem; margin-top: 0.5rem; margin-bottom: 1rem; font-weight: 800; line-height: 1.15;">
+          Consulte seus <span style="color: var(--solar-orange);">Orçamentos</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.125rem; max-width: 500px; margin: 0 auto;">
+          Digite seu número de WhatsApp para encontrar todos os orçamentos gerados para você.
+        </p>
+      </div>
+
+      <!-- Search Card -->
+      <div class="glass-card" style="max-width: 480px; margin: 0 auto; border-radius: var(--radius-lg); padding: 2rem;">
+        <form id="searchForm">
+          <div class="form-group">
+            <label for="telefone" class="form-label" style="text-align: center; display: block;">Seu WhatsApp</label>
+            <input type="tel" id="telefone" class="form-control" style="text-align: center; font-size: 1.125rem; padding: 0.875rem;" placeholder="(XX) XXXXX-XXXX" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+            🔍 Buscar Meus Orçamentos
+          </button>
+        </form>
+      </div>
+
+      <!-- Results Container -->
+      <div id="resultsContainer" style="max-width: 800px; margin: 2rem auto; display: none;">
+        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; text-align: center;">Seus Orçamentos</h2>
+        <div id="resultsList"></div>
+      </div>
+
+      <!-- No Results -->
+      <div id="noResults" style="max-width: 480px; margin: 2rem auto; text-align: center; display: none;">
+        <div class="glass-card" style="padding: 2rem; border-radius: var(--radius-lg);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <h3 style="font-size: 1.125rem; margin-bottom: 0.5rem;">Nenhum orçamento encontrado</h3>
+          <p style="color: var(--text-muted); font-size: 0.875rem;">
+            Não encontramos orçamentos para este número. Solicite um novo orçamento abaixo.
+          </p>
+          <a href="./lead.html" class="btn btn-primary" style="margin-top: 1rem;">
+            Solicitar Orçamento
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid var(--border-color); padding: 2rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6);">
+    <div class="container">
+      <p>© 2026 Spark - Todos os direitos reservados.</p>
+      <p style="margin-top: 0.5rem; font-size: 0.75rem;">Desenvolvido por Spark</p>
+    </div>
+  </footer>
+
+  <script type="module" src="./src/js/historico.js"></script>
+</body>
+</html>

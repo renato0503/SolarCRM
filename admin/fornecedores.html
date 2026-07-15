@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark - Fornecedores</title>
+  <link rel="icon" type="image/png" href="../logospark.png">
+  <link rel="stylesheet" href="../src/css/style.css">
+</head>
+<body>
+  <header class="dashboard-header">
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center;">
+      <a href="../dashboard.html" class="brand-logo">
+        <img src="../logospark.png" alt="Spark" style="height:38px;">
+      </a>
+      <a href="../dashboard.html" class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.875rem;">Voltar ao CRM</a>
+    </div>
+  </header>
+
+  <main style="padding:2.5rem 0;">
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;">
+        <div>
+          <h1 style="font-size:1.75rem;font-weight:700;color:#fff;">📦 Fornecedores</h1>
+          <p style="color:var(--text-muted);font-size:0.95rem;">Cadastre distribuidores e compare cotações automaticamente.</p>
+        </div>
+        <button id="btnNovoFornecedor" class="btn btn-primary" style="padding:0.5rem 1.25rem;">+ Novo Fornecedor</button>
+      </div>
+
+      <div id="fornecedoresList" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="glass-card" style="padding:2rem;text-align:center;color:var(--text-muted);">
+          Carregando fornecedores...
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Novo/Editar Fornecedor -->
+  <div id="fornecedorModal" class="modal">
+    <div class="modal-content" style="max-width:550px;">
+      <button class="close-modal" id="btnCloseFornecedor">&times;</button>
+      <h3 style="font-size:1.25rem;font-weight:700;color:#fff;margin-bottom:1.5rem;" id="fornecedorModalTitle">Novo Fornecedor</h3>
+      <form id="fornecedorForm">
+        <input type="hidden" id="fornId">
+        <div class="form-group"><label class="form-label">Nome do Fornecedor *</label><input type="text" id="fornNome" class="form-control" required></div>
+        <div class="form-group"><label class="form-label">CNPJ</label><input type="text" id="fornCnpj" class="form-control"></div>
+        <div class="form-group"><label class="form-label">Contato (Nome)</label><input type="text" id="fornContato" class="form-control"></div>
+        <div class="form-group"><label class="form-label">Telefone</label><input type="text" id="fornTelefone" class="form-control"></div>
+        <div class="form-group"><label class="form-label">Site</label><input type="text" id="fornSite" class="form-control" placeholder="https://..."></div>
+        <div class="form-group"><label class="form-label">Observações</label><textarea id="fornObs" class="form-control" rows="2"></textarea></div>
+        <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1rem;">
+          <button type="button" class="btn btn-secondary" id="btnCancelFornecedor">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script type="module">
+    import { showToast, formatPhone } from '../src/js/utils.js';
+    import { getEquipamentos } from '../src/js/firebase.js';
+
+    const FORN_KEY = 'solarcrm_fornecedores';
+    const listEl = document.getElementById('fornecedoresList');
+
+    function getFornecedores() {
+      try { return JSON.parse(localStorage.getItem(FORN_KEY) || '[]'); } catch(e) { return []; }
+    }
+    function saveFornecedores(arr) { localStorage.setItem(FORN_KEY, JSON.stringify(arr)); }
+
+    function renderizar() {
+      const forn = getFornecedores();
+      if (forn.length === 0) {
+        listEl.innerHTML = '<div class="glass-card" style="padding:2rem;text-align:center;color:var(--text-muted);">Nenhum fornecedor cadastrado. Clique em "+ Novo Fornecedor".</div>';
+      } else {
+        listEl.innerHTML = forn.map((f, i) => `
+          <div class="glass-card" style="display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;">
+            <div>
+              <div style="font-weight:700;font-size:1rem;color:#fff;">${f.nome}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">
+                ${f.cnpj ? `CNPJ: ${f.cnpj} | ` : ''}${f.contato ? `Contato: ${f.contato} | ` : ''}${f.telefone || ''}
+                ${f.site ? `<br>${f.site}` : ''}
+              </div>
+            </div>
+            <div style="display:flex;gap:0.5rem;">
+              <button class="btn btn-secondary" style="padding:0.4rem 0.75rem;font-size:0.75rem;" data-edit="${i}">Editar</button>
+              <button class="btn btn-danger" style="padding:0.4rem 0.75rem;font-size:0.75rem;" data-del="${i}">Excluir</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', () => editar(parseInt(btn.dataset.edit)));
+      });
+      document.querySelectorAll('[data-del]').forEach(btn => {
+        btn.addEventListener('click', () => excluir(parseInt(btn.dataset.del)));
+      });
+    }
+
+    const modal = document.getElementById('fornecedorModal');
+    function abrirModal(forn = null) {
+      document.getElementById('fornId').value = forn ? forn._idx : '';
+      document.getElementById('fornNome').value = forn ? forn.nome : '';
+      document.getElementById('fornCnpj').value = forn ? forn.cnpj || '' : '';
+      document.getElementById('fornContato').value = forn ? forn.contato || '' : '';
+      document.getElementById('fornTelefone').value = forn ? forn.telefone || '' : '';
+      document.getElementById('fornSite').value = forn ? forn.site || '' : '';
+      document.getElementById('fornObs').value = forn ? forn.obs || '' : '';
+      document.getElementById('fornecedorModalTitle').textContent = forn ? 'Editar Fornecedor' : 'Novo Fornecedor';
+      modal.classList.add('active');
+    }
+    function fecharModal() { modal.classList.remove('active'); }
+
+    document.getElementById('btnNovoFornecedor').addEventListener('click', () => abrirModal());
+    document.getElementById('btnCloseFornecedor').addEventListener('click', fecharModal);
+    document.getElementById('btnCancelFornecedor').addEventListener('click', fecharModal);
+    document.getElementById('fornecedorForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const forn = {
+        nome: document.getElementById('fornNome').value.trim(),
+        cnpj: document.getElementById('fornCnpj').value.trim(),
+        contato: document.getElementById('fornContato').value.trim(),
+        telefone: document.getElementById('fornTelefone').value.trim(),
+        site: document.getElementById('fornSite').value.trim(),
+        obs: document.getElementById('fornObs').value.trim(),
+        atualizadoEm: new Date().toISOString()
+      };
+      const idx = document.getElementById('fornId').value;
+      const list = getFornecedores();
+      if (idx !== '') {
+        list[parseInt(idx)] = { ...list[parseInt(idx)], ...forn };
+      } else {
+        list.push(forn);
+      }
+      saveFornecedores(list);
+      fecharModal();
+      renderizar();
+      showToast('Fornecedor salvo!', 'success');
+    });
+
+    function editar(i) {
+      const f = getFornecedores()[i];
+      if (f) { f._idx = i; abrirModal(f); }
+    }
+    function excluir(i) {
+      if (confirm('Excluir este fornecedor?')) {
+        const list = getFornecedores();
+        list.splice(i, 1);
+        saveFornecedores(list);
+        renderizar();
+        showToast('Fornecedor removido.', 'info');
+      }
+    }
+
+    renderizar();
+  </script>
+</body>
+</html>

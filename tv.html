@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark - Monitoramento</title>
+  <link rel="icon" type="image/png" href="./logospark.png">
+  <link rel="stylesheet" href="./src/css/style.css">
+  
+  <!-- ApexCharts Local -->
+  <script src="./apexcharts.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+      overflow: hidden;
+    }
+    
+    .tv-header {
+      background: linear-gradient(90deg, var(--solar-orange), #ff6b00);
+      color: #fff;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .tv-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .tv-header .clock {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: monospace;
+    }
+    
+    .tv-container {
+      padding: 1.5rem 2rem;
+      height: calc(100vh - 80px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 1.5rem;
+    }
+    
+    .tv-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    
+    .tv-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .kanban-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+    }
+    
+    .kanban-column {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+      border: 2px solid transparent;
+    }
+    
+    .kanban-column.novo { border-color: var(--status-novo); }
+    .kanban-column.qualificacao { border-color: var(--status-enviado); }
+    .kanban-column.proposta { border-color: #9333ea; }
+    .kanban-column.negociacao { border-color: #f59e0b; }
+    .kanban-column.fechado { border-color: var(--status-fechado); }
+    .kanban-column.perdido { border-color: var(--status-perdido); }
+    
+    .kanban-count {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+    }
+    
+    .kanban-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    
+    .stat-item {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--solar-orange);
+      line-height: 1;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+    
+    .activity-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+    
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    
+    .activity-icon.novo { background: var(--status-novo-bg); }
+    .activity-icon.enviado { background: var(--status-enviado-bg); }
+    .activity-icon.fechado { background: var(--status-fechado-bg); }
+    
+    .activity-content {
+      flex: 1;
+    }
+    
+    .activity-name {
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+    
+    .activity-detail {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    
+    .activity-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+    
+    .footer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 0.75rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    
+    .footer-bar a {
+      color: var(--solar-orange);
+      text-decoration: none;
+    }
+    
+    .refresh-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .refresh-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--status-fechado);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  
+  <header class="tv-header">
+    <h1>
+      ☀️ Spark
+      <span style="font-size: 1rem; font-weight: 400; opacity: 0.9;">MONITORAMENTO EM TEMPO REAL</span>
+    </h1>
+    <div class="clock" id="clock">00:00:00</div>
+  </header>
+
+  <main class="tv-container">
+    <!-- Funil de Vendas -->
+    <div class="tv-card">
+      <div class="tv-card-title">📊 Funil de Vendas</div>
+      <div class="kanban-row" id="kanbanStats">
+        <div class="kanban-column novo">
+          <div class="kanban-count" id="countNovo">0</div>
+          <div class="kanban-label">Novo</div>
+        </div>
+        <div class="kanban-column qualificacao">
+          <div class="kanban-count" id="countQualificacao">0</div>
+          <div class="kanban-label">Qualificação</div>
+        </div>
+        <div class="kanban-column proposta">
+          <div class="kanban-count" id="countProposta">0</div>
+          <div class="kanban-label">Proposta</div>
+        </div>
+        <div class="kanban-column negociacao">
+          <div class="kanban-count" id="countNegociacao">0</div>
+          <div class="kanban-label">Negociação</div>
+        </div>
+        <div class="kanban-column fechado">
+          <div class="kanban-count" id="countFechado">0</div>
+          <div class="kanban-label">Fechado</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicadores -->
+    <div class="tv-card">
+      <div class="tv-card-title">📈 Indicadores</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="statTotalLeads">0</div>
+          <div class="stat-label">Total de Leads</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statFaturamento">R$ 0</div>
+          <div class="stat-label">Faturamento</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statEnviadas">0</div>
+          <div class="stat-label">Propostas Enviadas</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statConversao">0%</div>
+          <div class="stat-label">Taxa de Conversão</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico de Crescimento -->
+    <div class="tv-card">
+      <div class="tv-card-title">📊 Crescimento Mensal</div>
+      <div id="graficoCrescimento"></div>
+    </div>
+
+    <!-- Última Atividades -->
+    <div class="tv-card" style="grid-column: span 2;">
+      <div class="tv-card-title">⚡ Últimas Atividades</div>
+      <div class="activity-list" id="activityList">
+        <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          Carregando atividades...
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer-bar">
+    <div class="refresh-indicator">
+      <div class="refresh-dot"></div>
+      <span>Atualizando automaticamente a cada 30s</span>
+    </div>
+    <div>
+      Desenvolvido por <a href="https://cerradofinancas.com.br" target="_blank">Cerrado Tech</a>
+    </div>
+    <div id="lastUpdate">Última atualização: --:--:--</div>
+  </footer>
+
+  <script type="module" src="./src/js/tv.js"></script>
+</body>
+</html>

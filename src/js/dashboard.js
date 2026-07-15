@@ -5,19 +5,48 @@ import {
   dbUpdateProposalStatus, 
   dbDeleteLeadAndProposal, 
   authGetCurrentUser,
-  firebaseIsMock
+  firebaseIsMock,
+  getUserProfile,
+  dbAddInteracao,
+  dbGetInteracoes
 } from './firebase.js';
 import { formatCurrency, showToast } from './utils.js';
 import { getSettings, saveSettings } from './config.js';
 
-// Ativa proteção de rota - redireciona se não estiver logado
 protegerRota();
 
+const THEME_KEY = 'solarcrm_theme';
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefers ? 'dark' : 'light'));
+}
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(THEME_KEY, t);
+  const s = document.getElementById('themeIconSun'), m = document.getElementById('themeIconMoon');
+  if (s) s.style.display = t === 'dark' ? 'block' : 'none';
+  if (m) m.style.display = t === 'dark' ? 'none' : 'block';
+}
+function toggleTheme() { applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+
 document.addEventListener('DOMContentLoaded', async () => {
-  // Configuração inicial do usuário no cabeçalho
+  initTheme();
+  document.getElementById('btnThemeToggle')?.addEventListener('click', toggleTheme);
+
   const user = authGetCurrentUser();
+  let currentUserId = null, isAdminUser = false;
   if (user) {
-    document.getElementById('userEmail').textContent = `${user.email} ${firebaseIsMock() ? '(Teste)' : '(Firebase)'}`;
+    const profile = await getUserProfile(user.uid);
+    currentUserId = user.uid;
+    isAdminUser = profile?.role === 'admin';
+    document.getElementById('userEmail').textContent = `${user.email} ${firebaseIsMock() ? '(Teste)' : ''} ${isAdminUser ? '(Admin)' : '(Vendedor)'}`;
+    if (isAdminUser) {
+      const b = document.getElementById('btnAdminEquip'); if (b) b.style.display = 'flex';
+      const f = document.getElementById('btnFornecedores'); if (f) f.style.display = 'inline-flex';
+      const bk = document.getElementById('btnBackup'); if (bk) bk.style.display = 'inline-flex';
+      const rs = document.getElementById('btnRestore'); if (rs) rs.style.display = 'inline-flex';
+    }
   }
 
   // Elementos do DOM
@@ -43,9 +72,63 @@ document.addEventListener('DOMContentLoaded', async () => {
   let propostas = [];
   let currentFilter = 'Todos';
   let searchQuery = '';
+  let paginaAtual = 1;
+  const LIMITE_PAGINA = 50;
+  let followUpBadges = {};
 
-  // Logout
   btnLogout.addEventListener('click', logout);
+
+  // Notification bell
+  const btnNotif = document.getElementById('btnNotificacoes');
+  const notifDrop = document.getElementById('notifDropdown');
+  const notifBadge = document.getElementById('notifBadge');
+  const notifList = document.getElementById('notifList');
+  btnNotif?.addEventListener('click', (e) => { e.stopPropagation(); if (notifDrop) notifDrop.style.display = notifDrop.style.display === 'none' ? 'block' : 'none'; });
+  document.addEventListener('click', () => { if (notifDrop) notifDrop.style.display = 'none'; });
+  document.getElementById('btnNotifDismissAll')?.addEventListener('click', () => {
+    if (notifList) notifList.innerHTML = '<div style="padding:1.5rem 1rem;text-align:center;color:var(--text-muted);font-size:0.8rem;">Nenhuma notificação pendente</div>';
+    if (notifBadge) { notifBadge.style.display = 'none'; notifBadge.textContent = '0'; }
+  });
+
+  // Load more button
+  document.getElementById('btnLoadMore')?.addEventListener('click', () => {
+    paginaAtual++;
+    renderizarCRM();
+  });
+
+  // Backup button (admin only)
+  document.getElementById('btnBackup')?.addEventListener('click', async () => {
+    const data = {
+      leads, propostas,
+      equipamentos: localStorage.getItem('solarcrm_mock_equipamentos'),
+      config: localStorage.getItem('solarcrm_config'),
+      exportadoEm: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `spark-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast('Backup exportado com sucesso!', 'success');
+  });
+
+  document.getElementById('btnRestore')?.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      try {
+        const data = JSON.parse(text);
+        if (data.config) localStorage.setItem('solarcrm_config', data.config);
+        if (data.equipamentos) localStorage.setItem('solarcrm_mock_equipamentos', data.equipamentos);
+        showToast('Backup restaurado! Recarregue a página.', 'success');
+        setTimeout(() => location.reload(), 1500);
+      } catch (err) { showToast('Arquivo inválido.', 'error'); }
+    };
+    input.click();
+  });
 
   // --- CARGA DE DADOS & RENDER ---
 
@@ -60,14 +143,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         </tr>
       `;
 
-      leads = await dbGetLeads();
+      leads = await dbGetLeads(currentUserId, isAdminUser);
       propostas = await dbGetProposals();
       
+      await carregarFollowUpBadges();
+      atualizarNotificacoes();
       renderizarCRM();
       atualizarEstatisticas();
     } catch (e) {
       console.error(e);
       showToast("Falha ao sincronizar com o banco de dados. Recarregando...", "error");
+    }
+  }
+
+  async function carregarFollowUpBadges() {
+    for (const lead of leads) {
+      try {
+        const interacoes = await dbGetInteracoes(lead.id);
+        if (interacoes.length > 0) {
+          followUpBadges[lead.id] = Math.floor((Date.now() - new Date(interacoes[0].data)) / 86400000);
+        } else {
+          followUpBadges[lead.id] = lead.data_criacao ? Math.floor((Date.now() - new Date(lead.data_criacao)) / 86400000) : 0;
+        }
+      } catch (e) { followUpBadges[lead.id] = 0; }
+    }
+  }
+
+  function getFollowUpBadgeHtml(leadId) {
+    const d = followUpBadges[leadId];
+    if (d === undefined) return '';
+    if (d >= 14) return '<span style="background:rgba(239,68,68,0.2);color:#ef4444;padding:2px 6px;border-radius:4px;font-size:0.65rem;">❄️ Frio</span>';
+    if (d >= 7) return '<span style="background:rgba(245,158,11,0.2);color:#f59e0b;padding:2px 6px;border-radius:4px;font-size:0.65rem;">⚠️ 7+dias</span>';
+    if (d >= 3) return '<span style="background:rgba(59,130,246,0.2);color:#3b82f6;padding:2px 6px;border-radius:4px;font-size:0.65rem;">👀 Atenção</span>';
+    return '';
+  }
+
+  function atualizarNotificacoes() {
+    const leadsMap = new Map(leads.map(l => [l.id, l]));
+    const notifs = [];
+    propostas.forEach(p => {
+      if (p.status === 'Fechado' || p.status === 'Perdido') return;
+      const d = followUpBadges[p.lead_id];
+      if (!d || d < 3) return;
+      const l = leadsMap.get(p.lead_id);
+      if (!l) return;
+      const level = d >= 14 ? { label: '❄️ Frio', cor: '#ef4444' } : d >= 7 ? { label: '⚠️ 7+ dias', cor: '#f59e0b' } : { label: '👀 Atenção', cor: '#3b82f6' };
+      notifs.push({ lead: l, prop: p, dias: d, ...level });
+    });
+    notifs.sort((a, b) => b.dias - a.dias);
+    if (notifBadge) {
+      if (notifs.length > 0) { notifBadge.style.display = 'block'; notifBadge.textContent = notifs.length; }
+      else notifBadge.style.display = 'none';
+    }
+    if (notifList) {
+      if (notifs.length === 0) {
+        notifList.innerHTML = '<div style="padding:1.5rem 1rem;text-align:center;color:var(--text-muted);font-size:0.8rem;">Nenhum lead pendente de follow-up</div>';
+      } else {
+        notifList.innerHTML = notifs.map(n => `<div style="padding:0.5rem 1rem;border-bottom:1px solid var(--border-color);cursor:pointer" onclick="window.open('./proposta.html?id=${n.prop.id}','_blank')"><div style="display:flex;align-items:center;gap:0.5rem"><span style="font-size:0.65rem;background:${n.cor}20;color:${n.cor};padding:1px 6px;border-radius:4px">${n.label}</span><span style="font-weight:600;font-size:0.82rem;color:var(--text-main)">${n.lead.nome}</span></div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">${n.dias} dias sem contato | ${formatCurrency(n.prop.preco_final||0)}</div></div>`).join('');
+      }
     }
   }
 
@@ -103,12 +236,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                             telefoneCliente.includes(searchQuery);
 
       // Filtro de Status
-      const matchesStatus = currentFilter === 'Todos' || prop.status === currentFilter;
+      const matchesStatus = currentFilter === 'Todos' || prop.status === currentFilter
+        || (currentFilter === 'Atencao' && followUpBadges[prop.lead_id] >= 3 && prop.status !== 'Fechado' && prop.status !== 'Perdido');
 
       return matchesSearch && matchesStatus;
     });
 
-    if (propostasFiltradas.length === 0) {
+    // Pagination
+    const total = propostasFiltradas.length;
+    const slice = propostasFiltradas.slice(0, paginaAtual * LIMITE_PAGINA);
+
+    if (slice.length === 0) {
       crmTableBody.innerHTML = `
         <tr>
           <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
@@ -119,7 +257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    propostasFiltradas.forEach(prop => {
+    slice.forEach(prop => {
       const lead = leadsMap.get(prop.lead_id);
       if (!lead) return; // ignora se não tiver lead associado
 
@@ -128,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Nome e contatos do lead
       const tdLead = document.createElement('td');
       tdLead.innerHTML = `
-        <div style="font-weight: 600; font-size: 0.95rem; color: #fff;">${lead.nome}</div>
+        <div style="font-weight: 600; font-size: 0.95rem; color: #fff;">${lead.nome} ${getFollowUpBadgeHtml(lead.id)}</div>
         <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
           ${lead.email} <br>
           <span style="font-family: monospace;">${formatPhone(lead.telefone)}</span>
@@ -270,6 +408,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       crmTableBody.appendChild(tr);
     });
+
+    // Load more container
+    const loadMoreC = document.getElementById('loadMoreContainer');
+    const loadMoreI = document.getElementById('loadMoreInfo');
+    if (loadMoreC) {
+      if (slice.length < total) {
+        loadMoreC.style.display = 'block';
+        if (loadMoreI) loadMoreI.textContent = `Exibindo ${slice.length} de ${total} leads`;
+      } else if (total > LIMITE_PAGINA) {
+        loadMoreC.style.display = 'block';
+        if (loadMoreI) loadMoreI.textContent = `Todos os ${total} leads carregados`;
+      } else {
+        loadMoreC.style.display = 'none';
+      }
+    }
+    paginaAtual = 1; // reset on new filter/search
   }
 
   // --- MENSAGEM WHATSAPP (FASE 4) ---
@@ -329,14 +483,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- CONFIGURAÇÕES GLOBAL MODAL ---
 
+  function atualizarPreviewConfig() {
+    const hsp = parseFloat(document.getElementById('cfgHsp')?.value) || 4.5;
+    const tarifa = parseFloat(document.getElementById('cfgTarifa')?.value) || 1.08;
+    const margem = parseInt(document.getElementById('cfgMargem')?.value) || 45;
+    const pr = parseFloat(document.getElementById('cfgPR')?.value) || 0.78;
+    document.getElementById('cfgHspVal') && (document.getElementById('cfgHspVal').textContent = hsp.toFixed(1));
+    document.getElementById('cfgTarifaVal') && (document.getElementById('cfgTarifaVal').textContent = tarifa.toFixed(2).replace('.', ','));
+    document.getElementById('cfgMargemVal') && (document.getElementById('cfgMargemVal').textContent = margem);
+    document.getElementById('cfgPRVal') && (document.getElementById('cfgPRVal').textContent = pr.toFixed(2).replace('.', ','));
+
+    const painelW = 620, consumo = 600;
+    const pot = consumo / (hsp * 30 * pr);
+    const np = Math.ceil(pot / (painelW / 1000));
+    document.getElementById('previewPotencia') && (document.getElementById('previewPotencia').textContent = `${(np * painelW / 1000).toFixed(1)} kWp`);
+    document.getElementById('previewPaineis') && (document.getElementById('previewPaineis').textContent = `${np} painéis`);
+    const custo = np * 410 + 2900 + np * 85 + 1100 + 120 * np * painelW / 1000;
+    const custoT = custo + 2200 + 350 * np * painelW / 1000 + 350;
+    const preco = custoT * (1 + margem / 100);
+    document.getElementById('previewPreco') && (document.getElementById('previewPreco').textContent = formatCurrency(preco));
+    const econ = consumo * tarifa * 12 * 0.85;
+    document.getElementById('previewPayback') && (document.getElementById('previewPayback').textContent = `${econ > 0 ? (preco / econ).toFixed(1) : '—'} anos`);
+  }
+
   btnConfig.addEventListener('click', () => {
-    const settings = getSettings();
-    document.getElementById('cfgHsp').value = settings.hsp;
-    document.getElementById('cfgTarifa').value = settings.tarifaEnergia;
-    document.getElementById('cfgMargem').value = settings.margemLucro;
-    document.getElementById('cfgTelefone').value = settings.empresaTelefone;
-    
+    const s = getSettings();
+    const hspEl = document.getElementById('cfgHsp'), tarEl = document.getElementById('cfgTarifa'), marEl = document.getElementById('cfgMargem'), prEl = document.getElementById('cfgPR');
+    if (hspEl) hspEl.value = s.hsp;
+    if (tarEl) tarEl.value = s.tarifaEnergia;
+    if (marEl) marEl.value = s.margemLucro;
+    if (prEl) prEl.value = s.performanceRatio;
+    document.getElementById('cfgTelefone').value = s.empresaTelefone;
+    atualizarPreviewConfig();
     configModal.classList.add('active');
+  });
+
+  ['cfgHsp','cfgTarifa','cfgMargem','cfgPR'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', atualizarPreviewConfig);
   });
 
   function fecharConfig() {
@@ -352,7 +535,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hsp = Number(document.getElementById('cfgHsp').value);
     const tarifaEnergia = Number(document.getElementById('cfgTarifa').value);
     const margemLucro = Number(document.getElementById('cfgMargem').value);
+    const performanceRatio = document.getElementById('cfgPR') ? Number(document.getElementById('cfgPR').value) : 0.78;
     const empresaTelefone = document.getElementById('cfgTelefone').value.trim();
+
+    saveSettings({ hsp, tarifaEnergia, margemLucro, performanceRatio, empresaTelefone });
 
     saveSettings({
       hsp,

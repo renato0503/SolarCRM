@@ -1,0 +1,27 @@
+Perfeito. Vou unificar tudo no padrão original: dark + dourado #F2BB03.
+Plano de ação:
+1. Corrigir spark-site/css/style.css — trocar azul por dourado, fundo claro por dark
+2. Corrigir spark-site/index.html — ajustar classes/estrutura que referenciam cores antigas
+3. Corrigir demais páginas do spark-site (sobre, servicos, solar, industrial, capacitores, orcamento, blog)
+4. Alinhar CRM src/css/style.css — trocar #FFD700 por #F2BB03 e limpar laranjas residuais
+5. Integrar botão "Solicite um Orçamento" do spark-site ao formulário do CRM (index.html)
+6. Corrigir spark-site/login.html — caminhos quebrados
+Vou criar o plano e começar.
+# Todos
+[ ] Corrigir spark-site/css/style.css — trocar cores azul/laranja por dark+dourado #F2BB03
+[ ] Corrigir spark-site/index.html — ajustar classes/cores inline
+[ ] Corrigir demais páginas spark-site (sobre, servicos, solar, industrial, capacitores, orcamento, blog)
+[ ] Alinhar CRM src/css/style.css — trocar #FFD700 por #F2BB03, limpar laranjas residuais
+[ ] Integrar botão Solicite um Orçamento do spark-site ao formulário CRM (index.html)
+[ ] Corrigir spark-site/login.html — caminhos quebrados de CSS/JS
+[ ] Verificar consistência visual geral entre todas as páginas
+# Todos
+[•] Corrigir spark-site/css/style.css — trocar cores azul/laranja por dark+dourado #F2BB03
+[ ] Corrigir spark-site/index.html — ajustar classes/cores inline
+[ ] Corrigir demais páginas spark-site (sobre, servicos, solar, industrial, capacitores, orcamento, blog)
+[ ] Alinhar CRM src/css/style.css — trocar #FFD700 por #F2BB03, limpar laranjas residuais
+[ ] Integrar botão Solicite um Orçamento do spark-site ao formulário CRM (index.html)
+[ ] Corrigir spark-site/login.html — caminhos quebrados de CSS/JS
+[ ] Verificar consistência visual geral entre todas as páginas
+→Read spark-site\css\style.css 
+→Read spark-site\index.html 

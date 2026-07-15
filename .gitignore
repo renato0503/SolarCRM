@@ -31,3 +31,6 @@ dist-ssr
 firebase.json
 .firestore.rules
 firestore.rules
+
+# Windows device files
+nul

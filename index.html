@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SolarCRM - Simulador de Economia Solar</title>
+  <title>Spark - Simulador de Economia Solar</title>
   <meta name="description" content="Simule o custo e a economia de instalar energia solar em sua casa ou empresa.">
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="icon" type="image/png" href="./logospark.png">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Spark CRM">
   <link rel="stylesheet" href="./src/css/style.css">
 </head>
 <body>
@@ -14,22 +18,14 @@
   <header style="border-bottom: 1px solid var(--border-color); padding: 1.25rem 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(10px);">
     <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
       <a href="./index.html" class="brand-logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="4"/>
-          <path d="M12 2v2"/>
-          <path d="M12 20v2"/>
-          <path d="M4.93 4.93l1.41 1.41"/>
-          <path d="M17.66 17.66l1.41 1.41"/>
-          <path d="M2 12h2"/>
-          <path d="M20 12h2"/>
-          <path d="M6.34 17.66l-1.41 1.41"/>
-          <path d="M19.07 4.93l-1.41 1.41"/>
-        </svg>
-        <span>SolarCRM</span>
+        <img src="./logospark.png" alt="Spark" style="height:42px;">
       </a>
       <a href="./dashboard.html" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.875rem;">
         Painel de Vendas
       </a>
+      <button id="btnInstallPWA" onclick="installPWA()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.8rem; display: none; align-items: center; gap: 4px;">
+        📲 Instalar App
+      </button>
     </div>
   </header>
 
@@ -108,22 +104,65 @@
                 <option value="" disabled selected>Selecione...</option>
                 <option value="ceramica">Telha Cerâmica (Barro)</option>
                 <option value="metalica">Telha Metálica (Zinco/Sanduíche)</option>
-                <option value="laje">Laje Plano ou Solo (Suportes de Alumínio)</option>
                 <option value="fibrocimento">Telha Fibrocimento (Eternit)</option>
+                <option value="fibro_madeira">Telha Fibrocimento base Madeira</option>
+                <option value="laje">Laje Plano ou Solo</option>
               </select>
               <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
             </div>
 
-            <!-- Orientação -->
+            <!-- Tipo de Ligação -->
             <div class="form-group">
-              <label for="orientacao" class="form-label">Orientação Solar (Se souber)</label>
-              <select id="orientacao" class="form-control">
+              <label for="tipo_ligacao" class="form-label">Tipo de Ligação *</label>
+              <select id="tipo_ligacao" class="form-control" required>
+                <option value="bifasico" selected>Bifásico (220V)</option>
+                <option value="monofasico">Monofásico (220V)</option>
+                <option value="trifasico">Trifásico (380V)</option>
+              </select>
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+          </div>
+
+          <div class="grid grid-cols-2">
+            
+            <!-- Orientação Solar -->
+            <div class="form-group">
+              <label for="orientacao" class="form-label">Orientação do Telhado *</label>
+              <select id="orientacao" class="form-control" required>
                 <option value="norte" selected>Norte (Ideal)</option>
-                <option value="leste_oeste">Leste / Oeste</option>
+                <option value="nordeste">Nordeste</option>
+                <option value="leste">Leste</option>
+                <option value="sudeste">Sudeste</option>
                 <option value="sul">Sul (Menor rendimento)</option>
+                <option value="sudoeste">Sudoeste</option>
+                <option value="oeste">Oeste</option>
+                <option value="noroeste">Noroeste</option>
               </select>
             </div>
 
+            <!-- Inclinação -->
+            <div class="form-group">
+              <label for="inclinacao" class="form-label">Inclinação do Telhado (°)</label>
+              <select id="inclinacao" class="form-control">
+                <option value="5">5° (Plano)</option>
+                <option value="10" selected>10° (Baixa)</option>
+                <option value="15">15° (Média)</option>
+                <option value="20">20° (Alta)</option>
+                <option value="25">25° (Muito inclinado)</option>
+              </select>
+            </div>
+
+          </div>
+
+          <!-- Tipo de Cliente -->
+          <div class="form-group">
+            <label for="tipo_cliente" class="form-label">Tipo de Cliente</label>
+            <select id="tipo_cliente" class="form-control">
+              <option value="residencial" selected>Residencial</option>
+              <option value="comercial">Comercial</option>
+              <option value="rural">Rural</option>
+            </select>
           </div>
 
           <div style="margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
@@ -147,11 +186,33 @@
   <!-- Footer -->
   <footer style="border-top: 1px solid var(--border-color); padding: 2.5rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6);">
     <div class="container">
-      <p>&copy; 2026 SolarCRM - Todos os direitos reservados.</p>
+      <p>&copy; 2026 Spark - Todos os direitos reservados.</p>
       <p style="margin-top: 0.5rem; font-size: 0.75rem;">Desenvolvido com HTML5, CSS3, Vanilla JS & Firebase</p>
     </div>
   </footer>
 
   <script type="module" src="./src/js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('btnInstallPWA');
+      if (btn) btn.style.display = 'inline-flex';
+    });
+    window.installPWA = async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        document.getElementById('btnInstallPWA').style.display = 'none';
+      }
+    };
+  </script>
 </body>
 </html>

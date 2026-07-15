@@ -455,6 +455,82 @@ Após validação → seguir para SPRINT 27.
 
 ---
 
-**Versão deste documento:** 2.0 · **Data:** 15/07/2026  
-**Autor da auditoria:** Análise técnica automatizada + atualizações manuais  
-**Próxima revisão:** após implementação de Sprint 25
+## 🔄 Atualizações Recentes (15/07/2026)
+
+### Fase 27 — Correções Categoria A e B (concluídas)
+
+| Item | Status | Alteração realizada |
+|------|--------|---------------------|
+| A4 | ✅ Concluído | `proposta.js` já protegia acesso a `lead-cidade` com `if (leadCidadeEl)`. |
+| B1/B4/B5 | ✅ Concluído | `firebase.js` agora importa `EQUIPAMENTOS` de `equipamentos.js` como fonte única. |
+| B2 | ✅ Concluído | Removido campo órfão `percentualAutoconsumo` de `config.js`. |
+| B3 | ✅ Concluído | `calculator.js` agora usa `getTipoClienteConfig()` ao invés de ternário hardcoded. |
+| B6 | ✅ Concluído | TIR refatorada para matemática anual nativa; `tirMensal` é derivado de `tirAnual`. |
+| B7 | ✅ Concluído | Removidos fallbacks hardcoded em `pdf.js`; agora exibe `—` quando `configs` não existe. |
+| B8 | ✅ Concluído | `diasNoMes()` aplicado na geração mensal; média anual de 30.44 dias. |
+| B9 | ✅ Concluído | Função renomeada para `gerarSaldoAnoAAno` em `financeiro.js` e `calculator.js`. |
+| B11 | ✅ Concluído | Slider de entrada em `proposta.js` atualiza tabela de financiamento imediatamente. |
+| B12 | 🔄 Em análise | Google Fonts via `@import` continua ativo; não foi alterado para não impactar produção. |
+| B13 | 🔄 Em análise | Measurement ID mantido localmente até validação do analytics no Firebase. |
+| B14 | ✅ Concluído | Adicionada `mobile-web-app-capable` em `simulador.html`. |
+| B15 | ✅ Concluído | Novos rewrites adicionados no `firebase.json` para rotas principais. |
+| B16 | ✅ Concluído | Regras Firestore deployadas via CLI. |
+
+### Deploy e Infraestrutura
+
+| Item | Status | Observação |
+|------|--------|-----------|
+| Firebase Hosting | ✅ Concluído | Deploy realizado em 15/07/2026. |
+| Firestore rules | ✅ Concluído | Deploy via CLI realizado com sucesso. |
+| Rotas SPA | ✅ Concluído | Rewrites configurados para `/simulador`, `/login`, `/dashboard`, `/proposta`, `/historico` e `/lead`. |
+| `import.meta.env` | ✅ Concluído | Adicionada função `getEnv()` em `firebase.js` para evitar `TypeError` em produção. |
+| `manifest.json` / `sw.js` | ✅ Concluído | Movidos para a raiz do projeto para correto funcionamento do PWA. |
+
+### 🔴 Pendências Atuais e Motivo
+
+| Item | Por que não foi feito ainda |
+|------|-----------------------------|
+| A1 / A2 | ✅ Já resolvidos em sprint anterior. |
+| A3 | ✅ Já resolvido em sprint anterior. |
+| B10 | Não auditado completamente; requer análise manual de `dashboard.js` para confirmar se há falhas de `null` em `profile.role`. |
+| B12 | Google Fonts continua funcionando; alteração para self-host é recomendada, mas não é bloqueante. |
+| B13 | Analytics está operando; ajuste do Measurement ID é baixo risco e pode ser validado posteriormente. |
+| C1 | Alteração de copy do WhatsApp depende de validação de marketing/comercial. |
+| C2 | Ajuste de timeout do toast é baixo risco; não foi priorizado nesta sprint. |
+| C3 | Tooltip de segurança depende de decisão de produto sobre selos LGPD. |
+| C4 | Validação em `calculator.js` demanda refatoração maior; será feita em sprint própria. |
+| C5 | Depende da conclusão de C4 para evitar duplicidade de validação. |
+| C6 | Baixo impacto; será revisitado durante SPRINT 28. |
+| C7 | Baixo impacto; será revisitado durante SPRINT 28. |
+| M1 | Depende de base de dados regional consolidada. |
+| M2 | Requer modelagem de campo `uf` em `leads`. |
+| M3 | Refatoração de cursor Firestore será feita em sprint dedicada. |
+| M4 | Requer design mobile específico para `proposta.html`. |
+| M5 | Baixo impacto; será feita em SPRINT 29. |
+| M6 | Internacionalização demanda estrutura de i18n completa. |
+| M7 | Baixo impacto na precisão atual. |
+| M8 | Acessibilidade será tratada em SPRINT 28. |
+| M9 | Depende de validação jurídica do texto do consentimento. |
+| M10 | Requer Cloud Function + Firebase Blaze. |
+| M11 | Bloqueado por credenciais externas (VAPID). |
+| M12 | Bloqueado por credenciais externas (SendGrid). |
+| M13 | Bloqueado por credenciais externas (Mercado Pago/Asaas). |
+| M14 | Decisão de biblioteca/etapas ainda pendente. |
+| M15 | Requer alteração no modelo de dados + workflow de reserva. |
+| M16 | Requer estrutura de cotações em `fornecedores.html`. |
+
+---
+
+## 📅 Próximos Passos Recomendados
+
+1. **Validar em produção** as rotas `/simulador`, `/login` e `/dashboard` após deploy.
+2. **Sprint 28** — UX/validações (C1, C2, C3, C4, C5, C6, C7, M8, M9).
+3. **Sprint 29** — Features de crescimento (M1, M2, M3, M5).
+4. **Sprint 30** — Integrações bloqueadas por credenciais (M10-M13).
+5. **Sprint 31** — Features avançadas (M14-M16).
+
+---
+
+**Versão deste documento:** 2.1 · **Data:** 15/07/2026  
+**Autor da atualização:** Kilo + revisão manual  
+**Próxima revisão:** após deploy de validação de rotas

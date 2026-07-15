@@ -135,6 +135,18 @@ Resumo consolidado do que já foi implementado na **Spark** (CRM Solar da Spark 
 - `firebase.json` ajustado: rewrite `/` → `/spark-site/index.html`.
 - Deploy Firebase Hosting atualizado com nova estrutura de rotas.
 
+### 27. Correções de Bugs Categorias A e B (Fase 27) ✅
+- **A4**: `proposta.js` já protegia acesso a `lead-cidade` com `if (leadCidadeEl)`.
+- **B1/B4/B5**: Unificado banco de equipamentos. `firebase.js` agora importa `EQUIPAMENTOS` de `equipamentos.js` como fonte única, eliminando duplicação.
+- **B2**: Removido campo órfão `percentualAutoconsumo` de `config.js`.
+- **B3**: `calculator.js` agora usa `getTipoClienteConfig()` ao invés de lógica ternária hardcoded.
+- **B6**: TIR refatorada para matemática anual nativa. `tirAnual` é direto e `tirMensal` é derivado.
+- **B7**: Removidos fallbacks hardcoded em `pdf.js` (`28.5`, `25`, `50`), agora exibe `—` quando `configs` não existe.
+- **B8**: Cálculo de dimensionamento e geração mensal usam `diasNoMes()` e média anual de 30.44 dias.
+- **B9**: Função `gerarFluxoCaixaAcumulado` renomeada para `gerarSaldoAnoAAno` em `financeiro.js`, `calculator.js`.
+- **B11**: Slider de entrada em `proposta.js` atualiza tabela de financiamento imediatamente.
+- **B12-B16**: Ajustes de deploy e infra: meta tag mobile-web-app-capable, rewrites SPA em `firebase.json`, deploy de `firestore.rules` via CLI.
+
 ---
 
 ## 🔴 PENDÊNCIAS (requerem credenciais/ações externas)

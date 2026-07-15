@@ -33,7 +33,7 @@ const firebaseConfig = {
   storageBucket: getEnv('VITE_FIREBASE_STORAGE_BUCKET', "solarcrm-60ce1.firebasestorage.app"),
   messagingSenderId: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID', "797245411122"),
   appId: getEnv('VITE_FIREBASE_APP_ID', "1:797245411122:web:bcfa64de128b1fd5d1112b"),
-  measurementId: getEnv('VITE_FIREBASE_MEASUREMENT_ID', "G-XQQZCQQ1FE9")
+  measurementId: getEnv('VITE_FIREBASE_MEASUREMENT_ID', "G-XQQZCQ1FE9")
 };
 
 let app, auth, db;

@@ -23,14 +23,17 @@ import {
 import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js';
 
 // Credenciais Firebase via variáveis de ambiente (nunca commitar .env)
+function getEnv(key, fallback) {
+  return (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) || fallback;
+}
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDStqxnwdR6hYxypR1Xm_2cLM0MQRphytE",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "solarcrm-60ce1.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "solarcrm-60ce1",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "solarcrm-60ce1.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "797245411122",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:797245411122:web:bcfa64de128b1fd5d1112b",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-XQQZCQQ1FE9"
+  apiKey: getEnv('VITE_FIREBASE_API_KEY', "AIzaSyDStqxnwdR6hYxypR1Xm_2cLM0MQRphytE"),
+  authDomain: getEnv('VITE_FIREBASE_AUTH_DOMAIN', "solarcrm-60ce1.firebaseapp.com"),
+  projectId: getEnv('VITE_FIREBASE_PROJECT_ID', "solarcrm-60ce1"),
+  storageBucket: getEnv('VITE_FIREBASE_STORAGE_BUCKET', "solarcrm-60ce1.firebasestorage.app"),
+  messagingSenderId: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID', "797245411122"),
+  appId: getEnv('VITE_FIREBASE_APP_ID', "1:797245411122:web:bcfa64de128b1fd5d1112b"),
+  measurementId: getEnv('VITE_FIREBASE_MEASUREMENT_ID', "G-XQQZCQQ1FE9")
 };
 
 let app, auth, db;

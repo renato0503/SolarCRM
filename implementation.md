@@ -531,6 +531,20 @@ Após validação → seguir para SPRINT 27.
 
 ---
 
-**Versão deste documento:** 2.1 · **Data:** 15/07/2026  
+**Versão deste documento:** 2.2 · **Data:** 15/07/2026  
 **Autor da atualização:** Kilo + revisão manual  
 **Próxima revisão:** após deploy de validação de rotas
+
+---
+
+## 🔄 Atualizações Recentes (15/07/2026 — parte 2)
+
+### Correções pós-sprint 27
+
+| Item | Status | Alteração realizada |
+|------|--------|---------------------|
+| `MESES` export | ✅ Concluído | `src/js/irradiacao.js` não exportava `MESES`, `ORIENTACAO_LABELS` e `ESTADO_ANOMALIA` após refatoração; restaurado. |
+| `import.meta.env` | ✅ Concluído | Adicionada função `getEnv()` em `src/js/firebase.js` para evitar `TypeError` quando `import.meta.env` não existe em produção. |
+| Measurement ID | ✅ Concluído | Alinhado fallback local do `measurementId` para `G-XQQZCQ1FE9`, removendo aviso do Firebase Analytics. |
+| TIR na proposta | ✅ Concluído | `tir_mensal`/`tir_anual` agora são salvos como campos flat em `app.js` e lidos em `proposta.js`, evitando `—` na proposta. |
+| Simulador LGPD/footer | ✅ Concluído | Link LGPD atualizado para `.../_ato2015-2018/2018/lei/l13709.htm`; emoji 🧮 removido do título; footer passa a exibir “Desenvolvido por Cerrado Tech” com link para `https://www.cerradofinancas.com.br/`. |

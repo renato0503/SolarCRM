@@ -201,3 +201,14 @@ Resumo consolidado do que já foi implementado na **Spark** (CRM Solar da Spark 
 ## 🌐 URLs
 - **Firebase Hosting**: https://solarcrm-60ce1.web.app
 - **GitHub Pages**: https://renato0503.github.io/Spark/
+
+---
+
+## 🔄 Atualizações Recentes (15/07/2026)
+
+### Correções pós-sprint 27
+- `src/js/irradiacao.js`: exportações `MESES`, `ORIENTACAO_LABELS` e `ESTADO_ANOMALIA` restauradas após refatoração.
+- `src/js/firebase.js`: função `getEnv()` adicionada para evitar `TypeError` com `import.meta.env` em produção.
+- Firebase Analytics: `measurementId` alinhado para `G-XQQZCQ1FE9`, removendo aviso de divergência.
+- TIR na proposta: `tir_mensal`/`tir_anual` salvos como campos flat em `app.js` e lidos em `proposta.js`, evitando `—` na proposta.
+- Simulador: link LGPD atualizado, emoji 🧮 removido do título, footer atualizado com crédito “Desenvolvido por Cerrado Tech” linkando para `https://www.cerradofinancas.com.br/`.

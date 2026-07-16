@@ -32,29 +32,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dc = proposta.dados_completos;
 
     const precoFinal = dc ? dc.precificacao.precoFinal : proposta.preco_final;
-    const valorKit = dc ? dc.precificacao.valorKit : proposta.valor_kit;
-    const fatorPreco = dc ? dc.precificacao.fatorPreco : proposta.fator_preco;
-    const valorImposto = dc ? dc.precificacao.valorImposto : proposta.valor_imposto;
-    const margemEfetiva = dc ? dc.precificacao.margemLucroEfetiva : proposta.margem_lucro_efetiva;
     const economiaAnual = dc ? dc.energia.economiaAnual : proposta.economia_anual;
-    const economiaMensal = dc ? dc.energia.economiaMensal : proposta.economia_mensal;
     const geracaoKwh = dc ? dc.energia.geracaoEstimadaKwh : proposta.geracao_estimada_kwh;
     const paybackAnos = dc ? dc.financeiro.paybackAnos : proposta.payback_anos;
     const paybackMeses = dc ? dc.financeiro.paybackMeses : proposta.payback_meses;
     const tirMensal = dc ? dc.financeiro.tirMensal : (proposta.tir_mensal ?? null);
-    const tirAnual = dc ? dc.financeiro.tirAnual : (proposta.tir_anual ?? null);
     const potenciaKwp = dc ? dc.sistema.potenciaRealKwp : proposta.potencia_kwp;
-    const numeroPaineis = dc ? dc.sistema.numeroPaineis : proposta.numero_paineis;
     const areaNecessaria = dc ? dc.sistema.areaNecessaria : null;
-    const painelInfo = dc ? dc.sistema.painel : null;
-    const inversorInfo = dc ? dc.sistema.inversor : null;
-    const projecao6Anos = dc ? dc.financeiro.projecao6Anos : null;
     const tabelaFinanciamento = dc ? dc.financeiro.tabelaFinanciamento : null;
-    const configs = dc ? dc.configuracoes : null;
     const co2Tons = dc ? dc.ecologia.co2EvitadoTons : null;
     const arvores = dc ? dc.ecologia.arvoresEquivalentes : null;
-    const geracaoMensal = dc ? dc.energia.geracaoMensal : null;
-    const hspMensal = dc ? dc.energia.hspMensal : null;
 
     const settings = getSettings();
 
@@ -87,35 +74,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('prop-tir').textContent = tirMensal ? `${tirMensal}% a.m.` : '—';
 
-    // Specs
-    const precoKitGeradorVenda = dc ? Number(dc.precosVenda.precoKitGerador) : 0;
-    const precoEstruturaVenda = dc ? Number(dc.precosVenda.precoEstrutura) : (proposta.preco_estrutura || 0);
-    const precoServicosVenda = dc ? Number(dc.precosVenda.precoServicos) : (proposta.preco_servicos || 0);
-    const precoFreteVenda = dc ? Number(dc.precosVenda.precoFrete) : (proposta.preco_frete || 0);
-    const taxaLocalidadeVenda = dc ? Number(dc.precosVenda.taxaLocalidadeVenda) : (proposta.taxa_localidade_venda || 0);
-
-    document.getElementById('spec-paineis').innerHTML = `${numeroPaineis}x ${painelInfo ? painelInfo.nome : proposta.painel_selecionado}<br><span style="font-weight:500;font-size:0.8125rem;color:var(--text-muted);display:block;margin-top:0.15rem;">Kit Gerador: <strong>${formatCurrency(precoKitGeradorVenda)}</strong></span>`;
-    document.getElementById('spec-inversor').innerHTML = `${inversorInfo ? inversorInfo.nome : proposta.inversor_selecionado}<br><span style="font-weight:500;font-size:0.8125rem;color:var(--text-muted);display:block;margin-top:0.15rem;">Inversor Homologado: <strong>Incluso no kit</strong></span>`;
-    const estruturaNome = dc ? dc.sistema.estrutura.nome : proposta.estrutura_selecionada;
-    document.getElementById('spec-estrutura').innerHTML = `${estruturaNome}<br><span style="font-weight:500;font-size:0.8125rem;color:var(--text-muted);display:block;margin-top:0.15rem;">Suportes de Alumínio: <strong>${formatCurrency(precoEstruturaVenda)}</strong></span>`;
-
-    const specServicoEl = document.getElementById('spec-servico');
-    if (specServicoEl) {
-      let html = `Projeto, ART, Homologação e Instalação<br><span style="font-weight:500;font-size:0.8125rem;color:var(--text-muted);display:block;margin-top:0.15rem;">Mão de Obra e Engenharia: <strong>${formatCurrency(precoServicosVenda)}</strong>`;
-      if (taxaLocalidadeVenda > 0) {
-        html += ` (inclui taxa local de <strong>${formatCurrency(taxaLocalidadeVenda)}</strong>)`;
-      }
-      html += `</span>`;
-      specServicoEl.innerHTML = html;
-    }
-
     // System info
     if (dc) {
       document.getElementById('prop-potencia').textContent = `${potenciaKwp} kWp`;
       document.getElementById('prop-area').textContent = areaNecessaria ? `${areaNecessaria} m²` : '—';
       document.getElementById('prop-rendimento').textContent = `${(dc.configuracoes.performanceRatio * 100).toFixed(0)}%`;
-      document.getElementById('prop-hsp').textContent = `${dc.energia.hsp} kWh/m²/dia`;
-      document.getElementById('prop-ligacao').textContent = dc.configuracoes.ligacaoNome;
     }
 
     // Ecology

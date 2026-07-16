@@ -71,6 +71,14 @@
 | M15 | Estoque | Sprint 24 indica | Adicionar **quantidade disponível** + **reserva ao fechar lead** por SKU. |
 | M16 | Cotação | Sprint 24 indica | Cotação automática integrando `fornecedores.html` → `calculator.js` para escolha de menor preço. |
 
+### Nova Lógica de Precificação (16/07/2026)
+- Removido campo `estado` do simulador; foco apenas em Mato Grosso.
+- Adicionado CEP com autocompletar ViaCEP para `cidade` e `bairro`.
+- Nova fórmula: `(kWp × R$/kWp) + (placas × R$/placa) + taxa cidade`.
+- `config.js` ganhou tabelas `custoEstrutura`, `custoKitPorFaixa` e `adicionalCidade`.
+- `dashboard.html`/`dashboard.js` atualizados para editar esses valores.
+- Proposta simplificada: exibe apenas valor final + itens principais.
+
 ---
 
 ## 🚧 Sprints de Correção

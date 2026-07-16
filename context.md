@@ -212,3 +212,11 @@ Resumo consolidado do que já foi implementado na **Spark** (CRM Solar da Spark 
 - Firebase Analytics: `measurementId` alinhado para `G-XQQZCQ1FE9`, removendo aviso de divergência.
 - TIR na proposta: `tir_mensal`/`tir_anual` salvos como campos flat em `app.js` e lidos em `proposta.js`, evitando `—` na proposta.
 - Simulador: link LGPD atualizado, emoji 🧮 removido do título, footer atualizado com crédito “Desenvolvido por Cerrado Tech” linkando para `https://www.cerradofinancas.com.br/`.
+
+### Nova Lógica de Precificação e UX (16/07/2026)
+- Removido campo `estado` do simulador; foco apenas em Mato Grosso.
+- Adicionado CEP com autocompletar ViaCEP para `cidade` e `bairro`.
+- Nova fórmula de orçamento: `(kWp × R$/kWp) + (placas × R$/placa) + taxa cidade`.
+- `config.js` ganhou tabelas `custoEstrutura`, `custoKitPorFaixa` e `adicionalCidade`.
+- `dashboard.html`/`dashboard.js` atualizados para editar esses valores.
+- Proposta simplificada: exibe apenas valor final + itens principais.

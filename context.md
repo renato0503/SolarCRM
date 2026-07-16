@@ -163,7 +163,7 @@ Resumo consolidado do que já foi implementado na **Spark** (CRM Solar da Spark 
 | Crashlytics | Ativar no Firebase Console, adicionar SDK | Admin Firebase |
 | Cloud Function backup | Scheduler semanal export JSON → Firebase Storage | Dev |
 | Cotação automática | ✅ Concluído - integração com fornecedores no calculator.js | Dev |
-| Gestão de estoque | Adicionar quantidade disponível por SKU, reserva ao fechar lead | Dev |
+| Gestão de estoque | ✅ Concluído - quantidade disponível por SKU, reserva ao gerar proposta | Dev |
 
 ---
 

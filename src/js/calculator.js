@@ -1,4 +1,4 @@
-import { getEquipamentosLocais } from './firebase.js';
+import { getEquipamentosLocais, getEstoqueDisponivel, reservarEstoque } from './firebase.js';
 import { getSettings, getLigacaoInfo, getFioBTUSD, getFioBProgressivo, getTipoClienteConfig, getCustoEstrutura, getCustoKitPorFaixa, getAdicionalCidade } from './config.js';
 import { getHSP, getHSPMensal, getVariacaoSazonal, MESES } from './irradiacao.js';
 import {
@@ -28,7 +28,10 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
     tipo_cliente = 'residencial'
   } = dadosLead;
 
-  function diasNoMes(mes, ano) {
+  // ===== 0. VALIDAÇÃO DE ESTOQUE =====
+  if (!EQUIPAMENTOS.paineis || !EQUIPAMENTOS.inversores || !EQUIPAMENTOS.estruturas) {
+    throw new Error('Equipamentos não carregados.');
+  }
     return new Date(ano, mes, 0).getDate();
   }
 
@@ -65,6 +68,23 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
   const numInversores = fatorDimensionamento > 1.6
     ? Math.ceil(potenciaRealKwp * 1000 / (inversor.potenciaMaxW * 1.2))
     : 1;
+
+  // ===== 3.1 VALIDAÇÃO DE ESTOQUE =====
+  const painelId = painel.id;
+  const inversorId = inversor.id;
+  const estruturaId = estruturaInfo.id;
+  const estoquePainel = getEstoqueDisponivel(painelId);
+  const estoqueInversor = getEstoqueDisponivel(inversorId);
+  const estoqueEstrutura = getEstoqueDisponivel(estruturaId);
+  if (estoquePainel < numeroPaineis) {
+    throw new Error(`Estoque insuficiente de painéis (${painel.nome}). Disponível: ${estoquePainel}, necessário: ${numeroPaineis}.`);
+  }
+  if (estoqueInversor < numInversores) {
+    throw new Error(`Estoque insuficiente de inversores (${inversor.nome}). Disponível: ${estoqueInversor}, necessário: ${numInversores}.`);
+  }
+  if (estoqueEstrutura < numeroPaineis) {
+    throw new Error(`Estoque insuficiente de estrutura (${estruturaInfo.nome}). Disponível: ${estoqueEstrutura}, necessário: ${numeroPaineis}.`);
+  }
 
   // ===== 4. ESTRUTURA E KIT ELÉTRICO =====
   const estruturaInfo = EQUIPAMENTOS.estruturas[tipo_telha] || EQUIPAMENTOS.estruturas['ceramica'];

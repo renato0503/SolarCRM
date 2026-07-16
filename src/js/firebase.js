@@ -745,6 +745,59 @@ export function invalidateEquipamentosCache() {
   equipamentosCache = null;
 }
 
+export function getEstoqueDisponivel(equipamentoId) {
+  const stored = localStorage.getItem('solarcrm_estoque');
+  const estoque = stored ? JSON.parse(stored) : {};
+  const item = estoque[equipamentoId];
+  return item ? Number(item.quantidade || 0) : 0;
+}
+
+export function reservarEstoque(equipamentoId, quantidade) {
+  const stored = localStorage.getItem('solarcrm_estoque');
+  const estoque = stored ? JSON.parse(stored) : {};
+  const item = estoque[equipamentoId] || { quantidade: 0 };
+  const disponivel = Number(item.quantidade || 0);
+  if (disponivel < quantidade) return false;
+  item.quantidade = disponivel - quantidade;
+  item.reserva = (Number(item.reserva || 0)) + quantidade;
+  estoque[equipamentoId] = item;
+  localStorage.setItem('solarcrm_estoque', JSON.stringify(estoque));
+  return true;
+}
+
+export function liberarEstoque(equipamentoId, quantidade) {
+  const stored = localStorage.getItem('solarcrm_estoque');
+  const estoque = stored ? JSON.parse(stored) : {};
+  const item = estoque[equipamentoId];
+  if (!item) return;
+  const reserva = Number(item.reserva || 0);
+  if (reserva > 0) {
+    item.reserva = Math.max(0, reserva - quantidade);
+    item.quantidade = Number(item.quantidade || 0) + quantidade;
+    estoque[equipamentoId] = item;
+    localStorage.setItem('solarcrm_estoque', JSON.stringify(estoque));
+  }
+}
+
+export function confirmarReserva(equipamentoId, quantidade) {
+  const stored = localStorage.getItem('solarcrm_estoque');
+  const estoque = stored ? JSON.parse(stored) : {};
+  const item = estoque[equipamentoId];
+  if (!item) return;
+  item.reserva = Math.max(0, Number(item.reserva || 0) - quantidade);
+  estoque[equipamentoId] = item;
+  localStorage.setItem('solarcrm_estoque', JSON.stringify(estoque));
+}
+
+export function atualizarEstoque(equipamentoId, quantidade) {
+  const stored = localStorage.getItem('solarcrm_estoque');
+  const estoque = stored ? JSON.parse(stored) : {};
+  const item = estoque[equipamentoId] || { reserva: 0 };
+  item.quantidade = Number(item.quantidade || 0) + quantidade;
+  estoque[equipamentoId] = item;
+  localStorage.setItem('solarcrm_estoque', JSON.stringify(estoque));
+}
+
 const MOCK_INTERACOES_KEY = 'solarcrm_mock_interacoes';
 
 export async function dbAddInteracao(interacaoData) {

@@ -1,4 +1,4 @@
-import { dbAddLead, dbAddProposal, authGetCurrentUser, getUserProfile } from './firebase.js';
+import { dbAddLead, dbAddProposal, authGetCurrentUser, getUserProfile, reservarEstoque, confirmarReserva } from './firebase.js';
 import { gerarProposta } from './calculator.js';
 import { showToast, formatPhone, cleanPhone, calcularFretePorCEP } from './utils.js';
 
@@ -131,6 +131,15 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const proposalCalculated = gerarProposta(dadosLeadCalculo);
+
+      const painelId = proposalCalculated.sistema.painel.id;
+      const inversorId = proposalCalculated.sistema.inversor.id;
+      const estruturaId = proposalCalculated.sistema.estrutura.id;
+      const numPaineis = proposalCalculated.sistema.numeroPaineis;
+      const numInversores = proposalCalculated.sistema.inversor.quantidade || 1;
+      reservarEstoque(painelId, numPaineis);
+      reservarEstoque(inversorId, numInversores);
+      reservarEstoque(estruturaId, numPaineis);
 
       const proposalData = {
         lead_id: savedLead.id,

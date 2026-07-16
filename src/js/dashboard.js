@@ -619,3 +619,32 @@ function formatPhone(value) {
   }
   return value;
 }
+
+// Tour guiado (Onboarding)
+const tourSteps = [
+  { element: '#statTotal', popover: { title: 'Indicadores', description: 'Aqui você acompanha leads novos, visitas agendadas, propostas enviadas e vendas fechadas.' } },
+  { element: '#crmSearch', popover: { title: 'Busca rápida', description: 'Filtre leads por nome, telefone, cidade ou bairro diretamente nesta barra.' } },
+  { element: '.filter-btn', popover: { title: 'Filtro por status', description: 'Selecione o estágio do funil para exibir apenas leads naquela fase.' } },
+  { element: '#tableView', popover: { title: 'Lista de leads', description: 'Clique em uma linha para ver detalhes, registrar interações ou avançar o status.' } },
+  { element: '#btnConfig', popover: { title: 'Configurações', description: 'Ajuste HSP, tarifa, margem, Performance Ratio e outros parâmetros globais aqui.' } },
+  { element: '#btnNotificacoes', popover: { title: 'Notificações', description: 'Acompanhe leads com follow-up pendente e necessitando atenção.' } }
+];
+
+function initTour() {
+  const btn = document.getElementById('btnTour');
+  if (!btn || typeof driver === 'undefined') return;
+  btn.addEventListener('click', () => {
+    const driverObj = driver.default.tour({
+      steps: tourSteps,
+      showProgress: true,
+      nextBtnText: 'Próximo',
+      prevBtnText: 'Anterior',
+      doneBtnText: 'Concluir'
+    });
+    driverObj.drive();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTour();
+});

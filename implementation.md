@@ -567,3 +567,13 @@ Após validação → seguir para SPRINT 27.
 | Integração no dashboard | ✅ Concluído | Adicionado CSS e JS do driver.js via CDN em `dashboard.html`. |
 | Botão de início | ✅ Concluído | Novo botão `#btnTour` no header com ícone de livro. |
 | Passos do tour | ✅ Concluído | 6 passos mapeados: indicadores, busca, filtros, tabela, configurações e notificações. |
+
+---
+
+## ✅ Concluído — Gestão de Estoque (Fase 30)
+
+| Item | Status | Alteração realizada |
+|------|--------|---------------------|
+| Funções de estoque | ✅ Concluído | Adicionadas em `firebase.js`: `getEstoqueDisponivel`, `reservarEstoque`, `liberarEstoque`, `confirmarReserva`, `atualizarEstoque`. |
+| Validação no cálculo | ✅ Concluído | `calculator.js` valida estoque de painel, inversor e estrutura antes de gerar proposta. |
+| Reserva automática | ✅ Concluído | `app.js` reserva estoque ao gerar proposta no simulador público. |

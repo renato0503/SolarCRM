@@ -115,6 +115,42 @@ Resumo consolidado do que já foi implementado na **Spark** (CRM Solar da Spark 
 - 🔴 Cotação automática: pendente (integrar com cálculo).
 - 🔴 Gestão de estoque: pendente.
 
+### 28. Proposta Simplificada (Fase 28) ✅
+- Removido bloco "Especificação Técnica do Gerador" detalhado (painéis, inversor, estrutura, serviço, frete).
+- Nova seção "Especificações do Sistema" compacta em grid 2x2: Potência, Área, Rendimento, Geração Mensal.
+- Cards de TIR e Geração Mensal lado a lado no topo da proposta.
+- `proposta.js` simplificado: removidos campos de precificação detalhada e elementos HSP/ligação dedicados.
+
+### 29. Nova Lógica de Precificação e UX (Fase 29) ✅
+- Removido campo `estado` do simulador; foco apenas em Mato Grosso.
+- Adicionado CEP com autocompletar ViaCEP para `cidade` e `bairro`.
+- Nova fórmula de orçamento: `(kWp × R$/kWp) + (placas × R$/placa) + taxa cidade`.
+- `config.js` ganhou tabelas `custoEstrutura`, `custoKitPorFaixa` e `adicionalCidade`.
+- `dashboard.html`/`dashboard.js` atualizados para editar esses valores.
+- Proposta simplificada: exibe apenas valor final + itens principais.
+
+### 30. Cotação Automática de Fornecedores (Fase 30) ✅
+- `obterCotacaoAutomatica()` em `utils.js`: lê fornecedores do `localStorage` (`solarcrm_fornecedores`).
+- Seleciona automaticamente menor preço para painel, inversor e estrutura.
+- `calculator.js` integrado: usa cotações quando disponíveis, senão aplica valores padrão.
+- `precosVenda` expandido com `precoPaineisKit`, `precoInversor`, `precoEstrutura`.
+
+### 31. Tour Guiado Onboarding (Fase 31) ✅
+- Biblioteca: `driver.js` via CDN (MIT, ~5KB, framework-agnostic).
+- Integração no `dashboard.html` + `dashboard.js`.
+- Botão `#btnTour` no header com ícone de livro.
+- 6 passos: indicadores, busca, filtros, tabela de leads, configurações, notificações.
+
+### 32. Gestão de Estoque (Fase 32) ✅
+- Funções em `firebase.js`: `getEstoqueDisponivel`, `reservarEstoque`, `liberarEstoque`, `confirmarReserva`, `atualizarEstoque`.
+- `calculator.js`: valida disponibilidade de painel, inversor e estrutura antes de gerar proposta.
+- `app.js`: reserva automática de estoque ao salvar lead no simulador público.
+
+### 33. Melhorias de UX/UX Mobile (Fase 33) ✅
+- Proposta: layout responsivo com grid adaptativo.
+- Dashboard: filtros por status com botões visuais + badge de notificações.
+- Simulador: link LGPD atualizado, footer com crédito Cerrado Tech.
+
 ### Extras
 - Logo Spark (`logospark.png`) em toda a plataforma (favicon + headers + PDF).
 - `public/favicon.svg` e `public/icons.svg` substituídos.

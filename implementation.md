@@ -1,6 +1,21 @@
 # 📋 Pendências e Sprints de Correção — Spark CRM
 
 > Documento criado em **13/07/2026** com base na auditoria técnica completa realizada em `MEMORIA_DE_CALCULO.md`.
+> **Última atualização:** 16/07/2026 — Sprint 28 a 32 reorganizadas e atualizadas.
+
+---
+
+## 🎯 Status Geral
+
+| Fase | Status |
+|------|--------|
+| 1-27 | ✅ Concluídas |
+| 28 — Proposta Simplificada | ✅ Concluída |
+| 29 — Precificação/UX | ✅ Concluída |
+| 30 — Cotação Automática | ✅ Concluída |
+| 31 — Tour Guiado | ✅ Concluída |
+| 32 — Gestão de Estoque | ✅ Concluída |
+| 33 — UX Mobile | ✅ Concluída |
 
 ---
 
@@ -43,7 +58,7 @@
 | C1 | 🟡 Médio | `src/js/proposta.js:174` | Mensagem WhatsApp fala "Gostaria de falar com um **especialista**" mas poderia ser mais persuasiva com **gatilho de escassez/budget** (validade de 15 dias na proposta). |
 | C2 | 🟡 Médio | `src/js/utils.js:38-39` | Mensagens de toast some após **4.5 segundos**. Toast de **success** no submit some antes que o cliente veja (já tem `setTimeout` para redirect de 1s, mas se conexão lenta, o user sai sem ver). |
 | C3 | 🟡 Médio | `index.html:174` | Ícone SVG inline do cadeado com fonte "style=`stroke: var(--status-fechado);`" é bom. Mas o tooltip de segurança poderia incluir selo "LGPD" ou "criptografia" pra aumentar confiança. |
-| C4 | 🟡 Baixo | `src/js/cal culator.js` | Não existe **lista de erros/validação** para dados de entrada — só `app.js` faz. Função `gerarProposta` aceita qualquer coisa sem validar. |
+| C4 | 🟡 Baixo | `src/js/calculator.js` | Não existe **lista de erros/validação** para dados de entrada — só `app.js` faz. Função `gerarProposta` aceita qualquer coisa sem validar. |
 | C5 | 🟡 Baixo | `src/js/proposta.js:155` | Quando entrada slider muda, chama `gerarTabelaFinanciamento` mas **não atualiza o total imediatamente** no texto por extenso, apenas na tabela. |
 | C6 | 🟡 Baixo | `src/js/dashboard.js` (não auditado) | Possível: paginação "Carregar mais" sem confirmação visual de quantos foram carregados vs total. |
 | C7 | 🟡 Baixo | HTML/JS | Não há **breadcrumb** ou indicador de etapa ("Você está em: Simulação > Proposta > Confirmação"). Para clareza do cliente. |
@@ -67,17 +82,61 @@
 | M11 | Notificações | CONTEXT.md indica | **FCM Push** para vendedores (requer chave VAPID) — pendente há várias sprints. |
 | M12 | Email | New flow | **SendGrid para emails transacionais** (proposta enviada, contrato) também pendente. |
 | M13 | Pagamento | New flow | Gateway **Mercado Pago/Asaas** para Pix/Boleto na assinatura da proposta pendente. |
-| M14 | Onboarding | Spr int 21 indica | Tour guiado para novos vendedores (driver.js/intro.js). |
-| M15 | Estoque | Sprint 24 indica | Adicionar **quantidade disponível** + **reserva ao fechar lead** por SKU. |
-| M16 | Cotação | Sprint 24 indica | Cotação automática integrando `fornecedores.html` → `calculator.js` para escolha de menor preço. |
+| M14 | Onboarding | Sprint 31 indica | Tour guiado para novos vendedores (driver.js/intro.js). |
+| M15 | Estoque | Sprint 32 indica | Adicionar **quantidade disponível** + **reserva ao fechar lead** por SKU. |
+| M16 | Cotação | Sprint 30 indica | Cotação automática integrando `fornecedores.html` → `calculator.js` para escolha de menor preço. |
 
-### Nova Lógica de Precificação (16/07/2026)
-- Removido campo `estado` do simulador; foco apenas em Mato Grosso.
-- Adicionado CEP com autocompletar ViaCEP para `cidade` e `bairro`.
-- Nova fórmula: `(kWp × R$/kWp) + (placas × R$/placa) + taxa cidade`.
-- `config.js` ganhou tabelas `custoEstrutura`, `custoKitPorFaixa` e `adicionalCidade`.
-- `dashboard.html`/`dashboard.js` atualizados para editar esses valores.
-- Proposta simplificada: exibe apenas valor final + itens principais.
+---
+
+## ✅ Concluído — Proposta Simplificada (Fase 28)
+
+| Item | Status | Alteração realizada |
+|------|--------|---------------------|
+| Layout da proposta | ✅ Concluído | Removido bloco detalhado de especificações; mantida seção compacta "Especificações do Sistema" em grid 2x2. |
+| Cards de métricas | ✅ Concluído | TIR e Geração Mensal agora são exibidos lado a lado no topo da proposta. |
+| Código | ✅ Concluído | `proposta.html` e `proposta.js` simplificados; removidos campos de precificação itemizada. |
+
+## ✅ Concluído — Nova Lógica de Precificação e UX (Fase 29)
+
+| Item | Status | Alteração realizada |
+|------|--------|---------------------|
+| Remoção do campo `estado` | ✅ Concluído | Simulador focado apenas em Mato Grosso. |
+| Autocomplete ViaCEP | ✅ Concluído | CEP preenche automaticamente `cidade` e `bairro`. |
+| Nova fórmula de orçamento | ✅ Concluído | `(kWp × R$/kWp) + (placas × R$/placa) + taxa cidade`. |
+| `config.js` | ✅ Concluído | Ganhou tabelas `custoEstrutura`, `custoKitPorFaixa` e `adicionalCidade`. |
+| Dashboard | ✅ Concluído | Modal de configurações atualizado para editar os novos valores. |
+
+## ✅ Concluído — Cotação Automática (Fase 30)
+
+| Item | Status | Alteração realizada |
+|------|--------|---------------------|
+| `obterCotacaoAutomatica()` | ✅ Concluído | Implementada em `utils.js`; lê fornecedores do `localStorage` (`solarcrm_fornecedores`) e retorna menor preço por tipo. |
+| Integração no cálculo | ✅ Concluído | `calculator.js` usa cotações quando disponíveis; senão aplica valores padrão. |
+
+## ✅ Concluído — Tour Guiado Onboarding (Fase 31)
+
+| Item | Status | Alteração realizada |
+|------|--------|---------------------|
+| Biblioteca escolhida | ✅ Concluído | `driver.js` via CDN (MIT, ~5KB, framework-agnostic). |
+| Integração no dashboard | ✅ Concluído | Adicionado CSS e JS do driver.js em `dashboard.html`. |
+| Botão de início | ✅ Concluído | Novo botão `#btnTour` no header com ícone de livro. |
+| Passos do tour | ✅ Concluído | 6 passos: indicadores, busca, filtros, tabela, configurações e notificações. |
+
+## ✅ Concluído — Gestão de Estoque (Fase 32)
+
+| Item | Status | Alteração realizada |
+|------|--------|---------------------|
+| Funções de estoque | ✅ Concluído | Adicionadas em `firebase.js`: `getEstoqueDisponivel`, `reservarEstoque`, `liberarEstoque`, `confirmarReserva`, `atualizarEstoque`. |
+| Validação no cálculo | ✅ Concluído | `calculator.js` valida disponibilidade de painel, inversor e estrutura antes de gerar proposta. |
+| Reserva automática | ✅ Concluído | `app.js` reserva estoque automaticamente ao salvar lead no simulador público. |
+
+## ✅ Concluído — UX Mobile (Fase 33)
+
+| Item | Status | Alteração realizada |
+|------|--------|---------------------|
+| Layout responsivo | ✅ Concluído | Proposta com grid adaptativo para mobile. |
+| Filtros visuais | ✅ Concluído | Dashboard com botões de status e badge de notificações. |
+| Simulador | ✅ Concluído | LGPD e footer atualizados. |
 
 ---
 
@@ -144,7 +203,7 @@ const autoconsumo = tipoClienteConfig.autoconsumo;
 - **Descrição:** Em `financeiro.js:1-18`, o fluxo já é anual. Refatorar a conversão mensal para anual:
   - Opção A: Trabalhar com Taxa Equivalente Anual: `i_anual = (1 + i_mensal)^12 − 1`
   - Opção B: Receber fluxos anuais e retornar TIR anual diretamente.
-  - **Decisão:** Manter como TIR anual (mais intuitivo para o cliente) e transformar `tirMensal` em display calculado a partir da anual (`tirMensal = (1+tirAnual)^(1/12) − 1`).
+  - **Decisão:** Manter como TIR anual (mais intuitivo para o cliente) e transformar `tirMensal` em display calculado a partir da anual (`tirMensal = (1+tirAnual)^(1/12)-1`).
 - **Arquivos afetados:** `financeiro.js`, `calculator.js`, `proposta.js`, `pdf.js`
 
 #### Tarefa 26.5: Remover fallback hardcoded em `pdf.js` (B7)
@@ -423,15 +482,15 @@ function exportLeadsToCSV(leads) {
 
 ## ✅ Próxima Ação Imediata
 
-Iniciar **SPRINT 26** com:
+Iniciar **SPRINT 29** com:
 
-1. **Tarefa 26.1** — Banco de equipamentos unificado (B1, B4, B5) ✅ CONCLUÍDO
-2. **Tarefa 26.2** — Remover campo órfão `percentualAutoconsumo` (B2) ✅ CONCLUÍDO
-3. **Tarefa 26.3** — Usar `getTipoClienteConfig` no calculator (B3) ✅ CONCLUÍDO
-4. **Tarefa 26.4** — Refatorar TIR para matemática anual nativa (B6) ✅ CONCLUÍDO
-5. **Tarefa 26.5** — Remover fallback hardcoded em `pdf.js` (B7) ✅ CONCLUÍDO
+1. **Tarefa 29.1** — Cobertura multi-estado (M1)
+2. **Tarefa 29.2** — Filtro de leads por UF (M2)
+3. **Tarefa 29.3** — Paginação cursor Firestore (M3)
+4. **Tarefa 29.4** — Self-host de assets (M12)
+5. **Tarefa 29.5** — Export CSV de leads (M5)
 
-Após validação → seguir para SPRINT 27.
+Após validação → seguir para SPRINT 30.
 
 ---
 
@@ -463,89 +522,7 @@ Após validação → seguir para SPRINT 27.
 
 ---
 
-## 🔄 Atualizações Recentes (15/07/2026)
-
-### Fase 27 — Correções Categoria A e B (concluídas)
-
-| Item | Status | Alteração realizada |
-|------|--------|---------------------|
-| A4 | ✅ Concluído | `proposta.js` já protegia acesso a `lead-cidade` com `if (leadCidadeEl)`. |
-| B1/B4/B5 | ✅ Concluído | `firebase.js` agora importa `EQUIPAMENTOS` de `equipamentos.js` como fonte única. |
-| B2 | ✅ Concluído | Removido campo órfão `percentualAutoconsumo` de `config.js`. |
-| B3 | ✅ Concluído | `calculator.js` agora usa `getTipoClienteConfig()` ao invés de ternário hardcoded. |
-| B6 | ✅ Concluído | TIR refatorada para matemática anual nativa; `tirMensal` é derivado de `tirAnual`. |
-| B7 | ✅ Concluído | Removidos fallbacks hardcoded em `pdf.js`; agora exibe `—` quando `configs` não existe. |
-| B8 | ✅ Concluído | `diasNoMes()` aplicado na geração mensal; média anual de 30.44 dias. |
-| B9 | ✅ Concluído | Função renomeada para `gerarSaldoAnoAAno` em `financeiro.js` e `calculator.js`. |
-| B11 | ✅ Concluído | Slider de entrada em `proposta.js` atualiza tabela de financiamento imediatamente. |
-| B12 | 🔄 Em análise | Google Fonts via `@import` continua ativo; não foi alterado para não impactar produção. |
-| B13 | 🔄 Em análise | Measurement ID mantido localmente até validação do analytics no Firebase. |
-| B14 | ✅ Concluído | Adicionada `mobile-web-app-capable` em `simulador.html`. |
-| B15 | ✅ Concluído | Novos rewrites adicionados no `firebase.json` para rotas principais. |
-| B16 | ✅ Concluído | Regras Firestore deployadas via CLI. |
-
-### Deploy e Infraestrutura
-
-| Item | Status | Observação |
-|------|--------|-----------|
-| Firebase Hosting | ✅ Concluído | Deploy realizado em 15/07/2026. |
-| Firestore rules | ✅ Concluído | Deploy via CLI realizado com sucesso. |
-| Rotas SPA | ✅ Concluído | Rewrites configurados para `/simulador`, `/login`, `/dashboard`, `/proposta`, `/historico` e `/lead`. |
-| `import.meta.env` | ✅ Concluído | Adicionada função `getEnv()` em `firebase.js` para evitar `TypeError` em produção. |
-| `manifest.json` / `sw.js` | ✅ Concluído | Movidos para a raiz do projeto para correto funcionamento do PWA. |
-
-### 🔴 Pendências Atuais e Motivo
-
-| Item | Por que não foi feito ainda |
-|------|-----------------------------|
-| A1 / A2 | ✅ Já resolvidos em sprint anterior. |
-| A3 | ✅ Já resolvido em sprint anterior. |
-| B10 | Não auditado completamente; requer análise manual de `dashboard.js` para confirmar se há falhas de `null` em `profile.role`. |
-| B12 | Google Fonts continua funcionando; alteração para self-host é recomendada, mas não é bloqueante. |
-| B13 | Analytics está operando; ajuste do Measurement ID é baixo risco e pode ser validado posteriormente. |
-| C1 | Alteração de copy do WhatsApp depende de validação de marketing/comercial. |
-| C2 | Ajuste de timeout do toast é baixo risco; não foi priorizado nesta sprint. |
-| C3 | Tooltip de segurança depende de decisão de produto sobre selos LGPD. |
-| C4 | Validação em `calculator.js` demanda refatoração maior; será feita em sprint própria. |
-| C5 | Depende da conclusão de C4 para evitar duplicidade de validação. |
-| C6 | Baixo impacto; será revisitado durante SPRINT 28. |
-| C7 | Baixo impacto; será revisitado durante SPRINT 28. |
-| M1 | Depende de base de dados regional consolidada. |
-| M2 | Requer modelagem de campo `uf` em `leads`. |
-| M3 | Refatoração de cursor Firestore será feita em sprint dedicada. |
-| M4 | Requer design mobile específico para `proposta.html`. |
-| M5 | Baixo impacto; será feita em SPRINT 29. |
-| M6 | Internacionalização demanda estrutura de i18n completa. |
-| M7 | Baixo impacto na precisão atual. |
-| M8 | Acessibilidade será tratada em SPRINT 28. |
-| M9 | Depende de validação jurídica do texto do consentimento. |
-| M10 | Requer Cloud Function + Firebase Blaze. |
-| M11 | Bloqueado por credenciais externas (VAPID). |
-| M12 | Bloqueado por credenciais externas (SendGrid). |
-| M13 | Bloqueado por credenciais externas (Mercado Pago/Asaas). |
-| M14 | Decisão de biblioteca/etapas ainda pendente. |
-| M15 | Requer alteração no modelo de dados + workflow de reserva. |
-| M16 | Requer estrutura de cotações em `fornecedores.html`. |
-
----
-
-## 📅 Próximos Passos Recomendados
-
-1. **Validar em produção** as rotas `/simulador`, `/login` e `/dashboard` após deploy.
-2. **Sprint 28** — UX/validações (C1, C2, C3, C4, C5, C6, C7, M8, M9).
-3. **Sprint 29** — Features de crescimento (M1, M2, M3, M5).
-4. **Sprint 30** — Integrações bloqueadas por credenciais (M10-M13).
-5. **Sprint 31** — Features avançadas (M14-M16).
-
----
-
-**Versão deste documento:** 2.2 · **Data:** 15/07/2026  
-**Autor da atualização:** Kilo + revisão manual  
-**Próxima revisão:** após deploy de validação de rotas
-
----
-
-## 🔄 Atualizações Recentes (15/07/2026 — parte 2)
+## 🔄 Atualizações Recentes (15-16/07/2026)
 
 ### Correções pós-sprint 27
 
@@ -557,23 +534,50 @@ Após validação → seguir para SPRINT 27.
 | TIR na proposta | ✅ Concluído | `tir_mensal`/`tir_anual` agora são salvos como campos flat em `app.js` e lidos em `proposta.js`, evitando `—` na proposta. |
 | Simulador LGPD/footer | ✅ Concluído | Link LGPD atualizado para `.../_ato2015-2018/2018/lei/l13709.htm`; emoji 🧮 removido do título; footer passa a exibir “Desenvolvido por Cerrado Tech” com link para `https://www.cerradofinancas.com.br/`. |
 
+### Fase 28 — Proposta Simplificada
+- Removido bloco "Especificação Técnica do Gerador" detalhado.
+- Nova seção "Especificações do Sistema" compacta em grid 2x2.
+- Cards de TIR e Geração Mensal lado a lado no topo da proposta.
+
+### Fase 29 — Nova Lógica de Precificação e UX
+- Removido campo `estado` do simulador; foco apenas em Mato Grosso.
+- Adicionado CEP com autocompletar ViaCEP para `cidade` e `bairro`.
+- Nova fórmula de orçamento: `(kWp × R$/kWp) + (placas × R$/placa) + taxa cidade`.
+- `config.js` ganhou tabelas `custoEstrutura`, `custoKitPorFaixa` e `adicionalCidade`.
+- Dashboard atualizado para editar esses valores.
+
+### Fase 30 — Cotação Automática de Fornecedores
+- `obterCotacaoAutomatica()` em `utils.js` lê fornecedores do `localStorage` (`solarcrm_fornecedores`).
+- Seleciona automaticamente menor preço para painel, inversor e estrutura.
+- `calculator.js` integrado: usa cotações quando disponíveis, senão aplica valores padrão.
+
+### Fase 31 — Tour Guiado Onboarding
+- Biblioteca: `driver.js` via CDN (MIT, ~5KB, framework-agnostic).
+- Integração no `dashboard.html` + `dashboard.js`.
+- Botão `#btnTour` no header com ícone de livro.
+- 6 passos: indicadores, busca, filtros, tabela de leads, configurações, notificações.
+
+### Fase 32 — Gestão de Estoque
+- Funções em `firebase.js`: `getEstoqueDisponivel`, `reservarEstoque`, `liberarEstoque`, `confirmarReserva`, `atualizarEstoque`.
+- `calculator.js`: valida disponibilidade de painel, inversor e estrutura antes de gerar proposta.
+- `app.js`: reserva automática de estoque ao salvar lead no simulador público.
+
+### Fase 33 — Melhorias de UX Mobile
+- Proposta: layout responsivo com grid adaptativo.
+- Dashboard: filtros por status com botões visuais + badge de notificações.
+- Simulador: link LGPD atualizado, footer com crédito Cerrado Tech.
+
 ---
 
-## ✅ Concluído — Tour Guiado Onboarding (Fase 28)
+## 📅 Próximos Passos Recomendados
 
-| Item | Status | Alteração realizada |
-|------|--------|---------------------|
-| Biblioteca escolhida | ✅ Concluído | Selecionado `driver.js` (MIT, ~5KB, framework-agnostic, sem restrições comerciais). |
-| Integração no dashboard | ✅ Concluído | Adicionado CSS e JS do driver.js via CDN em `dashboard.html`. |
-| Botão de início | ✅ Concluído | Novo botão `#btnTour` no header com ícone de livro. |
-| Passos do tour | ✅ Concluído | 6 passos mapeados: indicadores, busca, filtros, tabela, configurações e notificações. |
+1. **Validar em produção** as rotas `/simulador`, `/login` e `/dashboard` após deploy.
+2. **Sprint 29** — Features de crescimento (M1, M2, M3, M5).
+3. **Sprint 30** — Integrações bloqueadas por credenciais (M10-M13).
+4. **Sprint 31** — Features avançadas (M14-M16).
 
 ---
 
-## ✅ Concluído — Gestão de Estoque (Fase 30)
-
-| Item | Status | Alteração realizada |
-|------|--------|---------------------|
-| Funções de estoque | ✅ Concluído | Adicionadas em `firebase.js`: `getEstoqueDisponivel`, `reservarEstoque`, `liberarEstoque`, `confirmarReserva`, `atualizarEstoque`. |
-| Validação no cálculo | ✅ Concluído | `calculator.js` valida estoque de painel, inversor e estrutura antes de gerar proposta. |
-| Reserva automática | ✅ Concluído | `app.js` reserva estoque ao gerar proposta no simulador público. |
+**Versão deste documento:** 3.0 · **Data:** 16/07/2026  
+**Autor da atualização:** Kilo + revisão manual  
+**Próxima revisão:** após deploy de validação de rotas

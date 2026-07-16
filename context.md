@@ -158,12 +158,9 @@ Resumo consolidado do que já foi implementado na **Spark** (CRM Solar da Spark 
 | Envio de Email (SendGrid) | Criar conta SendGrid, obter API key, configurar template | Admin |
 | WhatsApp Business API | Criar app no Meta Business, verificar número, obter token | Admin Spark |
 | Pix/Boleto (Mercado Pago) | Criar conta Mercado Pago, obter access token | Financeiro |
-| Tour guiado (Onboarding) | ✅ Concluído - driver.js integrado no dashboard com 6 passos | Dev |
 | Índices Firestore | Criar no console: `vendedorId+status+createdAt`, `status+updatedAt` | Admin Firebase |
 | Crashlytics | Ativar no Firebase Console, adicionar SDK | Admin Firebase |
 | Cloud Function backup | Scheduler semanal export JSON → Firebase Storage | Dev |
-| Cotação automática | ✅ Concluído - integração com fornecedores no calculator.js | Dev |
-| Gestão de estoque | ✅ Concluído - quantidade disponível por SKU, reserva ao gerar proposta | Dev |
 
 ---
 

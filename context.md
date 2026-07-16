@@ -162,7 +162,7 @@ Resumo consolidado do que já foi implementado na **Spark** (CRM Solar da Spark 
 | Índices Firestore | Criar no console: `vendedorId+status+createdAt`, `status+updatedAt` | Admin Firebase |
 | Crashlytics | Ativar no Firebase Console, adicionar SDK | Admin Firebase |
 | Cloud Function backup | Scheduler semanal export JSON → Firebase Storage | Dev |
-| Cotação automática | Integrar fornecedores ao calculator.js para menor preço | Dev |
+| Cotação automática | ✅ Concluído - integração com fornecedores no calculator.js | Dev |
 | Gestão de estoque | Adicionar quantidade disponível por SKU, reserva ao fechar lead | Dev |
 
 ---

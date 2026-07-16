@@ -318,3 +318,48 @@ export async function calcularFretePorCEP(cep) {
   return result;
 }
 
+/**
+ * Busca fornecedores cadastrados no localStorage e sugere o menor preço
+ * para painel, inversor e estrutura, retornando objetos com melhor cotação.
+ */
+export function obterCotacaoAutomatica() {
+  try {
+    const raw = localStorage.getItem('solarcrm_fornecedores');
+    const fornecedores = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(fornecedores) || fornecedores.length === 0) return null;
+
+    const melhorPainel = fornecedores
+      .filter(f => Array.isArray(f.produtos) && f.produtos.some(p => p.tipo === 'painel'))
+      .map(f => {
+        const painel = f.produtos.find(p => p.tipo === 'painel');
+        return { fornecedor: f.nome, preco: Number(painel.preco) || Infinity };
+      })
+      .sort((a, b) => a.preco - b.preco)[0];
+
+    const melhorInversor = fornecedores
+      .filter(f => Array.isArray(f.produtos) && f.produtos.some(p => p.tipo === 'inversor'))
+      .map(f => {
+        const inversor = f.produtos.find(p => p.tipo === 'inversor');
+        return { fornecedor: f.nome, preco: Number(inversor.preco) || Infinity };
+      })
+      .sort((a, b) => a.preco - b.preco)[0];
+
+    const melhorEstrutura = fornecedores
+      .filter(f => Array.isArray(f.produtos) && f.produtos.some(p => p.tipo === 'estrutura'))
+      .map(f => {
+        const estrutura = f.produtos.find(p => p.tipo === 'estrutura');
+        return { fornecedor: f.nome, preco: Number(estrutura.preco) || Infinity };
+      })
+      .sort((a, b) => a.preco - b.preco)[0];
+
+    return {
+      painel: melhorPainel && isFinite(melhorPainel.preco) ? melhorPainel : null,
+      inversor: melhorInversor && isFinite(melhorInversor.preco) ? melhorInversor : null,
+      estrutura: melhorEstrutura && isFinite(melhorEstrutura.preco) ? melhorEstrutura : null
+    };
+  } catch (e) {
+    console.warn('Erro ao obter cotação automática:', e);
+    return null;
+  }
+}
+

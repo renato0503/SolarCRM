@@ -5,6 +5,7 @@ import {
   calcularTIR, calcularPaybackDetalhado,
   gerarProjecao6Anos, gerarTabelaFinanciamento, gerarSaldoAnoAAno
 } from './financeiro.js';
+import { obterCotacaoAutomatica } from './utils.js';
 
 export async function gerarPropostaAsync(dadosLead, configsCustom = {}) {
   const EQUIPAMENTOS = await getEquipamentosLocais();
@@ -69,9 +70,22 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
   const estruturaInfo = EQUIPAMENTOS.estruturas[tipo_telha] || EQUIPAMENTOS.estruturas['ceramica'];
   const kitEletrico = EQUIPAMENTOS.kitsEletricos[0];
 
-  // ===== 5. VALOR DO KIT GERADOR (nova lógica: R$/kWp por faixa) =====
-  const valorKitPorKwp = getCustoKitPorFaixa(potenciaRealKwp);
-  const custoKitGerador = potenciaRealKwp * valorKitPorKwp;
+  // ===== 4.1 COTAÇÃO AUTOMÁTICA POR FORNECEDOR =====
+  const cotacao = obterCotacaoAutomatica();
+  let custoKitGerador = 0;
+  let custoEstrutura = 0;
+  if (cotacao) {
+    if (cotacao.painel) custoKitGerador += numeroPaineis * cotacao.painel.preco;
+    if (cotacao.inversor) custoKitGerador += numInversores * cotacao.inversor.preco;
+    if (cotacao.estrutura) custoEstrutura = numeroPaineis * cotacao.estrutura.preco;
+  }
+  if (custoKitGerador === 0) {
+    const valorKitPorKwp = getCustoKitPorFaixa(potenciaRealKwp);
+    custoKitGerador = potenciaRealKwp * valorKitPorKwp;
+  }
+  if (custoEstrutura === 0) {
+    custoEstrutura = numeroPaineis * estruturaInfo.precoPorPainel;
+  }
 
   // ===== 6. CUSTOS ADICIONAIS (serviços + frete + adicional cidade) =====
   const freteValor = Number(dadosLead.frete_valor) || EQUIPAMENTOS.frete.minimo || 350.00;
@@ -89,11 +103,12 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
   // ===== 7. FATOR DE PREÇO E PREÇO CALCULADO =====
   const fatorPreco = 1 + (settings.margemLucro / 100);
   const valorKitComMarkup = custoKitGerador * fatorPreco;
+  const custoEstruturaComMarkup = custoEstrutura * fatorPreco;
   const custosAdicionaisComMarkup = custosAdicionais * fatorPreco;
-  const precoCalculado = valorKitComMarkup + custosAdicionaisComMarkup;
+  const precoCalculado = valorKitComMarkup + custoEstruturaComMarkup + custosAdicionaisComMarkup;
 
   // ===== 8. IMPOSTO (alíquota sobre o lucro) =====
-  const custoDiretoTotal = custoKitGerador + custosAdicionais;
+  const custoDiretoTotal = custoKitGerador + custoEstrutura + custosAdicionais;
   const lucroBruto = precoCalculado - custoDiretoTotal;
   const aliquotaImposto = settings.aliquotaImposto || 0.085;
   const valorImposto = lucroBruto * aliquotaImposto;

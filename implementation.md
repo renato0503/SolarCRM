@@ -556,3 +556,14 @@ Após validação → seguir para SPRINT 27.
 | Measurement ID | ✅ Concluído | Alinhado fallback local do `measurementId` para `G-XQQZCQ1FE9`, removendo aviso do Firebase Analytics. |
 | TIR na proposta | ✅ Concluído | `tir_mensal`/`tir_anual` agora são salvos como campos flat em `app.js` e lidos em `proposta.js`, evitando `—` na proposta. |
 | Simulador LGPD/footer | ✅ Concluído | Link LGPD atualizado para `.../_ato2015-2018/2018/lei/l13709.htm`; emoji 🧮 removido do título; footer passa a exibir “Desenvolvido por Cerrado Tech” com link para `https://www.cerradofinancas.com.br/`. |
+
+---
+
+## ✅ Concluído — Tour Guiado Onboarding (Fase 28)
+
+| Item | Status | Alteração realizada |
+|------|--------|---------------------|
+| Biblioteca escolhida | ✅ Concluído | Selecionado `driver.js` (MIT, ~5KB, framework-agnostic, sem restrições comerciais). |
+| Integração no dashboard | ✅ Concluído | Adicionado CSS e JS do driver.js via CDN em `dashboard.html`. |
+| Botão de início | ✅ Concluído | Novo botão `#btnTour` no header com ícone de livro. |
+| Passos do tour | ✅ Concluído | 6 passos mapeados: indicadores, busca, filtros, tabela, configurações e notificações. |

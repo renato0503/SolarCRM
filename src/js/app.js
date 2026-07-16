@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.target.value = formatPhone(e.target.value);
   });
 
-  const cepInput = document.getElementById('endereco');
+  const cepInput = document.getElementById('cep');
   cepInput.addEventListener('input', (e) => {
     let val = e.target.value.replace(/\D/g, '');
     if (val.length > 8) val = val.slice(0, 8);
@@ -43,7 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const telefone = cleanPhone(telefoneRaw);
     const email = document.getElementById('email').value.trim();
     const consumoKwh = document.getElementById('consumo_mensal').value;
-    const endereco = document.getElementById('endereco').value.trim();
+    const cep = document.getElementById('cep').value.trim();
+    const cidade = document.getElementById('cidade').value.trim();
+    const bairro = document.getElementById('bairro').value.trim();
     const tipoTelha = document.getElementById('tipo_telha').value;
     const orientacao = document.getElementById('orientacao')?.value || 'norte';
     const inclinacao = document.getElementById('inclinacao')?.value || '10';
@@ -55,8 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errors.email = "E-mail inválido."; isValid = false; }
     if (!consumoKwh || consumoKwh <= 0) { errors.consumo_mensal = "Insira um valor de consumo válido maior que zero."; isValid = false; }
 
-    const cepClean = endereco.replace(/\D/g, '');
-    if (cepClean.length !== 8) { errors.endereco = "CEP inválido (digite os 8 números)."; isValid = false; }
+    const cepClean = cep.replace(/\D/g, '');
+    if (cepClean.length !== 8) { errors.cep = "CEP inválido (digite os 8 números)."; isValid = false; }
+    if (!cidade) { errors.cidade = "Cidade é obrigatória."; isValid = false; }
+    if (!bairro) { errors.bairro = "Bairro é obrigatório."; isValid = false; }
     if (!tipoTelha) { errors.tipo_telha = "Selecione o tipo de telhado."; isValid = false; }
 
     if (!isValid) {
@@ -103,11 +107,12 @@ document.addEventListener('DOMContentLoaded', () => {
         nome,
         telefone,
         email,
-        endereco: `${freteInfo.cep.slice(0, 5)}-${freteInfo.cep.slice(5)} (${freteInfo.cidade}/${freteInfo.uf})`,
+        endereco: `${cep} (${cidade}/${bairro})`,
         consumo_mensal_kwh: Number(consumoKwh),
         tipo_ligacao: tipoLigacao,
         tipo_cliente: tipoCliente,
-        estado
+        cidade,
+        bairro
       };
 
       const savedLead = await dbAddLead(leadData, vendedorId, vendedorNome);
@@ -119,7 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
         inclinacao: Number(inclinacao),
         tipo_ligacao: tipoLigacao,
         tipo_cliente: tipoCliente,
-        estado,
+        cidade,
+        bairro,
         frete_valor: freteInfo.freteValor,
         distancia_km: freteInfo.distanciaKm
       };
@@ -133,7 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
         inclinacao: Number(inclinacao),
         tipo_ligacao: tipoLigacao,
         tipo_cliente: tipoCliente,
-        estado,
+        cidade,
+        bairro,
 
         // Flat fields for quick queries (backward compat)
         preco_final: proposalCalculated.precificacao.precoFinal,

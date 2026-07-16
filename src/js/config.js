@@ -17,7 +17,23 @@ const defaultSettings = {
 
   inflacaoAnual: 0.08,
   fioB: 0.285,
-  aliquotaImposto: 0.085
+  aliquotaImposto: 0.085,
+
+  custoEstrutura: {
+    ceramica: 70,
+    metalica: 70,
+    fibrocimento: 90,
+    fibro_madeira: 90,
+    laje: 70
+  },
+
+  custoKitPorFaixa: [
+    { faixaMax: 5, valor: 2300 },
+    { faixaMax: 15, valor: 2200 },
+    { faixaMax: 30, valor: 2000 }
+  ],
+
+  adicionalCidade: {}
 };
 
 const FIO_B_PROGRESSIVO = {
@@ -88,4 +104,26 @@ export function getTipoClienteConfig(tipo) {
 
 export function getTiposCliente() {
   return Object.entries(TIPO_CLIENTE_CONFIG).map(([k, v]) => ({ id: k, ...v }));
+}
+
+export function getCustoEstrutura(tipoTelha) {
+  const settings = getSettings();
+  return settings.custoEstrutura[tipoTelha] || 70;
+}
+
+export function getCustoKitPorFaixa(kwp) {
+  const settings = getSettings();
+  const faixas = settings.custoKitPorFaixa || [
+    { faixaMax: 5, valor: 2300 },
+    { faixaMax: 15, valor: 2200 },
+    { faixaMax: 30, valor: 2000 }
+  ];
+  const faixa = faixas.find(f => kwp <= f.faixaMax) || faixas[faixas.length - 1];
+  return faixa.valor;
+}
+
+export function getAdicionalCidade(cidade) {
+  const settings = getSettings();
+  const adicionais = settings.adicionalCidade || {};
+  return adicionais[cidade] || 0;
 }

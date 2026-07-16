@@ -96,9 +96,27 @@
 
           <!-- Endereço (CEP) -->
           <div class="form-group">
-            <label for="endereco" class="form-label">CEP da Instalação *</label>
-            <input type="text" id="endereco" class="form-control" placeholder="Ex: 79002-000" maxlength="9" required aria-required="true">
+            <label for="cep" class="form-label">CEP da Instalação *</label>
+            <input type="text" id="cep" class="form-control" placeholder="Ex: 79002-000" maxlength="9" required aria-required="true">
             <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            
+            <!-- Cidade -->
+            <div class="form-group">
+              <label for="cidade" class="form-label">Cidade *</label>
+              <input type="text" id="cidade" class="form-control" placeholder="Ex: Cuiabá" required aria-required="true" readonly>
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+            <!-- Bairro -->
+            <div class="form-group">
+              <label for="bairro" class="form-label">Bairro *</label>
+              <input type="text" id="bairro" class="form-control" placeholder="Ex: Centro" required aria-required="true">
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
           </div>
 
           <div class="grid grid-cols-2">
@@ -171,41 +189,6 @@
             </select>
           </div>
 
-          <!-- Estado -->
-          <div class="form-group">
-            <label for="estado" class="form-label">Estado da Instalação *</label>
-            <select id="estado" class="form-control" required aria-required="true">
-              <option value="" disabled selected>Selecione...</option>
-              <option value="AC">Acre</option>
-              <option value="AL">Alagoas</option>
-              <option value="AM">Amazonas</option>
-              <option value="AP">Amapá</option>
-              <option value="BA">Bahia</option>
-              <option value="CE">Ceará</option>
-              <option value="DF">Distrito Federal</option>
-              <option value="ES">Espírito Santo</option>
-              <option value="GO">Goiás</option>
-              <option value="MA">Maranhão</option>
-              <option value="MG">Minas Gerais</option>
-              <option value="MS">Mato Grosso do Sul</option>
-              <option value="MT" selected>Mato Grosso</option>
-              <option value="PA">Pará</option>
-              <option value="PB">Paraíba</option>
-              <option value="PE">Pernambuco</option>
-              <option value="PI">Piauí</option>
-              <option value="PR">Paraná</option>
-              <option value="RJ">Rio de Janeiro</option>
-              <option value="RN">Rio Grande do Norte</option>
-              <option value="RO">Rondônia</option>
-              <option value="RR">Roraima</option>
-              <option value="RS">Rio Grande do Sul</option>
-              <option value="SC">Santa Catarina</option>
-              <option value="SE">Sergipe</option>
-              <option value="SP">São Paulo</option>
-              <option value="TO">Tocantins</option>
-            </select>
-          </div>
-
           <!-- LGPD Consentimento -->
           <div class="form-group" style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">
             <input type="checkbox" id="lgpdConsent" required aria-required="true" style="margin-top: 0.25rem; accent-color: var(--solar-orange);">
@@ -269,6 +252,27 @@
         document.getElementById('btnInstallPWA').style.display = 'none';
       }
     };
+  <script>
+    document.getElementById('cep')?.addEventListener('blur', async function() {
+      const cep = this.value.replace(/\\D/g, '');
+      if (cep.length === 8) {
+        try {
+          const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+          const data = await res.json();
+          if (!data.erro) {
+            document.getElementById('cidade').value = data.localidade || '';
+            const bairroInput = document.getElementById('bairro');
+            if (data.bairro) {
+              bairroInput.value = data.bairro;
+            } else {
+              bairroInput.focus();
+            }
+          }
+        } catch (e) {
+          console.warn('CEP lookup failed', e);
+        }
+      }
+    });
   </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 import { getEquipamentosLocais } from './firebase.js';
-import { getSettings, getLigacaoInfo, getFioBTUSD, getFioBProgressivo, getTipoClienteConfig } from './config.js';
+import { getSettings, getLigacaoInfo, getFioBTUSD, getFioBProgressivo, getTipoClienteConfig, getCustoEstrutura, getCustoKitPorFaixa, getAdicionalCidade } from './config.js';
 import { getHSP, getHSPMensal, getVariacaoSazonal, MESES } from './irradiacao.js';
 import {
   calcularTIR, calcularPaybackDetalhado,
@@ -69,33 +69,31 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
   const estruturaInfo = EQUIPAMENTOS.estruturas[tipo_telha] || EQUIPAMENTOS.estruturas['ceramica'];
   const kitEletrico = EQUIPAMENTOS.kitsEletricos[0];
 
-  // ===== 5. VALOR DO KIT (custo dos equipamentos - preço fornecedor) =====
-  const custoPaineis = numeroPaineis * painel.precoUnitario;
-  const custoInversor = inversor.precoUnitario * numInversores;
-  const custoEstrutura = numeroPaineis * estruturaInfo.precoPorPainel;
-  const custoKitEletrico = kitEletrico.precoBase + (kitEletrico.precoAdicionalPorKw * potenciaRealKwp);
-  const valorKit = custoPaineis + custoInversor + custoEstrutura + custoKitEletrico;
+  // ===== 5. VALOR DO KIT GERADOR (nova lógica: R$/kWp por faixa) =====
+  const valorKitPorKwp = getCustoKitPorFaixa(potenciaRealKwp);
+  const custoKitGerador = potenciaRealKwp * valorKitPorKwp;
 
-  // ===== 6. CUSTOS ADICIONAIS (serviços não inclusos no kit) =====
+  // ===== 6. CUSTOS ADICIONAIS (serviços + frete + adicional cidade) =====
   const freteValor = Number(dadosLead.frete_valor) || EQUIPAMENTOS.frete.minimo || 350.00;
   const distanciaKm = Number(dadosLead.distancia_km) || 10.0;
+  const adicionalCidade = getAdicionalCidade(cidade);
 
   let taxaLocalidade = 0.00;
   if (distanciaKm > 25.0) taxaLocalidade = 450.00;
   else if (distanciaKm >= 15.0) taxaLocalidade = 250.00;
 
   const servicoInfo = EQUIPAMENTOS.servicos;
-  const custoServicos = servicoInfo.custoFixo + (servicoInfo.custoPorKwp * potenciaRealKwp) + taxaLocalidade;
+  const custoServicos = servicoInfo.custoFixo + (servicoInfo.custoPorKwp * potenciaRealKwp) + taxaLocalidade + adicionalCidade;
   const custosAdicionais = custoServicos + freteValor;
 
   // ===== 7. FATOR DE PREÇO E PREÇO CALCULADO =====
   const fatorPreco = 1 + (settings.margemLucro / 100);
-  const valorKitComMarkup = valorKit * fatorPreco;
+  const valorKitComMarkup = custoKitGerador * fatorPreco;
   const custosAdicionaisComMarkup = custosAdicionais * fatorPreco;
   const precoCalculado = valorKitComMarkup + custosAdicionaisComMarkup;
 
   // ===== 8. IMPOSTO (alíquota sobre o lucro) =====
-  const custoDiretoTotal = valorKit + custosAdicionais;
+  const custoDiretoTotal = custoKitGerador + custosAdicionais;
   const lucroBruto = precoCalculado - custoDiretoTotal;
   const aliquotaImposto = settings.aliquotaImposto || 0.085;
   const valorImposto = lucroBruto * aliquotaImposto;
@@ -216,12 +214,14 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
       }
     },
 
-    // ----- Precificação (equivale às colunas I/J do xlsm) -----
+    // ----- Precificação (nova lógica: kit por kWp + estrutura por placa + adicional cidade) -----
     precificacao: {
-      valorKit: Number(valorKit.toFixed(2)),
+      valorKit: Number(custoKitGerador.toFixed(2)),
+      custoEstrutura: Number(custoEstrutura.toFixed(2)),
       custoServicos: Number(custoServicos.toFixed(2)),
       freteValor: Number(freteValor.toFixed(2)),
       taxaLocalidade: Number(taxaLocalidade.toFixed(2)),
+      adicionalCidade: Number(adicionalCidade.toFixed(2)),
       custosAdicionais: Number(custosAdicionais.toFixed(2)),
       custoDiretoTotal: Number(custoDiretoTotal.toFixed(2)),
       fatorPreco: Number(fatorPreco.toFixed(2)),
@@ -235,12 +235,12 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
 
     // ----- Desmembramento de preços de venda -----
     precosVenda: {
-      precoPaineisKit: Number((custoPaineis + custoKitEletrico) * fatorPreco).toFixed(2),
-      precoInversor: Number(custoInversor * fatorPreco).toFixed(2),
+      precoKitGerador: Number(custoKitGerador * fatorPreco).toFixed(2),
       precoEstrutura: Number(custoEstrutura * fatorPreco).toFixed(2),
       precoServicos: Number(custoServicos * fatorPreco).toFixed(2),
       precoFrete: Number(freteValor * fatorPreco).toFixed(2),
-      taxaLocalidadeVenda: Number(taxaLocalidade * fatorPreco).toFixed(2)
+      taxaLocalidadeVenda: Number(taxaLocalidade * fatorPreco).toFixed(2),
+      adicionalCidadeVenda: Number(adicionalCidade * fatorPreco).toFixed(2)
     },
 
     // ----- Energia -----

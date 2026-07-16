@@ -88,15 +88,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('prop-tir').textContent = tirMensal ? `${tirMensal}% a.m.` : '—';
 
     // Specs
-    const precoPaineisVenda = dc ? Number(dc.precosVenda.precoPaineisKit) : (proposta.preco_paineis || 0);
-    const precoInversorVenda = dc ? Number(dc.precosVenda.precoInversor) : (proposta.preco_inversor || 0);
+    const precoKitGeradorVenda = dc ? Number(dc.precosVenda.precoKitGerador) : 0;
     const precoEstruturaVenda = dc ? Number(dc.precosVenda.precoEstrutura) : (proposta.preco_estrutura || 0);
     const precoServicosVenda = dc ? Number(dc.precosVenda.precoServicos) : (proposta.preco_servicos || 0);
     const precoFreteVenda = dc ? Number(dc.precosVenda.precoFrete) : (proposta.preco_frete || 0);
     const taxaLocalidadeVenda = dc ? Number(dc.precosVenda.taxaLocalidadeVenda) : (proposta.taxa_localidade_venda || 0);
 
-    document.getElementById('spec-paineis').innerHTML = `${numeroPaineis}x ${painelInfo ? painelInfo.nome : proposta.painel_selecionado}<br><span style="font-weight:500;font-size:0.8125rem;color:var(--text-muted);display:block;margin-top:0.15rem;">Módulos e Cabos: <strong>${formatCurrency(precoPaineisVenda)}</strong></span>`;
-    document.getElementById('spec-inversor').innerHTML = `${inversorInfo ? inversorInfo.nome : proposta.inversor_selecionado}<br><span style="font-weight:500;font-size:0.8125rem;color:var(--text-muted);display:block;margin-top:0.15rem;">Inversor Homologado: <strong>${formatCurrency(precoInversorVenda)}</strong></span>`;
+    document.getElementById('spec-paineis').innerHTML = `${numeroPaineis}x ${painelInfo ? painelInfo.nome : proposta.painel_selecionado}<br><span style="font-weight:500;font-size:0.8125rem;color:var(--text-muted);display:block;margin-top:0.15rem;">Kit Gerador: <strong>${formatCurrency(precoKitGeradorVenda)}</strong></span>`;
+    document.getElementById('spec-inversor').innerHTML = `${inversorInfo ? inversorInfo.nome : proposta.inversor_selecionado}<br><span style="font-weight:500;font-size:0.8125rem;color:var(--text-muted);display:block;margin-top:0.15rem;">Inversor Homologado: <strong>Incluso no kit</strong></span>`;
     const estruturaNome = dc ? dc.sistema.estrutura.nome : proposta.estrutura_selecionada;
     document.getElementById('spec-estrutura').innerHTML = `${estruturaNome}<br><span style="font-weight:500;font-size:0.8125rem;color:var(--text-muted);display:block;margin-top:0.15rem;">Suportes de Alumínio: <strong>${formatCurrency(precoEstruturaVenda)}</strong></span>`;
 

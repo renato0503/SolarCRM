@@ -528,7 +528,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (tarEl) tarEl.value = s.tarifaEnergia;
     if (marEl) marEl.value = s.margemLucro;
     if (prEl) prEl.value = s.performanceRatio;
-    document.getElementById('cfgTelefone').value = s.empresaTelefone;
+    document.getElementById('cfgTelefone').value = s.empresaTelefone || '';
+
+    const estrutura = s.custoEstrutura || {};
+    document.getElementById('cfgCustoMetalica').value = estrutura.metalica ?? 70;
+    document.getElementById('cfgCustoFibrocimento').value = estrutura.fibrocimento ?? 90;
+
+    const faixas = s.custoKitPorFaixa || [];
+    document.getElementById('cfgKitFaixa1').value = faixas[0]?.valor ?? 2300;
+    document.getElementById('cfgKitFaixa2').value = faixas[1]?.valor ?? 2200;
+    document.getElementById('cfgKitFaixa3').value = faixas[2]?.valor ?? 2000;
+
+    const adicionais = s.adicionalCidade || {};
+    document.getElementById('cfgAdicionalCidade').value = Object.entries(adicionais)
+      .map(([cidade, valor]) => `${cidade}=${valor}`)
+      .join(', ');
+
     atualizarPreviewConfig();
     configModal.classList.add('active');
   });
@@ -553,13 +568,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     const performanceRatio = document.getElementById('cfgPR') ? Number(document.getElementById('cfgPR').value) : 0.78;
     const empresaTelefone = document.getElementById('cfgTelefone').value.trim();
 
-    saveSettings({ hsp, tarifaEnergia, margemLucro, performanceRatio, empresaTelefone });
+    const custoEstrutura = {
+      metalica: Number(document.getElementById('cfgCustoMetalica').value) || 70,
+      fibrocimento: Number(document.getElementById('cfgCustoFibrocimento').value) || 90
+    };
 
-    saveSettings({
-      hsp,
-      tarifaEnergia,
-      margemLucro,
-      empresaTelefone
+    const custoKitPorFaixa = [
+      { faixaMax: 5, valor: Number(document.getElementById('cfgKitFaixa1').value) || 2300 },
+      { faixaMax: 15, valor: Number(document.getElementById('cfgKitFaixa2').value) || 2200 },
+      { faixaMax: 30, valor: Number(document.getElementById('cfgKitFaixa3').value) || 2000 }
+    ];
+
+    const adicionalCidadeRaw = document.getElementById('cfgAdicionalCidade').value.trim();
+    const adicionalCidade = {};
+    if (adicionalCidadeRaw) {
+      adicionalCidadeRaw.split(',').forEach(item => {
+        const [cidade, valor] = item.split('=').map(s => s.trim());
+        if (cidade && !isNaN(Number(valor))) {
+          adicionalCidade[cidade] = Number(valor);
+        }
+      });
+    }
+
+    saveSettings({ 
+      hsp, tarifaEnergia, margemLucro, performanceRatio, empresaTelefone,
+      custoEstrutura,
+      custoKitPorFaixa,
+      adicionalCidade
     });
 
     showToast("Parâmetros do CRM atualizados com sucesso!", "success");

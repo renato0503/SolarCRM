@@ -671,6 +671,47 @@
           <small style="color: var(--text-muted); font-size: 0.75rem;">Redirecionamento ao clicar em "Falar com Consultor".</small>
         </div>
 
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-bottom: 1.5rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Custo da Estrutura (R$/placa)</h4>
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="cfgCustoMetalica" class="form-label">Telha Metálica</label>
+              <input type="number" id="cfgCustoMetalica" class="form-control" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+              <label for="cfgCustoFibrocimento" class="form-label">Fibrocimento/Madeira</label>
+              <input type="number" id="cfgCustoFibrocimento" class="form-control" step="0.01" min="0">
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-bottom: 1.5rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Custo do Kit por Faixa (R$/kWp)</h4>
+          <div class="grid grid-cols-3">
+            <div class="form-group">
+              <label for="cfgKitFaixa1" class="form-label">Até 5 kWp</label>
+              <input type="number" id="cfgKitFaixa1" class="form-control" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+              <label for="cfgKitFaixa2" class="form-label">5 a 15 kWp</label>
+              <input type="number" id="cfgKitFaixa2" class="form-control" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+              <label for="cfgKitFaixa3" class="form-label">15 a 30 kWp</label>
+              <input type="number" id="cfgKitFaixa3" class="form-control" step="0.01" min="0">
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-bottom: 2rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Adicional por Cidade (R$)</h4>
+          <div class="form-group">
+            <label for="cfgAdicionalCidade" class="form-label">Cidades e valores (formato: Cidade=valor, separadas por vírgula)</label>
+            <textarea id="cfgAdicionalCidade" class="form-control" rows="3" placeholder="Ex: Marcelândia=600, Sinop=0"></textarea>
+            <small style="color: var(--text-muted); font-size: 0.75rem;">Esses valores são somados automaticamente no cálculo do orçamento.</small>
+          </div>
+        </div>
+
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
           <button type="button" class="btn btn-secondary" id="btnCancelConfig">Cancelar</button>
           <button type="submit" class="btn btn-primary">Salvar Ajustes</button>

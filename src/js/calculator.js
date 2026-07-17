@@ -71,6 +71,10 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
     ? Math.ceil(potenciaRealKwp * 1000 / (inversor.potenciaMaxW * 1.2))
     : 1;
 
+  // ===== 4. ESTRUTURA E KIT ELÉTRICO =====
+  const estruturaInfo = EQUIPAMENTOS.estruturas[tipo_telha] || EQUIPAMENTOS.estruturas['ceramica'];
+  const kitEletrico = EQUIPAMENTOS.kitsEletricos[0];
+
   // ===== 3.1 VALIDAÇÃO DE ESTOQUE =====
   const painelId = painel.id;
   const inversorId = inversor.id;
@@ -87,10 +91,6 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
   if (estoqueEstrutura < numeroPaineis) {
     throw new Error(`Estoque insuficiente de estrutura (${estruturaInfo.nome}). Disponível: ${estoqueEstrutura}, necessário: ${numeroPaineis}.`);
   }
-
-  // ===== 4. ESTRUTURA E KIT ELÉTRICO =====
-  const estruturaInfo = EQUIPAMENTOS.estruturas[tipo_telha] || EQUIPAMENTOS.estruturas['ceramica'];
-  const kitEletrico = EQUIPAMENTOS.kitsEletricos[0];
 
   // ===== 4.1 COTAÇÃO AUTOMÁTICA POR FORNECEDOR =====
   const cotacao = obterCotacaoAutomatica();

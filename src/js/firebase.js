@@ -749,13 +749,13 @@ export function getEstoqueDisponivel(equipamentoId) {
   const stored = localStorage.getItem('solarcrm_estoque');
   const estoque = stored ? JSON.parse(stored) : {};
   const item = estoque[equipamentoId];
-  return item ? Number(item.quantidade || 0) : 0;
+  return item ? Number(item.quantidade || 0) : 999;
 }
 
 export function reservarEstoque(equipamentoId, quantidade) {
   const stored = localStorage.getItem('solarcrm_estoque');
   const estoque = stored ? JSON.parse(stored) : {};
-  const item = estoque[equipamentoId] || { quantidade: 0 };
+  const item = estoque[equipamentoId] || { quantidade: 999 };
   const disponivel = Number(item.quantidade || 0);
   if (disponivel < quantidade) return false;
   item.quantidade = disponivel - quantidade;

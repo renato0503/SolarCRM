@@ -42,6 +42,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tabelaFinanciamento = dc ? dc.financeiro.tabelaFinanciamento : null;
     const co2Tons = dc ? dc.ecologia.co2EvitadoTons : null;
     const arvores = dc ? dc.ecologia.arvoresEquivalentes : null;
+    const projecao6Anos = dc ? (dc.financeiro.projecao6Anos || null) : null;
+    const numeroPaineis = dc ? dc.sistema.numeroPaineis : (proposta.numero_paineis ?? null);
+    const geracaoMensal = dc ? dc.energia.geracaoMensal : null;
 
     const settings = getSettings();
 

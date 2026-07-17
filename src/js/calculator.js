@@ -32,14 +32,16 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
   if (!EQUIPAMENTOS.paineis || !EQUIPAMENTOS.inversores || !EQUIPAMENTOS.estruturas) {
     throw new Error('Equipamentos não carregados.');
   }
-    return new Date(ano, mes, 0).getDate();
-  }
 
   function perdaPorTemperatura(performanceRatio, temperaturaAmbiente = 30) {
     const temperaturaReferencia = 25;
     const perdaPorGrau = 0.004;
     const deltaT = Math.max(0, temperaturaAmbiente - temperaturaReferencia);
     return performanceRatio * (1 - deltaT * perdaPorGrau);
+  }
+
+  function diasNoMes(mes, ano) {
+    return new Date(ano, mes, 0).getDate();
   }
 
   const prComPerdaTemperatura = perdaPorTemperatura(settings.performanceRatio);

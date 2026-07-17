@@ -271,7 +271,11 @@ function calcularProposta(dadosLead, configsCustom, EQUIPAMENTOS) {
     },
 
     // ----- Desmembramento de preços de venda -----
+    const custoPaineis = numeroPaineis * (cotacao?.painel?.preco || painel.precoUnitario || 0);
+    const custoInversor = numInversores * (cotacao?.inversor?.preco || inversor.precoUnitario || 0);
     precosVenda: {
+      precoPaineisKit: Number((custoPaineis * fatorPreco).toFixed(2)),
+      precoInversor: Number((custoInversor * fatorPreco).toFixed(2)),
       precoKitGerador: Number(custoKitGerador * fatorPreco).toFixed(2),
       precoEstrutura: Number(custoEstrutura * fatorPreco).toFixed(2),
       precoServicos: Number(custoServicos * fatorPreco).toFixed(2),

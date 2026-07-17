@@ -76,6 +76,18 @@ export async function logout() {
   }
 }
 
+export async function reauth(password) {
+  try {
+    await authReauthenticate(password);
+    showToast("Reautenticação realizada com sucesso.", 'success');
+    return { success: true };
+  } catch (error) {
+    console.error("Erro na reautenticação:", error);
+    showToast(error.message || "Erro ao reautenticar. Verifique sua senha.", 'error');
+    throw error;
+  }
+}
+
 /**
  * Garante que a página atual é acessível apenas para usuários autenticados.
  * Caso não esteja autenticado, redireciona para login.html.

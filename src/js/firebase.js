@@ -4,7 +4,9 @@ import {
   signInWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  EmailAuthProvider,
+  reauthenticateWithCredential
 } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js';
 import { 
   getFirestore, 
@@ -449,6 +451,24 @@ export async function authSendPasswordReset(email) {
       return { success: true };
     }
     throw new Error("E-mail não encontrado.");
+  }
+}
+
+export async function authReauthenticate(password) {
+  const user = authGetCurrentUser();
+  if (!user || !user.email) {
+    throw new Error("Usuário não autenticado.");
+  }
+
+  if (!isMock) {
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential);
+    return { success: true };
+  } else {
+    if (password === 'admin123' || password === 'vendedor123') {
+      return { success: true };
+    }
+    throw new Error("Senha incorreta.");
   }
 }
 

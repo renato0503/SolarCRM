@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark - Setup de Usuários Admin</title>
+  <link rel="icon" type="image/png" href="../assets/logospark-f2niuQAy.png">
+  <script type="module" crossorigin src="../assets/adminSetupUsers-dE9gfLWy.js"></script>
+  <link rel="modulepreload" crossorigin href="../assets/modulepreload-polyfill-Dezn_h7o.js">
+  <link rel="stylesheet" crossorigin href="../assets/style-CoCL7Yrt.css">
+</head>
+<body>
+  <header style="background:var(--bg-card);border-bottom:1px solid var(--border-color);padding:1rem 0;">
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center;">
+      <a href="../dashboard.html" class="brand-logo">
+        <img src="../assets/logospark-f2niuQAy.png" alt="Spark" style="height:38px;">
+      </a>
+      <span id="userInfo" style="font-size:0.875rem;color:var(--text-muted);"></span>
+    </div>
+  </header>
+
+  <main style="padding:3rem 0;">
+    <div class="container" style="max-width:680px;margin:0 auto;">
+      <div class="glass-card" style="padding:2rem;">
+        <h1 style="font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:0.5rem;">Setup de Perfis Admin</h1>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:1.5rem;">
+          Cria os perfis na coleção <code>users</code> do Firestore para os 3 administradores.
+        </p>
+
+        <div id="loginSection">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="loginEmail" class="form-control" value="admin@admin.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input type="password" id="loginPassword" class="form-control">
+          </div>
+          <button id="btnLogin" class="btn btn-primary" style="width:100%;">Fazer Login</button>
+        </div>
+
+        <div id="setupSection" style="display:none;">
+          <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
+            <p style="color:var(--status-fechado);font-size:0.875rem;font-weight:600;">✅ Logado como <span id="loggedEmail"></span></p>
+          </div>
+
+          <div style="margin-bottom:1.5rem;">
+            <h3 style="font-size:1rem;font-weight:600;color:#fff;margin-bottom:0.75rem;">Usuários a criar:</h3>
+            <div id="userList"></div>
+          </div>
+
+          <button id="btnSetup" class="btn btn-primary" style="width:100%;height:48px;font-size:1rem;">
+            Criar Perfis Admin
+          </button>
+
+          <div id="resultArea" style="margin-top:1.5rem;display:none;"></div>
+
+          <p style="margin-top:1.5rem;font-size:0.75rem;color:var(--text-muted);text-align:center;">
+            Após o setup, as regras do Firestore devem ser restauradas para <code>request.auth.uid == userId</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+</body>
+</html>

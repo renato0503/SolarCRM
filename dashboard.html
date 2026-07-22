@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spark - Painel de Vendas</title>
   <link rel="icon" type="image/png" href="./assets/logospark-f2niuQAy.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
   
   <!-- ApexCharts Local -->
   <script src="./apexcharts.min.js"></script>
@@ -38,28 +39,31 @@
       border-radius: var(--radius-md);
       overflow-x: auto;
       margin-top: 1.5rem;
+      max-width: 100%;
     }
 
     .crm-table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      font-size: 0.875rem;
+      font-size: 0.8125rem;
+      table-layout: auto;
     }
 
     .crm-table th {
       background-color: rgba(255, 255, 255, 0.02);
       color: var(--text-muted);
       font-weight: 600;
-      padding: 1rem 1.25rem;
+      padding: 0.6rem 0.75rem;
       border-bottom: 1px solid var(--border-color);
       text-transform: uppercase;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       letter-spacing: 0.05em;
+      white-space: nowrap;
     }
 
     .crm-table td {
-      padding: 1rem 1.25rem;
+      padding: 0.6rem 0.75rem;
       border-bottom: 1px solid var(--border-color);
       color: var(--text-main);
       vertical-align: middle;
@@ -79,8 +83,8 @@
     }
 
     .action-btn {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       border-radius: var(--radius-sm);
       display: inline-flex;
       align-items: center;
@@ -383,11 +387,53 @@
     .table-container.hidden {
       display: none;
     }
+
+    /* Funil / Faturamento Views */
+    .chart-view {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    .chart-view.active { display: block; }
+
+    .chart-filters {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .chart-filters .form-group { margin: 0; }
+    .chart-filters .form-group label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem; display: block; }
+    .chart-filters input { background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 0.8rem; }
+    .chart-filters .btn-apply { padding: 0.45rem 0.9rem; font-size: 0.8rem; }
+
+    .funil-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+    .funil-summary-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem;
+      text-align: center;
+    }
+    .funil-summary-card .v { font-size: 1.4rem; font-weight: 700; color: #fff; }
+    .funil-summary-card .l { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-top: 0.15rem; }
   </style>
-  <script type="module" crossorigin src="./assets/dashboard-DaSYy52i.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/utils-BESuGCCH.js">
-  <link rel="modulepreload" crossorigin href="./assets/auth-BBeP8vwF.js">
-  <link rel="modulepreload" crossorigin href="./assets/config-BjIB13fx.js">
+  <script type="module" crossorigin src="./assets/dashboard-WJyBbb3J.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-Dezn_h7o.js">
+  <link rel="modulepreload" crossorigin href="./assets/utils--YuW_03s.js">
+  <link rel="modulepreload" crossorigin href="./assets/auth-Dqm6F3qX.js">
+  <link rel="modulepreload" crossorigin href="./assets/config-V3bEXGuH.js">
   <link rel="stylesheet" crossorigin href="./assets/style-CoCL7Yrt.css">
 </head>
 <body>
@@ -396,7 +442,7 @@
   <header class="dashboard-header">
     <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
       <div style="display: flex; align-items: center; gap: 2rem;">
-        <a href="./index.html" class="brand-logo">
+        <a href="./simulador.html" class="brand-logo">
             <img src="./assets/logospark-f2niuQAy.png" alt="Spark" style="height:42px; vertical-align:middle;">
         </a>
         <span style="font-size: 0.75rem; background-color: var(--border-color); color: var(--text-muted); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">PAINEL INTERNO</span>
@@ -407,6 +453,9 @@
         <button id="btnConfig" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem; display: flex; align-items: center; gap: 4px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Config
+        </button>
+        <button id="btnTour" class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;" title="Tour guiado">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         </button>
         <button id="btnThemeToggle" class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;" title="Alternar Tema">
           <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -458,7 +507,7 @@
           <h1 style="font-size: 1.75rem; font-weight: 700; color: #fff;">Painel CRM de Leads e Propostas</h1>
           <p style="color: var(--text-muted); font-size: 0.95rem;">Monitore as simulações enviadas, altere status e contate leads direto pelo WhatsApp.</p>
         </div>
-        <div class="view-toggle">
+        <div class="view-toggle" role="group" aria-label="Alternar visualização">
           <button id="viewTable" class="active">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
             Tabela
@@ -466,6 +515,14 @@
           <button id="viewKanban">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             Kanban
+          </button>
+          <button id="viewFunil">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Funil
+          </button>
+          <button id="viewFaturamento">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Faturamento
           </button>
         </div>
       </div>
@@ -486,27 +543,6 @@
           <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">Projetos Fechados / Faturamento</span>
           <div id="statFaturamento" class="stat-value">R$ 0,00</div>
           <span style="font-size: 0.75rem; color: var(--status-fechado);"><span id="statFechadosCount">0</span> vendas concretizadas</span>
-        </div>
-      </div>
-
-      <!-- Gráficos de Performance -->
-      <div class="grid grid-cols-2" style="margin-bottom: 2rem; gap: 1.5rem;">
-        <div class="glass-card" style="padding: 1.5rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin: 0;">Funil de Vendas</h4>
-          </div>
-          <div id="graficoFunil"></div>
-        </div>
-        <div class="glass-card" style="padding: 1.5rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin: 0;">Faturamento Mensal</h4>
-            <div style="display: flex; gap: 0.25rem;">
-              <button class="filter-btn active" data-periodo="3" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;">3M</button>
-              <button class="filter-btn" data-periodo="6" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;">6M</button>
-              <button class="filter-btn" data-periodo="12" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;">12M</button>
-            </div>
-          </div>
-          <div id="graficoFaturamento"></div>
         </div>
       </div>
 
@@ -550,13 +586,13 @@
                 <th>Dimensionamento</th>
                 <th>Custo Total</th>
                 <th>Status</th>
-                <th>Data</th>
+                <th>Última Atualização</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody id="crmTableBody">
               <tr>
-                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
                   <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
                   Carregando Leads...
                 </td>
@@ -623,6 +659,69 @@
         </div>
       </div>
 
+      <!-- Funil View -->
+      <div class="chart-view" id="funilView">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Funil de Vendas
+        </h3>
+        <div class="chart-filters">
+          <div class="form-group">
+            <label for="funilDataInicio">De</label>
+            <input type="date" id="funilDataInicio">
+          </div>
+          <div class="form-group">
+            <label for="funilDataFim">Até</label>
+            <input type="date" id="funilDataFim">
+          </div>
+          <div class="form-group">
+            <label for="funilVendedor">Vendedor</label>
+            <select id="funilVendedor" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 0.8rem; min-width: 160px;">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <button id="btnAplicarFunil" class="btn btn-primary btn-apply">Aplicar</button>
+          <button id="btnLimparFunil" class="btn btn-secondary btn-apply">Limpar</button>
+        </div>
+        <div id="graficoFunil" style="min-height: 360px;"></div>
+        <div class="funil-summary" id="funilSummary"></div>
+      </div>
+
+      <!-- Faturamento View -->
+      <div class="chart-view" id="faturamentoView">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Faturamento Mensal
+        </h3>
+        <div class="chart-filters">
+          <div class="form-group">
+            <label for="fatDataInicio">De</label>
+            <input type="date" id="fatDataInicio">
+          </div>
+          <div class="form-group">
+            <label for="fatDataFim">Até</label>
+            <input type="date" id="fatDataFim">
+          </div>
+          <div class="form-group">
+            <label>Agrupar por</label>
+            <div style="display:flex;gap:0.25rem;">
+              <button class="filter-btn active" data-agrupar="mes">Mês</button>
+              <button class="filter-btn" data-agrupar="ano">Ano</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="fatVendedor">Vendedor</label>
+            <select id="fatVendedor" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 0.8rem; min-width: 160px;">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <button id="btnAplicarFat" class="btn btn-primary btn-apply">Aplicar</button>
+          <button id="btnLimparFat" class="btn btn-secondary btn-apply">Limpar</button>
+        </div>
+        <div id="graficoFaturamento" style="min-height: 360px;"></div>
+        <div class="funil-summary" id="fatSummary"></div>
+      </div>
+
     </div>
   </main>
 
@@ -673,6 +772,47 @@
           <label for="cfgTelefone" class="form-label">WhatsApp Padrão da Empresa (DDD+Número)</label>
           <input type="text" id="cfgTelefone" class="form-control" required>
           <small style="color: var(--text-muted); font-size: 0.75rem;">Redirecionamento ao clicar em "Falar com Consultor".</small>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-bottom: 1.5rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Custo da Estrutura (R$/placa)</h4>
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="cfgCustoMetalica" class="form-label">Telha Metálica</label>
+              <input type="number" id="cfgCustoMetalica" class="form-control" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+              <label for="cfgCustoFibrocimento" class="form-label">Fibrocimento/Madeira</label>
+              <input type="number" id="cfgCustoFibrocimento" class="form-control" step="0.01" min="0">
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-bottom: 1.5rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Custo do Kit por Faixa (R$/kWp)</h4>
+          <div class="grid grid-cols-3">
+            <div class="form-group">
+              <label for="cfgKitFaixa1" class="form-label">Até 5 kWp</label>
+              <input type="number" id="cfgKitFaixa1" class="form-control" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+              <label for="cfgKitFaixa2" class="form-label">5 a 15 kWp</label>
+              <input type="number" id="cfgKitFaixa2" class="form-control" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+              <label for="cfgKitFaixa3" class="form-label">15 a 30 kWp</label>
+              <input type="number" id="cfgKitFaixa3" class="form-control" step="0.01" min="0">
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-bottom: 2rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Adicional por Cidade (R$)</h4>
+          <div class="form-group">
+            <label for="cfgAdicionalCidade" class="form-label">Cidades e valores (formato: Cidade=valor, separadas por vírgula)</label>
+            <textarea id="cfgAdicionalCidade" class="form-control" rows="3" placeholder="Ex: Marcelândia=600, Sinop=0"></textarea>
+            <small style="color: var(--text-muted); font-size: 0.75rem;">Esses valores são somados automaticamente no cálculo do orçamento.</small>
+          </div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
@@ -726,6 +866,77 @@
     </div>
   </div>
 
+  <!-- Editar Proposta Modal -->
+  <div id="editarPropostaModal" class="modal">
+    <div class="modal-content" style="max-width: 650px;">
+      <button class="close-modal" id="btnCloseEditarProposta">&times;</button>
+      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: #fff;">
+        ✏️ Editar Proposta
+      </h3>
+      <p id="editarPropostaLeadName" style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;"></p>
+      
+      <form id="editarPropostaForm">
+        <input type="hidden" id="editPropostaId">
+        
+        <div class="grid grid-cols-2" style="gap: 1rem;">
+          <div class="form-group">
+            <label for="editNumeroPaineis" class="form-label">Qtd. Módulos</label>
+            <input type="number" id="editNumeroPaineis" class="form-control" min="1" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="editModeloModulo" class="form-label">Modelo Módulo</label>
+            <select id="editModeloModulo" class="form-control" required></select>
+          </div>
+          
+          <div class="form-group">
+            <label for="editNumeroInversores" class="form-label">Qtd. Inversores</label>
+            <input type="number" id="editNumeroInversores" class="form-control" min="1" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="editModeloInversor" class="form-label">Modelo Inversor</label>
+            <select id="editModeloInversor" class="form-control" required></select>
+          </div>
+          
+          <div class="form-group">
+            <label for="editPrecoFinal" class="form-label">Preço Final (R$)</label>
+            <input type="number" id="editPrecoFinal" class="form-control" step="0.01" min="0" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="editModuloDisponivel" class="form-label">Módulo Disponível (opcional)</label>
+            <input type="text" id="editModuloDisponivel" class="form-control" placeholder="Ex: Em estoque">
+          </div>
+          
+          <div class="form-group">
+            <label for="editInversorDisponivel" class="form-label">Inversor Disponível (opcional)</label>
+            <input type="text" id="editInversorDisponivel" class="form-control" placeholder="Ex: Em estoque">
+          </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" id="btnCancelEditarProposta">Cancelar</button>
+          <button type="button" class="btn btn-secondary" id="btnPreviewProposta" style="margin-right: auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Visualizar Proposta
+          </button>
+          <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Solicitações Pendentes -->
+  <div id="solicitacoesSection" class="glass-card" style="margin-bottom: 2rem; padding: 1.5rem; display: none;">
+    <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7 3 9 3 9h6s3-2 3-9z"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      Solicitações de Proposta Formal
+      <span id="solicitacoesCount" style="background: var(--solar-orange); color: #fff; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">0</span>
+    </h3>
+    <div id="solicitacoesList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toastContainer" class="toast-container"></div>
 
@@ -734,5 +945,6 @@
     <p>&copy; 2026 Spark - CRM de Negócios Solares.</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
 </body>
 </html>

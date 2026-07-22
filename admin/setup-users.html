@@ -1,69 +1,128 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spark - Setup de Usuários Admin</title>
-  <link rel="icon" type="image/png" href="../assets/logospark-f2niuQAy.png">
-  <script type="module" crossorigin src="../assets/adminSetupUsers-dE9gfLWy.js"></script>
-  <link rel="modulepreload" crossorigin href="../assets/modulepreload-polyfill-Dezn_h7o.js">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark - Setup de Usuários Admin</title>
+<link rel="icon" type="image/png" href="../assets/logospark-f2niuQAy.png">
   <link rel="stylesheet" crossorigin href="../assets/style-CoCL7Yrt.css">
 </head>
 <body>
-  <header style="background:var(--bg-card);border-bottom:1px solid var(--border-color);padding:1rem 0;">
-    <div class="container" style="display:flex;justify-content:space-between;align-items:center;">
-      <a href="../dashboard.html" class="brand-logo">
-        <img src="../assets/logospark-f2niuQAy.png" alt="Spark" style="height:38px;">
-      </a>
-      <span id="userInfo" style="font-size:0.875rem;color:var(--text-muted);"></span>
-    </div>
-  </header>
+<header style="background:var(--bg-card);border-bottom:1px solid var(--border-color);padding:1rem 0;">
+<div class="container" style="display:flex;justify-content:space-between;align-items:center;">
+  <a href="../dashboard.html" class="brand-logo"><img src="../assets/logospark-f2niuQAy.png" alt="Spark" style="height:38px;"></a>
+  <span id="userInfo" style="font-size:0.875rem;color:var(--text-muted);"></span>
+</div>
+</header>
+<main style="padding:3rem 0;">
+<div class="container" style="max-width:680px;margin:0 auto;">
+<div class="glass-card" style="padding:2rem;">
+<h1 style="font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:0.5rem;">Setup de Perfis Admin</h1>
+<p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:1.5rem;">
+  Cria os perfis na coleção <code>users</code> do Firestore para os 3 administradores.
+</p>
+<div id="loginSection">
+  <div class="form-group">
+    <label class="form-label">Email</label>
+    <input type="email" id="loginEmail" class="form-control" value="admin@admin.com">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Senha</label>
+    <input type="password" id="loginPassword" class="form-control">
+  </div>
+  <button id="btnLogin" class="btn btn-primary" style="width:100%;">Fazer Login</button>
+</div>
+<div id="setupSection" style="display:none;">
+  <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
+    <p style="color:var(--status-fechado);font-size:0.875rem;font-weight:600;">✅ Logado como <span id="loggedEmail"></span></p>
+  </div>
+  <div style="margin-bottom:1.5rem;">
+    <h3 style="font-size:1rem;font-weight:600;color:#fff;margin-bottom:0.75rem;">Usuários a criar:</h3>
+    <div id="userList"></div>
+  </div>
+  <button id="btnSetup" class="btn btn-primary" style="width:100%;height:48px;font-size:1rem;">Criar Perfis Admin</button>
+  <div id="resultArea" style="margin-top:1.5rem;display:none;"></div>
+  <p style="margin-top:1.5rem;font-size:0.75rem;color:var(--text-muted);text-align:center;">
+    Após o setup, as regras do Firestore devem ser restauradas.
+  </p>
+</div>
+</div>
+</div>
+</main>
+<div id="toastContainer" class="toast-container"></div>
 
-  <main style="padding:3rem 0;">
-    <div class="container" style="max-width:680px;margin:0 auto;">
-      <div class="glass-card" style="padding:2rem;">
-        <h1 style="font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:0.5rem;">Setup de Perfis Admin</h1>
-        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:1.5rem;">
-          Cria os perfis na coleção <code>users</code> do Firestore para os 3 administradores.
-        </p>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDStqxnwdR6hYxypR1Xm_2cLM0MQRphytE",
+  authDomain: "solarcrm-60ce1.firebaseapp.com",
+  projectId: "solarcrm-60ce1",
+  storageBucket: "solarcrm-60ce1.firebasestorage.app",
+  messagingSenderId: "797245411122",
+  appId: "1:797245411122:web:bcfa64de128b1fd5d1112b"
+};
 
-        <div id="loginSection">
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" id="loginEmail" class="form-control" value="admin@admin.com">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Senha</label>
-            <input type="password" id="loginPassword" class="form-control">
-          </div>
-          <button id="btnLogin" class="btn btn-primary" style="width:100%;">Fazer Login</button>
-        </div>
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-        <div id="setupSection" style="display:none;">
-          <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
-            <p style="color:var(--status-fechado);font-size:0.875rem;font-weight:600;">✅ Logado como <span id="loggedEmail"></span></p>
-          </div>
+const USERS = [
+  { uid: 'bQkEsOjXPWaSx7TCaIbwRDcDQth1', email: 'contato@sparkengenharia.net', nome: 'Contato Spark', role: 'admin' },
+  { uid: 'LQuFXi2Eg3aIVRsxdqRsZoheyHB2', email: 'adalberto.eng.eletrica@gmail.com', nome: 'Adalberto Engenharia', role: 'admin' },
+  { uid: 'vayD8Cc5hdRXgJzxmR7gb9wYNDb2', email: 'eng.eudesr@gmail.com', nome: 'Eudes Rodrigues', role: 'admin' },
+];
 
-          <div style="margin-bottom:1.5rem;">
-            <h3 style="font-size:1rem;font-weight:600;color:#fff;margin-bottom:0.75rem;">Usuários a criar:</h3>
-            <div id="userList"></div>
-          </div>
-
-          <button id="btnSetup" class="btn btn-primary" style="width:100%;height:48px;font-size:1rem;">
-            Criar Perfis Admin
-          </button>
-
-          <div id="resultArea" style="margin-top:1.5rem;display:none;"></div>
-
-          <p style="margin-top:1.5rem;font-size:0.75rem;color:var(--text-muted);text-align:center;">
-            Após o setup, as regras do Firestore devem ser restauradas para <code>request.auth.uid == userId</code>.
-          </p>
-        </div>
+document.getElementById('btnLogin').onclick = async () => {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('btnLogin');
+  try {
+    btn.disabled = true; btn.textContent = 'Entrando...';
+    await auth.signInWithEmailAndPassword(email, password);
+    document.getElementById('loggedEmail').textContent = email;
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('setupSection').style.display = 'block';
+    document.getElementById('userList').innerHTML = USERS.map(u => `
+      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;margin-bottom:0.5rem;">
+        <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,215,0,0.2);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--solar-orange);font-size:0.875rem;">${u.nome.charAt(0)}</div>
+        <div style="flex:1;"><p style="font-weight:600;color:#fff;font-size:0.875rem;">${u.nome}</p><p style="color:var(--text-muted);font-size:0.75rem;">${u.email}</p></div>
+        <span style="background:rgba(255,215,0,0.2);color:var(--solar-orange);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:600;">${u.role}</span>
       </div>
-    </div>
-  </main>
+    `).join('');
+  } catch (err) { alert('Erro no login: ' + err.message); }
+  finally { btn.disabled = false; btn.textContent = 'Fazer Login'; }
+};
 
-  <div id="toastContainer" class="toast-container"></div>
-
+document.getElementById('btnSetup').onclick = async () => {
+  const btn = document.getElementById('btnSetup');
+  const area = document.getElementById('resultArea');
+  area.style.display = 'block'; area.innerHTML = '<p style="color:var(--text-muted);">Criando perfis...</p>';
+  let ok = 0, erros = [];
+  for (const u of USERS) {
+    try {
+      await db.collection('users').doc(u.uid).set({
+        email: u.email, nome: u.nome, role: u.role, criadoEm: new Date().toISOString()
+      }, { merge: true });
+      ok++;
+    } catch (err) { erros.push(u.email + ': ' + err.message); }
+  }
+  if (erros.length === 0) {
+    area.innerHTML = '<div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:1rem;text-align:center;">' +
+      '<p style="color:var(--status-fechado);font-size:1.125rem;font-weight:700;">✅ ' + ok + ' perfis criados com sucesso!</p>' +
+      '<p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.5rem;">Os usuários já podem fazer login.</p></div>' +
+      '<div style="margin-top:1rem;padding:0.75rem;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:8px;">' +
+      '<p style="font-size:0.8rem;color:var(--solar-orange);font-weight:600;">⚠️ Reverta as regras do Firestore no Console:</p>' +
+      '<p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Altere a regra de volta para:</p>' +
+      '<code style="background:#1e293b;padding:0.25rem 0.5rem;border-radius:4px;font-size:0.75rem;color:var(--text-muted);display:inline-block;margin-top:0.25rem;">allow create, update: if request.auth != null && request.auth.uid == userId;</code></div>';
+  } else {
+    area.innerHTML = '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:1rem;">' +
+      '<p style="color:var(--status-perdido);font-weight:700;">' + ok + ' criados, ' + erros.length + ' erros</p>' +
+      '<ul style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem;">' + erros.map(e => '<li>' + e + '</li>').join('') + '</ul></div>';
+  }
+  btn.disabled = true; btn.textContent = '✅ Concluído';
+};
+</script>
 </body>
 </html>

@@ -50,9 +50,9 @@
     .badge-estrutura { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
     .badge-servico { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
   </style>
-  <script type="module" crossorigin src="../assets/adminEquipamentos-Cu7EzZrq.js"></script>
-  <link rel="modulepreload" crossorigin href="../assets/utils-B8curuJI.js">
-  <link rel="modulepreload" crossorigin href="../assets/auth-By9I2HAI.js">
+  <script type="module" crossorigin src="../assets/adminEquipamentos-CNW7k-zO.js"></script>
+  <link rel="modulepreload" crossorigin href="../assets/utils-hAzASED0.js">
+  <link rel="modulepreload" crossorigin href="../assets/auth-B0iUMosN.js">
   <link rel="stylesheet" crossorigin href="../assets/style-CoCL7Yrt.css">
 </head>
 <body>
@@ -115,6 +115,28 @@
             <div class="form-group">
               <label for="editMarca" class="form-label">Marca/Fornecedor</label>
               <input type="text" id="editMarca" class="form-control">
+            </div>
+
+            <div class="form-group" id="editDimensoesGroup" style="display:none;">
+              <label class="form-label">Dimensões do Módulo</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                <div><label style="font-size:0.75rem;color:var(--text-muted);">Largura (m)</label><input type="number" id="editLargura" class="form-control" step="0.001" min="0"></div>
+                <div><label style="font-size:0.75rem;color:var(--text-muted);">Altura (m)</label><input type="number" id="editAltura" class="form-control" step="0.001" min="0"></div>
+              </div>
+            </div>
+
+            <div class="form-group" id="editTipoInversorGroup" style="display:none;">
+              <label for="editTipoInversor" class="form-label">Tipo do Inversor</label>
+              <select id="editTipoInversor" class="form-control">
+                <option value="bifasico">Bifásico</option>
+                <option value="monofasico">Monofásico</option>
+                <option value="trifasico">Trifásico</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="editEstoque" class="form-label">Qtd. em Estoque</label>
+              <input type="number" id="editEstoque" class="form-control" min="0" step="1" placeholder="Deixe em branco para não alterar">
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">

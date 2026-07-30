@@ -29,7 +29,7 @@
     .stat-value {
       font-size: 1.75rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-main);
       font-family: var(--font-headings);
     }
 
@@ -429,10 +429,10 @@
     .funil-summary-card .v { font-size: 1.4rem; font-weight: 700; color: #fff; }
     .funil-summary-card .l { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-top: 0.15rem; }
   </style>
-  <script type="module" crossorigin src="./assets/dashboard-dkUDKHCp.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/utils-B8curuJI.js">
-  <link rel="modulepreload" crossorigin href="./assets/auth-By9I2HAI.js">
-  <link rel="modulepreload" crossorigin href="./assets/config-V3bEXGuH.js">
+  <script type="module" crossorigin src="./assets/dashboard-DLr9FiBw.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/utils-hAzASED0.js">
+  <link rel="modulepreload" crossorigin href="./assets/auth-B0iUMosN.js">
+  <link rel="modulepreload" crossorigin href="./assets/config-CZRkzUH9.js">
   <link rel="stylesheet" crossorigin href="./assets/style-CoCL7Yrt.css">
 </head>
 <body>
@@ -483,6 +483,9 @@
         <a href="./admin/fornecedores.html" class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.875rem;display:none;" id="btnFornecedores">
           📦 Fornecedores
         </a>
+        <button id="btnEstoque" class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.875rem;display:none;">
+          📊 Estoque
+        </button>
         <button id="btnBackup" class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.875rem;display:none;" title="Exportar Backup">
           💾 Backup
         </button>
@@ -728,7 +731,7 @@
   <div id="configModal" class="modal">
     <div class="modal-content" style="max-width: 600px;">
       <button class="close-modal" id="btnCloseConfig">&times;</button>
-      <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: #fff;">
+      <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-main);">
         ⚙️ Configurações do CRM Solar
       </h3>
       
@@ -755,6 +758,12 @@
           <label for="cfgPR" class="form-label">Performance Ratio: <strong id="cfgPRVal">0,78</strong></label>
           <input type="range" id="cfgPR" class="form-control" min="0.65" max="0.90" step="0.01" style="padding:0;height:6px;cursor:pointer;accent-color:var(--solar-orange);">
           <small style="color: var(--text-muted); font-size: 0.75rem;">Eficiência global. 0,78 = 78% após perdas elétricas e térmicas.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="cfgOverload" class="form-label">Overload Máx. do Inversor: <strong id="cfgOverloadVal">1,20</strong></label>
+          <input type="range" id="cfgOverload" class="form-control" min="1.0" max="2.0" step="0.05" style="padding:0;height:6px;cursor:pointer;accent-color:var(--solar-orange);">
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Fator de dimensionamento. 1,2 = inversor pode ter até 20% menos potência que o array.</small>
         </div>
 
         <div class="form-group" id="previewBox" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:1rem;margin-top:1rem;">
@@ -822,11 +831,39 @@
     </div>
   </div>
 
+  <!-- Estoque Modal -->
+  <div id="estoqueModal" class="modal">
+    <div class="modal-content" style="max-width: 700px;">
+      <button class="close-modal" id="btnCloseEstoque">&times;</button>
+      <h3 style="font-size:1.25rem;font-weight:700;color:var(--text-main);margin-bottom:1rem;">
+        📊 Gestão de Estoque
+      </h3>
+      <p style="color:var(--text-muted);font-size:0.8rem;margin-bottom:1rem;">Edite a quantidade disponível de cada equipamento. Valores em <strong>verde</strong> = estoque OK, <strong>amarelo</strong> = acabando, <strong>vermelho</strong> = sem estoque.</p>
+      <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+          <thead>
+            <tr style="background:rgba(255,255,255,0.05);position:sticky;top:0;">
+              <th style="padding:0.5rem 0.75rem;text-align:left;font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border-color);">Equipamento</th>
+              <th style="padding:0.5rem 0.75rem;text-align:center;font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border-color);">Tipo</th>
+              <th style="padding:0.5rem 0.75rem;text-align:center;font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border-color);">Qtd.</th>
+              <th style="padding:0.5rem 0.75rem;text-align:center;font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border-color);">Status</th>
+            </tr>
+          </thead>
+          <tbody id="estoqueTableBody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
+        <button type="button" class="btn btn-secondary" id="btnCancelEstoque">Fechar</button>
+        <button type="button" class="btn btn-primary" id="btnSalvarEstoque">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Interações Modal -->
   <div id="interacoesModal" class="modal">
     <div class="modal-content" style="max-width: 550px; max-height: 80vh; overflow-y: auto;">
       <button class="close-modal" id="btnCloseInteracoes">&times;</button>
-      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
         📋 Histórico de Interações
       </h3>
       <p id="interacoesLeadName" style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;"></p>
@@ -834,7 +871,7 @@
       <div id="interacoesList" style="margin-bottom: 1.5rem;"></div>
       
       <div style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
-        <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; color: #fff;">Nova Interação</h4>
+        <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-main);">Nova Interação</h4>
         <form id="interacaoForm">
           <input type="hidden" id="interacaoLeadId">
           
@@ -869,7 +906,7 @@
   <div id="editarPropostaModal" class="modal">
     <div class="modal-content" style="max-width: 650px;">
       <button class="close-modal" id="btnCloseEditarProposta">&times;</button>
-      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: #fff;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">
         ✏️ Editar Proposta
       </h3>
       <p id="editarPropostaLeadName" style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;"></p>
@@ -928,7 +965,7 @@
 
   <!-- Solicitações Pendentes -->
   <div id="solicitacoesSection" class="glass-card" style="margin-bottom: 2rem; padding: 1.5rem; display: none;">
-    <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+    <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7 3 9 3 9h6s3-2 3-9z"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
       Solicitações de Proposta Formal
       <span id="solicitacoesCount" style="background: var(--solar-orange); color: #fff; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">0</span>

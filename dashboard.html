@@ -257,7 +257,7 @@
 
     .kanban-count {
       background: rgba(255, 255, 255, 0.1);
-      color: #fff;
+      color: var(--text-main);
       font-size: 0.75rem;
       font-weight: 700;
       padding: 0.2rem 0.6rem;
@@ -293,7 +293,7 @@
 
     .kanban-card-name {
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
       font-size: 0.95rem;
       margin-bottom: 0.25rem;
     }
@@ -355,7 +355,7 @@
 
     .kanban-card-actions .btn-view {
       background: rgba(255, 255, 255, 0.1);
-      color: #fff;
+      color: var(--text-main);
     }
 
     .kanban-card-actions .btn-view:hover {
@@ -414,7 +414,7 @@
     }
     .chart-filters .form-group { margin: 0; }
     .chart-filters .form-group label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem; display: block; }
-    .chart-filters input { background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 0.8rem; }
+    .chart-filters input { background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 0.8rem; }
     .chart-filters .btn-apply { padding: 0.45rem 0.9rem; font-size: 0.8rem; }
 
     .funil-summary {
@@ -430,10 +430,10 @@
       padding: 0.75rem;
       text-align: center;
     }
-    .funil-summary-card .v { font-size: 1.4rem; font-weight: 700; color: #fff; }
+    .funil-summary-card .v { font-size: 1.4rem; font-weight: 700; color: var(--text-main); }
     .funil-summary-card .l { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-top: 0.15rem; }
   </style>
-  <script type="module" crossorigin src="./assets/dashboard-DlAzfx7X.js"></script>
+  <script type="module" crossorigin src="./assets/dashboard-BrQye7Tc.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/utils-hAzASED0.js">
   <link rel="modulepreload" crossorigin href="./assets/auth-B0iUMosN.js">
   <link rel="modulepreload" crossorigin href="./assets/config-CZRkzUH9.js">
@@ -510,7 +510,7 @@
       <!-- Page Title -->
       <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
-          <h1 style="font-size: 1.75rem; font-weight: 700; color: #fff;">Painel CRM de Leads e Propostas</h1>
+          <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--text-main);">Painel CRM de Leads e Propostas</h1>
           <p style="color: var(--text-muted); font-size: 0.95rem;">Monitore as simulações enviadas, altere status e contate leads direto pelo WhatsApp.</p>
         </div>
         <div class="view-toggle" role="group" aria-label="Alternar visualização">
@@ -667,7 +667,7 @@
 
       <!-- Funil View -->
       <div class="chart-view" id="funilView">
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
           Funil de Vendas
         </h3>
@@ -682,7 +682,7 @@
           </div>
           <div class="form-group">
             <label for="funilVendedor">Vendedor</label>
-            <select id="funilVendedor" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 0.8rem; min-width: 160px;">
+            <select id="funilVendedor" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 0.8rem; min-width: 160px;">
               <option value="">Todos</option>
             </select>
           </div>
@@ -695,7 +695,7 @@
 
       <!-- Faturamento View -->
       <div class="chart-view" id="faturamentoView">
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           Faturamento Mensal
         </h3>
@@ -717,7 +717,7 @@
           </div>
           <div class="form-group">
             <label for="fatVendedor">Vendedor</label>
-            <select id="fatVendedor" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 0.8rem; min-width: 160px;">
+            <select id="fatVendedor" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 0.8rem; min-width: 160px;">
               <option value="">Todos</option>
             </select>
           </div>

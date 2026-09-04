@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark - Simulador de Economia Solar</title>
+  <meta name="description" content="Simule o custo e a economia de instalar energia solar em sua casa ou empresa.">
+  <link rel="icon" type="image/png" href="./assets/logospark-f2niuQAy.png">
+  <link rel="manifest" href="./assets/manifest-mSf7nPsb.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Spark CRM">
+  <script type="module" crossorigin src="./assets/simulador-CpTZGCnS.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/utils-0vwyr_qt.js">
+  <link rel="modulepreload" crossorigin href="./assets/config-rnHZ82zY.js">
+  <link rel="modulepreload" crossorigin href="./assets/financeiro-C2A1moPf.js">
+  <link rel="stylesheet" crossorigin href="./assets/style-CoCL7Yrt.css">
+</head>
+<body>
+  
+  <!-- Header -->
+  <header style="border-bottom: 1px solid var(--border-color); padding: 1.25rem 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(10px);">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <a href="./simulador.html" class="brand-logo">
+        <img src="./assets/logospark-f2niuQAy.png" alt="Spark" style="height:42px;">
+      </a>
+      <nav style="display: flex; gap: 0.5rem; align-items: center;">
+        <a href="#simulacao" style="color: #fff; text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">Home</a>
+        <a href="./spark-site/sobre.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">Sobre</a>
+        <a href="./spark-site/servicos.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">Serviços</a>
+        <a href="./spark-site/solar.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">Energia Solar</a>
+        <a href="./spark-site/blog.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">Blog</a>
+        <a href="./login.html" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.875rem;">Login</a>
+      </nav>
+      <button id="btnInstallPWA" onclick="installPWA()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.8rem; display: none; align-items: center; gap: 4px;">
+        📲 Instalar App
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero / Simulation Section -->
+  <main style="padding: 4rem 0 6rem 0; position: relative; overflow: hidden;">
+    <!-- Background Light Rays Glow -->
+    <div style="position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(255, 94, 0, 0.15) 0%, rgba(255, 94, 0, 0) 70%); z-index: -1; pointer-events: none; border-radius: 50%;"></div>
+
+    <div class="container">
+      <div style="max-width: 800px; margin: 0 auto; text-align: center; margin-bottom: 3.5rem;">
+        <span style="background: var(--solar-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.875rem;">Energia Limpa e Inesgotável</span>
+        <h1 style="font-size: 3rem; margin-top: 0.5rem; margin-bottom: 1rem; font-weight: 800; line-height: 1.15;">
+          Simule seu Sistema Solar e <br><span style="color: var(--solar-orange);">Economize até 95%</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.125rem; max-width: 600px; margin: 0 auto;">
+          Insira seus dados de consumo abaixo para calcular o tamanho do gerador solar, custo estimado do equipamento e tempo de retorno do investimento.
+        </p>
+      </div>
+
+      <!-- Glass Form Container -->
+      <div class="glass-card" style="max-width: 680px; margin: 0 auto; border-radius: var(--radius-lg);">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; font-weight: 700; color: #fff;">
+          Faça sua Simulação Gratuita
+        </h2>
+        
+        <form id="simulationForm" novalidate>
+          <div class="grid grid-cols-2">
+            
+            <!-- Nome -->
+            <div class="form-group">
+              <label for="nome" class="form-label">Nome Completo *</label>
+              <input type="text" id="nome" class="form-control" placeholder="Ex: João Silva" required aria-required="true">
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+            <!-- Telefone -->
+            <div class="form-group">
+              <label for="telefone" class="form-label">WhatsApp (DDD + Número) *</label>
+              <input type="tel" id="telefone" class="form-control" placeholder="Ex: 11 99999-9999" required aria-required="true">
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+          </div>
+
+          <div class="grid grid-cols-2">
+            
+            <!-- Email -->
+            <div class="form-group">
+              <label for="email" class="form-label">E-mail *</label>
+              <input type="email" id="email" class="form-control" placeholder="Ex: joao@email.com" required aria-required="true">
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+            <!-- Consumo Mensal -->
+            <div class="form-group">
+              <label for="consumo_mensal" class="form-label">Consumo Mensal Médio (kWh) *</label>
+              <input type="number" id="consumo_mensal" class="form-control" placeholder="Ex: 450" min="50" required aria-required="true">
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+          </div>
+
+          <!-- Endereço (CEP) -->
+          <div class="form-group">
+            <label for="cep" class="form-label">CEP da Instalação *</label>
+            <input type="text" id="cep" class="form-control" placeholder="Ex: 79002-000" maxlength="9" required aria-required="true">
+            <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            
+            <!-- Cidade -->
+            <div class="form-group">
+              <label for="cidade" class="form-label">Cidade *</label>
+              <input type="text" id="cidade" class="form-control" placeholder="Ex: Cuiabá" required aria-required="true" readonly>
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+            <!-- Bairro -->
+            <div class="form-group">
+              <label for="bairro" class="form-label">Bairro *</label>
+              <input type="text" id="bairro" class="form-control" placeholder="Ex: Centro" required aria-required="true">
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+          </div>
+
+          <div class="grid grid-cols-2">
+            
+            <!-- Tipo de Telha -->
+            <div class="form-group">
+              <label for="tipo_telha" class="form-label">Tipo de Telhado *</label>
+              <select id="tipo_telha" class="form-control" required aria-required="true">
+                <option value="" disabled selected>Selecione...</option>
+                <option value="ceramica">Telha Cerâmica (Barro)</option>
+                <option value="metalica">Telha Metálica (Zinco/Sanduíche)</option>
+                <option value="fibrocimento">Telha Fibrocimento (Eternit)</option>
+
+                <option value="laje">Laje Plano ou Solo</option>
+              </select>
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+            <!-- Tipo de Ligação -->
+            <div class="form-group">
+              <label for="tipo_ligacao" class="form-label">Tipo de Ligação *</label>
+              <select id="tipo_ligacao" class="form-control" required aria-required="true">
+                <option value="bifasico" selected>Bifásico (220V)</option>
+                <option value="monofasico">Monofásico (220V)</option>
+                <option value="trifasico">Trifásico (380V)</option>
+              </select>
+              <div class="error-feedback" style="color: var(--status-perdido); font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
+            </div>
+
+          </div>
+
+          <div class="grid grid-cols-2">
+            
+            <!-- Orientação Solar -->
+            <div class="form-group">
+              <label for="orientacao" class="form-label">Orientação do Telhado *</label>
+              <select id="orientacao" class="form-control" required aria-required="true">
+                <option value="norte" selected>Norte (Ideal)</option>
+                <option value="nordeste">Nordeste</option>
+                <option value="leste">Leste</option>
+                <option value="sudeste">Sudeste</option>
+                <option value="sul">Sul (Menor rendimento)</option>
+                <option value="sudoeste">Sudoeste</option>
+                <option value="oeste">Oeste</option>
+                <option value="noroeste">Noroeste</option>
+              </select>
+            </div>
+
+            <!-- Inclinação -->
+            <div class="form-group">
+              <label for="inclinacao" class="form-label">Inclinação do Telhado (°)</label>
+              <select id="inclinacao" class="form-control">
+                <option value="5">5° (Plano)</option>
+                <option value="10" selected>10° (Baixa)</option>
+                <option value="15">15° (Média)</option>
+                <option value="20">20° (Alta)</option>
+                <option value="25">25° (Muito inclinado)</option>
+              </select>
+            </div>
+
+          </div>
+
+           <!-- Tipo de Cliente -->
+           <div class="form-group">
+             <label for="tipo_cliente" class="form-label">Tipo de Cliente</label>
+             <select id="tipo_cliente" class="form-control">
+               <option value="residencial" selected>Residencial</option>
+               <option value="comercial">Comercial</option>
+               <option value="rural">Rural</option>
+             </select>
+           </div>
+
+           <!-- LGPD Consentimento -->
+          <div class="form-group" style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">
+            <input type="checkbox" id="lgpdConsent" required aria-required="true" style="margin-top: 0.25rem; accent-color: var(--solar-orange);">
+            <label for="lgpdConsent">
+              Aceito receber contato comercial e autorizo o tratamento dos meus dados conforme a <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener" style="color: var(--solar-orange); text-decoration: underline;">Lei 13.709/2018 (LGPD)</a>.
+            </label>
+          </div>
+
+          <div style="margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+            <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; height: 50px;">
+              <span>Calcular Economia</span>
+              <div class="spinner" style="display: none; border-top-color: #fff; width: 20px; height: 20px;"></div>
+            </button>
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke: var(--status-fechado);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Seus dados estão protegidos e salvos de forma segura.
+            </span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notifications Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid var(--border-color); padding: 2.5rem 0; text-align: center; font-size: 0.875rem; color: var(--text-muted); background-color: rgba(15, 23, 42, 0.6); margin-top: 5rem;">
+    <div class="container">
+      <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <a href="./spark-site/sobre.html" style="color: var(--text-muted); text-decoration: none;">Sobre Nós</a>
+        <a href="./spark-site/servicos.html" style="color: var(--text-muted); text-decoration: none;">Serviços</a>
+        <a href="./spark-site/solar.html" style="color: var(--text-muted); text-decoration: none;">Energia Solar</a>
+        <a href="./spark-site/blog.html" style="color: var(--text-muted); text-decoration: none;">Blog</a>
+        <a href="./simulador.html" style="color: var(--text-muted); text-decoration: none;">Solicite Orçamento</a>
+      </div>
+      <p>&copy; 2026 Spark - Todos os direitos reservados.</p>
+      <p style="margin-top: 0.5rem; font-size: 0.75rem;">Desenvolvido por <a href="https://www.cerradofinancas.com.br/" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">Cerrado Tech</a></p>
+    </div>
+  </footer>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('btnInstallPWA');
+      if (btn) btn.style.display = 'inline-flex';
+    });
+    window.installPWA = async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        document.getElementById('btnInstallPWA').style.display = 'none';
+      }
+    };
+  </script>
+  <script>
+    const cepInput = document.getElementById('cep');
+    const cidadeInput = document.getElementById('cidade');
+    const bairroInput = document.getElementById('bairro');
+
+    async function buscarCep(cep) {
+      const cepLimpo = cep.replace(/\D/g, '');
+      if (cepLimpo.length !== 8) return;
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+        const data = await res.json();
+        if (!data.erro) {
+          cidadeInput.value = data.localidade || '';
+          if (data.bairro) {
+            bairroInput.value = data.bairro;
+          } else {
+            bairroInput.focus();
+          }
+        }
+      } catch (e) {
+        console.warn('CEP lookup failed', e);
+      }
+    }
+
+    if (cepInput) {
+      cepInput.addEventListener('change', () => buscarCep(cepInput.value));
+      cepInput.addEventListener('input', () => {
+        const cepLimpo = cepInput.value.replace(/\D/g, '');
+        if (cepLimpo.length === 8) {
+          buscarCep(cepInput.value);
+        }
+      });
+      if (cepInput.value && cepInput.value.replace(/\D/g, '').length === 8) {
+        buscarCep(cepInput.value);
+      }
+    }
+  </script>
+</body>
+</html>

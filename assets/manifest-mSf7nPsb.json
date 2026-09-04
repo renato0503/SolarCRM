@@ -1,0 +1,25 @@
+{
+  "name": "Spark Engenharia Elétrica - CRM Solar",
+  "short_name": "Spark CRM",
+  "description": "CRM para vendas de energia solar fotovoltaica",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "./logospark.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./logospark.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
